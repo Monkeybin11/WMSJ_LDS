@@ -191,7 +191,7 @@ namespace CPAS.Classes
                 Thread.Sleep(50);
                 sp.Write("getstatuscode$");     //注意这个返回值还没有判断
                 Thread.Sleep(50);
-                sp.Write("holdlds$");
+                sp.Write("holdlds$");       //注意这个返回值还没有判断 dddd   
                 return true;
             }
         }
