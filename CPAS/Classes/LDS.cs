@@ -189,7 +189,7 @@ namespace CPAS.Classes
                     byteSend[i] = (byte)((B >> 24 - 8 * (i-4)) & 0xFF);
                 sp.Write(byteSend, 0, byteSend.Length);
                 Thread.Sleep(50);
-                sp.Write("getstatuscode$");
+                sp.Write("getstatuscode$");     //注意这个返回值还没有判断
                 Thread.Sleep(50);
                 sp.Write("holdlds$");
                 return true;
