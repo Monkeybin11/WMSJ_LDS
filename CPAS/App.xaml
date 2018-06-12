@@ -1,0 +1,19 @@
+﻿<Application x:Class="CPAS.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="Views\MainWindow.xaml"
+             xmlns:Convert="clr-namespace:CPAS.Converters">
+      
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/ImplicitStylesResourceDictionary.xaml" />
+                <ResourceDictionary Source="Resources/IconsResourceDictionary.xaml" />
+                <ResourceDictionary Source="Resources/StylesResourceDictionary.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Convert:Text2Visibility x:Key="Text2Visibility"/>
+            <Convert:MsgType2Image x:Key="MsgType2Image"/>
+            <Convert:MsgType2ForeBrush x:Key="MsgType2ForeBrush"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

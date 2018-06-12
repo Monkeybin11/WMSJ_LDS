@@ -1,0 +1,128 @@
+﻿<Window xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"  xmlns:my="clr-namespace:DevExpress.Xpf.LayoutControl;assembly=DevExpress.Xpf.LayoutControl.v17.1"  x:Class="CPAS.Views.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+		xmlns:viewModels="clr-namespace:CPAS.ViewModels"
+        xmlns:converters="clr-namespace:CPAS.Converters"
+        xmlns:local="clr-namespace:CPAS"
+        Title="CPAS"
+        WindowStartupLocation="CenterScreen"
+        Height="459"
+        Width="795" 
+        xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon" 
+        xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+        xmlns:dxd="http://schemas.devexpress.com/winfx/2008/xaml/docking" 
+        xmlns:cls="clr-namespace:CPAS.Classes"
+        xmlns:views="clr-namespace:CPAS.Views"
+        Loaded="Window_Loaded">
+    <Window.Resources>
+        <viewModels:MainWindowViewModel x:Key="Windows1ViewModel" />
+        <converters:IsBiggerThanConverter x:Key="IsBiggerThanConverter" />
+    </Window.Resources>
+    <Grid DataContext="{StaticResource Windows1ViewModel}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="3"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+      
+        <dxr:RibbonControl Name="ribbonControl1">
+            <dxr:RibbonControl.ApplicationMenu>
+                <dxr:ApplicationMenu />
+            </dxr:RibbonControl.ApplicationMenu>
+            <dxr:RibbonDefaultPageCategory Caption="defaultCategory" Name="ribbonDefaultPageCategory1">
+                <dxr:RibbonPage Caption="Menu" Name="ribbonPage1">
+                    <dxr:RibbonPageGroup Caption="Run" AllowCollapse="True">
+                        <dxb:BarButtonItem
+                            Content="Run" 
+                            RibbonStyle="Large"
+                            LargeGlyph="/CPAS;component/Images/Start64_64.png"
+                            Command="{Binding StartCommand}"
+                            />
+                        <dxb:BarButtonItem
+                            Content="Stop" 
+                            RibbonStyle="Large"
+                            LargeGlyph="/CPAS;component/Images/Stop64_64.png"
+                            Command="{Binding StopCommand}"
+                           />
+                    </dxr:RibbonPageGroup>
+                    <dxr:RibbonPageGroup Caption="Main" Name="ribbonPageGroup1" AllowCollapse="True">
+                        
+                        <dxb:BarButtonItem         
+                            Name="btnChkHome"
+                            Content="Home" 
+                            RibbonStyle="Large"
+                            LargeGlyph="/CPAS;component/Images/Home64_64.png"
+                            Command="{Binding RibonCommand}" 
+                            CommandParameter="Home"/>
+                        <dxb:BarButtonItem
+                            Name="btnChkPara"
+                            Content="para" 
+                            RibbonStyle="Large"
+                            LargeGlyph="/CPAS;component/Images/Setting64_64.png"
+                            Command="{Binding RibonCommand}" 
+                            CommandParameter="Para"/>
+                        <dxb:BarButtonItem
+                            Name="btnChkCamera"
+                            Content="Camera" 
+                            RibbonStyle="Large"
+                            LargeGlyph="/CPAS;component/Images/Camera64_64.png"
+                            Command="{Binding RibonCommand}" 
+                            CommandParameter="Camera"/>
+                        <dxb:BarButtonItem
+                            Name="btnChkData"
+                            Content="Data" 
+                            RibbonStyle="Large"
+                            LargeGlyph="/CPAS;component/Images/Data64_64.png"
+                            Command="{Binding RibonCommand}" 
+                            CommandParameter="Data"/>
+                    </dxr:RibbonPageGroup>
+                    <dxr:RibbonPageGroup Caption="Login" AllowCollapse="True">
+                        <dxb:BarButtonItem
+                            Content="User" 
+                            RibbonStyle="Large"
+                            LargeGlyph="/CPAS;component/Images/User64_64.png"
+                            />
+                    </dxr:RibbonPageGroup>
+                </dxr:RibbonPage>
+            </dxr:RibbonDefaultPageCategory>
+        </dxr:RibbonControl>
+        <ContentControl Grid.Row="1">
+            <Grid>
+                <views:UC_Home Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Home}"/>
+                <views:UC_CameraView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Camera}"/>
+                <views:UC_ParaSetting Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Para}"/>
+                <views:UC_DataView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Data}"/>
+            </Grid>
+        </ContentControl>
+        <GridSplitter Grid.Row="2" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+        <dxe:ListBoxEdit Grid.Row="3" ItemsSource="{Binding MessageCollection}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
+            <dxe:ListBoxEdit.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Clear" Command="{Binding ShowInfoCommand}" CommandParameter="Clear"/>
+                </ContextMenu>
+            </dxe:ListBoxEdit.ContextMenu>
+            <dxe:ListBoxEdit.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Height="25">
+                        <Image Source="{Binding MsgType,Converter={StaticResource MsgType2Image}}" VerticalAlignment="Center" Margin="3"/>
+                        <TextBlock Width="200" Text="{Binding StrTime}" VerticalAlignment="Center" Foreground="{Binding MsgType, Converter={StaticResource MsgType2ForeBrush}}" FontSize="12" Margin="10,0,0,0"/>
+                        <TextBlock Text="{Binding StrMsg}" VerticalAlignment="Center" FontSize="12" Foreground="{Binding MsgType, Converter={StaticResource MsgType2ForeBrush}}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </dxe:ListBoxEdit.ItemTemplate>
+        </dxe:ListBoxEdit>
+        <dxr:RibbonStatusBarControl Name="statusBarControl1"  Grid.Row="4">
+            <dxr:RibbonStatusBarControl.LeftItems>
+                <dxb:BarStaticItem Content="V1.0.0.0"/>
+            </dxr:RibbonStatusBarControl.LeftItems>
+            <dxr:RibbonStatusBarControl.RightItems>
+                <dxb:BarStaticItem Content="{Binding StrUserName}"/>
+            </dxr:RibbonStatusBarControl.RightItems>
+        </dxr:RibbonStatusBarControl>
+    </Grid>
+</Window>
