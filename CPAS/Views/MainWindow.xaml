@@ -15,8 +15,7 @@
         xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
         xmlns:dxd="http://schemas.devexpress.com/winfx/2008/xaml/docking" 
         xmlns:cls="clr-namespace:CPAS.Classes"
-        xmlns:views="clr-namespace:CPAS.Views"
-        Loaded="Window_Loaded">
+        xmlns:views="clr-namespace:CPAS.Views">
     <Window.Resources>
         <viewModels:MainWindowViewModel x:Key="Windows1ViewModel" />
         <converters:IsBiggerThanConverter x:Key="IsBiggerThanConverter" />
@@ -29,77 +28,84 @@
             <RowDefinition Height="100"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-      
-        <dxr:RibbonControl Name="ribbonControl1">
-            <dxr:RibbonControl.ApplicationMenu>
-                <dxr:ApplicationMenu />
-            </dxr:RibbonControl.ApplicationMenu>
-            <dxr:RibbonDefaultPageCategory Caption="defaultCategory" Name="ribbonDefaultPageCategory1">
-                <dxr:RibbonPage Caption="Menu" Name="ribbonPage1">
-                    <dxr:RibbonPageGroup Caption="Run" AllowCollapse="True">
-                        <dxb:BarButtonItem
+
+    
+        <dxr:RibbonControl Name="ribbonControl1" PageCategoryAlignment="Right">
+                <dxr:RibbonControl.ApplicationMenu>
+                    <dxr:ApplicationMenu />
+                </dxr:RibbonControl.ApplicationMenu>
+                <dxr:RibbonDefaultPageCategory Caption="defaultCategory" Name="ribbonDefaultPageCategory1">
+                    <dxr:RibbonPage Caption="Menu" Name="ribbonPage1">
+                        <dxr:RibbonPageGroup Caption="Run" AllowCollapse="True">
+                            <dxb:BarButtonItem
                             Content="Run" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/Start64_64.png"
                             Command="{Binding StartCommand}"
                             />
-                        <dxb:BarButtonItem
+                            <dxb:BarButtonItem
                             Content="Stop" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/Stop64_64.png"
                             Command="{Binding StopCommand}"
                            />
-                    </dxr:RibbonPageGroup>
-                    <dxr:RibbonPageGroup Caption="Main" Name="ribbonPageGroup1" AllowCollapse="True">
-                        
-                        <dxb:BarButtonItem         
+                        </dxr:RibbonPageGroup>
+                        <dxr:RibbonPageGroup Caption="Main" Name="ribbonPageGroup1" AllowCollapse="True">
+
+                            <dxb:BarButtonItem         
                             Name="btnChkHome"
                             Content="Home" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/Home64_64.png"
                             Command="{Binding RibonCommand}" 
-                            CommandParameter="Home"/>
-                        <dxb:BarButtonItem
+                            CommandParameter="Home"
+                            IsVisible="{Binding Level, Converter={StaticResource Level2IsVisible},ConverterParameter=0}"/>
+                            <dxb:BarButtonItem
                             Name="btnChkPara"
                             Content="para" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/Setting64_64.png"
                             Command="{Binding RibonCommand}" 
-                            CommandParameter="Para"/>
-                        <dxb:BarButtonItem
+                            CommandParameter="Para"
+                            IsVisible="{Binding Level, Converter={StaticResource Level2IsVisible},ConverterParameter=1}"/>
+                            <dxb:BarButtonItem
                             Name="btnChkCamera"
                             Content="Camera" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/Camera64_64.png"
                             Command="{Binding RibonCommand}" 
-                            CommandParameter="Camera"/>
-                        <dxb:BarButtonItem
+                            CommandParameter="Camera"
+                            IsVisible="{Binding Level, Converter={StaticResource Level2IsVisible},ConverterParameter=1}"/>
+                            <dxb:BarButtonItem
                             Name="btnChkData"
                             Content="Data" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/Data64_64.png"
                             Command="{Binding RibonCommand}" 
-                            CommandParameter="Data"/>
-                    </dxr:RibbonPageGroup>
-                    <dxr:RibbonPageGroup Caption="Login" AllowCollapse="True">
-                        <dxb:BarButtonItem
+                            CommandParameter="Data"
+                            IsVisible="{Binding Level, Converter={StaticResource Level2IsVisible},ConverterParameter=1}"/>
+                        </dxr:RibbonPageGroup>
+                        <dxr:RibbonPageGroup Caption="Login" AllowCollapse="True">
+                            <dxb:BarButtonItem
                             Content="User" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/User64_64.png"
                             Command="{Binding RibonCommand}" 
                             CommandParameter="LogIn"
                             />
-                    </dxr:RibbonPageGroup>
-                </dxr:RibbonPage>
-            </dxr:RibbonDefaultPageCategory>
-        </dxr:RibbonControl>
+                        </dxr:RibbonPageGroup>
+                    </dxr:RibbonPage>
+                </dxr:RibbonDefaultPageCategory>
+            </dxr:RibbonControl>
+       
+        
         <ContentControl Grid.Row="1">
             <Grid>
-                <views:UC_Home Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Home}"/>
-                <views:UC_CameraView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Camera}"/>
-                <views:UC_ParaSetting Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Para}"/>
-                <views:UC_DataView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Data}"/>
-                <views:UC_LogIn Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=LogIn}"/>
+                <views:UC_Home Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Home}" x:Name="Home"/>
+                <views:UC_CameraView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Camera}" x:Name="Camera"/>
+                <views:UC_ParaSetting Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Para}" x:Name="Para"/>
+                <views:UC_DataView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Data}" x:Name="Data"/>
+                <views:UC_LogIn Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=LogIn}" x:Name="LogIn"/>
             </Grid>
         </ContentControl>
         <GridSplitter Grid.Row="2" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>

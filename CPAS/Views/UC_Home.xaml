@@ -52,10 +52,44 @@
             </Grid>
         </Border >
         <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
-            <Grid />
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Fill="LightBlue"/>
+                    <TextBlock Text="Cam1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Rectangle Fill="LightCoral" Grid.Column="1"/>
+                    <TextBlock Text="Cam2" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1"/>
+                </Grid>
+                <Rectangle Grid.Row="1" Fill="LightPink"/>
+                <TextBlock Text="Cam3" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1"/>
+            </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="2" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
-            <Grid />
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Rectangle Fill="LightBlue"/>
+                    <TextBlock Text="Cam4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Rectangle Fill="LightCoral" Grid.Column="1"/>
+                    <TextBlock Text="Cam5" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1"/>
+                </Grid>
+                <Rectangle Grid.Row="1" Fill="LightPink"/>
+                <TextBlock Text="Cam6" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1"/>
+            </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="3" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
             <Grid  />

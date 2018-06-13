@@ -1,4 +1,5 @@
-﻿using CPAS.Models;
+﻿using CPAS.Interface;
+using CPAS.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,15 +19,29 @@ namespace CPAS.Views
     /// <summary>
     /// UC_ParaSetting.xaml 的交互逻辑
     /// </summary>
-    public partial class UC_ParaSetting : UserControl
+    public partial class UC_ParaSetting : UserControl , Iauthor
     {
         public UC_ParaSetting()
         {
             InitializeComponent();
         }
+
+       
+
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             PropertyGrid.SelectedObject = new SystemParaModel();
+        }
+
+        public int Level { get; set; }
+        public static DependencyProperty LevelProperty = DependencyProperty.Register("Level", typeof(int), typeof(UC_ParaSetting));
+        public int GetLever()
+        {
+            throw new NotImplementedException();
+        }
+        public void SetLever(int nLever)
+        {
+            throw new NotImplementedException();
         }
     }
 }
