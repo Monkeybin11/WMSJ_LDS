@@ -5,7 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:UserCtrl="clr-namespace:CPAS.UserCtrl"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="800">
+             d:DesignHeight="300" d:DesignWidth="800"
+             xmlns:halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
+             Loaded="UserControl_Loaded"
+             SizeChanged="UserControl_SizeChanged"
+             MouseDoubleClick="UserControl_MouseDoubleClick"
+             >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
@@ -64,11 +69,14 @@
                     </Grid.ColumnDefinitions>
                     <Rectangle Fill="LightBlue"/>
                     <TextBlock Text="Cam1" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <halcon:HWindowControlWPF Margin="1" x:Name="Cam1"/>
                     <Rectangle Fill="LightCoral" Grid.Column="1"/>
                     <TextBlock Text="Cam2" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1"/>
+                    <halcon:HWindowControlWPF Grid.Column="1" Margin="1" x:Name="Cam2"/>
                 </Grid>
                 <Rectangle Grid.Row="1" Fill="LightPink"/>
-                <TextBlock Text="Cam3" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1"/>
+                <TextBlock Text="Cam3" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1" />
+                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam3"/>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="2" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
@@ -84,11 +92,14 @@
                     </Grid.ColumnDefinitions>
                     <Rectangle Fill="LightBlue"/>
                     <TextBlock Text="Cam4" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <halcon:HWindowControlWPF Margin="1" x:Name="Cam4"/>
                     <Rectangle Fill="LightCoral" Grid.Column="1"/>
                     <TextBlock Text="Cam5" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Column="1"/>
+                    <halcon:HWindowControlWPF Grid.Column="1" Margin="1" x:Name="Cam5"/>
                 </Grid>
                 <Rectangle Grid.Row="1" Fill="LightPink"/>
                 <TextBlock Text="Cam6" VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="1"/>
+                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam6"/>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="3" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">

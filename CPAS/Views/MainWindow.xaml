@@ -28,12 +28,24 @@
             <RowDefinition Height="100"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <Rectangle Opacity="0.5">
+            <Rectangle.Fill>
+                <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+                    <GradientStop Color="White"/>
+                    <GradientStop Color="White" Offset="0.7"/>
+                    <GradientStop Color="#FFF1F1F5" Offset="0.9"/>
+                    <GradientStop Color="#FF5555AA" Offset="1"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+            
+        </Rectangle>
 
-    
-        <dxr:RibbonControl Name="ribbonControl1" PageCategoryAlignment="Right">
-                <dxr:RibbonControl.ApplicationMenu>
-                    <dxr:ApplicationMenu />
-                </dxr:RibbonControl.ApplicationMenu>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="600"/>
+            </Grid.ColumnDefinitions>
+            <dxr:RibbonControl Name="ribbonControl1" PageCategoryAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center" MinWidth="350">
                 <dxr:RibbonDefaultPageCategory Caption="defaultCategory" Name="ribbonDefaultPageCategory1">
                     <dxr:RibbonPage Caption="Menu" Name="ribbonPage1">
                         <dxr:RibbonPageGroup Caption="Run" AllowCollapse="True">
@@ -85,7 +97,7 @@
                             CommandParameter="Data"
                             IsVisible="{Binding Level, Converter={StaticResource Level2IsVisible},ConverterParameter=1}"/>
                         </dxr:RibbonPageGroup>
-                        <dxr:RibbonPageGroup Caption="Login" AllowCollapse="True">
+                        <dxr:RibbonPageGroup Caption="Login">
                             <dxb:BarButtonItem
                             Content="User" 
                             RibbonStyle="Large"
@@ -97,15 +109,33 @@
                     </dxr:RibbonPage>
                 </dxr:RibbonDefaultPageCategory>
             </dxr:RibbonControl>
-       
-        
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="OK:" VerticalAlignment="Center" FontSize="20" Margin="50,0,0,0"/>
+                    <TextBlock Text="123" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Column="1">
+                    <TextBlock Text="NG:" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
+                    <TextBlock Text="123" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
         <ContentControl Grid.Row="1">
             <Grid>
-                <views:UC_Home Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Home}" x:Name="Home"/>
-                <views:UC_CameraView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Camera}" x:Name="Camera"/>
-                <views:UC_ParaSetting Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Para}" x:Name="Para"/>
-                <views:UC_DataView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Data}" x:Name="Data"/>
-                <views:UC_LogIn Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=LogIn}" x:Name="LogIn"/>
+                <views:UC_Home Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Home}"/>
+                <views:UC_CameraView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Camera}"/>
+                <views:UC_ParaSetting Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Para}" />
+                <views:UC_DataView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Data}" />
+                <views:UC_LogIn Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=LogIn}" />
             </Grid>
         </ContentControl>
         <GridSplitter Grid.Row="2" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>

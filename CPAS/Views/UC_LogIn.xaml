@@ -54,8 +54,8 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Name="BtnLogIn" Grid.Column="1" Content="登陆" FontSize="30" FontFamily="隶书" Margin="10,50,10,50" FontWeight="Light" Click="BtnLogIn_Click" Style="{StaticResource RoundButtonStyle1}"/>
-                    <Button Name="BtnLogOut" Grid.Column="2" Content="注销" FontSize="30" FontFamily="隶书" Margin="10,50,10,50" FontWeight="Light" Click="BtnLogOut_Click" Style="{StaticResource RoundButtonStyle1}"/>
+                    <Button Name="BtnLogIn" Grid.Column="1" Content="登陆" FontSize="30" FontFamily="隶书" Margin="10,50,10,50" FontWeight="Light" Click="BtnLogIn_Click" Style="{StaticResource RoundButtonStyle1}" Background="White" BorderThickness="0" />
+                    <Button Name="BtnLogOut" Grid.Column="2" Content="注销" FontSize="30" FontFamily="隶书" Margin="10,50,10,50" FontWeight="Light" Click="BtnLogOut_Click" Style="{StaticResource RoundButtonStyle1}" Background="White" BorderThickness="0" />
                 </Grid>
             </Grid>
         </Border>
