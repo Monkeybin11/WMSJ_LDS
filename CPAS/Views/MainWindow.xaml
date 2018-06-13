@@ -86,6 +86,8 @@
                             Content="User" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/User64_64.png"
+                            Command="{Binding RibonCommand}" 
+                            CommandParameter="LogIn"
                             />
                     </dxr:RibbonPageGroup>
                 </dxr:RibbonPage>
@@ -97,6 +99,7 @@
                 <views:UC_CameraView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Camera}"/>
                 <views:UC_ParaSetting Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Para}"/>
                 <views:UC_DataView Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=Data}"/>
+                <views:UC_LogIn Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=LogIn}"/>
             </Grid>
         </ContentControl>
         <GridSplitter Grid.Row="2" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>

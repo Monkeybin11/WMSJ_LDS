@@ -169,6 +169,9 @@
     <Compile Include="Views\UC_Home.xaml.cs">
       <DependentUpon>UC_Home.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UC_LogIn.xaml.cs">
+      <DependentUpon>UC_LogIn.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\UC_ParaSetting.xaml.cs">
       <DependentUpon>UC_ParaSetting.xaml</DependentUpon>
     </Compile>
@@ -215,6 +218,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UC_Home.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\UC_LogIn.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -278,6 +285,9 @@
   <ItemGroup>
     <Folder Include="LogData\" />
     <Folder Include="ParaData\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\bk.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.108.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.108.0\build\net45\System.Data.SQLite.Core.targets')" />
