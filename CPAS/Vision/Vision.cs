@@ -47,6 +47,7 @@ namespace CPAS.Vision
         {
             lock (_lockList[nCamID])
             {
+                //关联当前窗口
                 if (HwindowDic.Keys.Contains(nCamID))
                 {
                     var its = from hd in HwindowDic[nCamID] where hd.Key == Name select hd;
@@ -57,9 +58,24 @@ namespace CPAS.Vision
                 }
                 else
                     HwindowDic.Add(nCamID, new Dictionary<string, HTuple>() { { Name,hWindow} });
-
                 if (ActiveCamDic.Keys.Contains(nCamID))
                     HOperatorSet.SetPart(HwindowDic[nCamID][Name], 0, 0, ActiveCamDic[nCamID].Item2, ActiveCamDic[nCamID].Item1);
+
+
+                //需要解除此窗口与其他相机的关联
+                foreach (var kps in HwindowDic)
+                {
+                    if (kps.Key == nCamID)
+                        continue;
+                    foreach (var kp in kps.Value)
+                    {
+                        if (kp.Key == Name)
+                        {
+                            kps.Value.Remove(Name);
+                            break;
+                        }
+                    }
+                }
                 return true;
             }
 

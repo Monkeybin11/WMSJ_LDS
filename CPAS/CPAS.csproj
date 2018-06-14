@@ -159,10 +159,15 @@
     <Compile Include="Converters\Level2IsVisible.cs" />
     <Compile Include="Converters\MsgType2ForeBrush.cs" />
     <Compile Include="Converters\MsgType2Image.cs" />
+    <Compile Include="Converters\Text2CameStateImage.cs" />
+    <Compile Include="Converters\Text2RoiImage.cs" />
     <Compile Include="Converters\Text2Visibility.cs" />
     <Compile Include="Interface\Iauthor.cs" />
+    <Compile Include="Models\CameraItem.cs" />
     <Compile Include="Models\MessageItem.cs" />
+    <Compile Include="Models\RoiItem.cs" />
     <Compile Include="Models\SystemParaModel.cs" />
+    <Compile Include="Models\TemplateItem.cs" />
     <Compile Include="UserCtrl\UC_StationHeader.xaml.cs">
       <DependentUpon>UC_StationHeader.xaml</DependentUpon>
     </Compile>
@@ -302,6 +307,24 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\switchcamera.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\GrabOnce.png" />
+    <Resource Include="Images\GrabRepeat.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Connected.png" />
+    <Resource Include="Images\Disconnected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\StopGrab.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Edit.png" />
+    <Resource Include="Images\New.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Delete.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.108.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.108.0\build\net45\System.Data.SQLite.Core.targets')" />

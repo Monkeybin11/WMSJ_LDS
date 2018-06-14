@@ -73,14 +73,7 @@ namespace CPAS.Views
                     Task.Delay(1500).Wait();
                     bFirstLoaded = false;
                 }
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam1", Cam1.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam2", Cam2.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam3", Cam3.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam4", Cam4.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam5", Cam5.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam6", Cam6.HalconWindow);
-                Console.WriteLine("---------------------Home--------------------");
-
+                SetAttachWindow(true);
             });
         }
 
@@ -109,6 +102,27 @@ namespace CPAS.Views
                 LoadDelay();
             else
             {
+                SetAttachWindow(false);
+            }
+        }
+
+        private void BenMenuShowImageInCurrentPage_Click(object sender, RoutedEventArgs e)
+        {
+            SetAttachWindow(true);
+        }
+        private void SetAttachWindow(bool bAttach)
+        {
+            if (bAttach)
+            {
+                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam1", Cam1.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam2", Cam2.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam3", Cam3.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam4", Cam4.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam5", Cam5.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam6", Cam6.HalconWindow);
+            }
+            else
+            {
                 Vision.Vision.Instance.DetachCamWindow(0, "HomeCam1");
                 Vision.Vision.Instance.DetachCamWindow(0, "HomeCam2");
                 Vision.Vision.Instance.DetachCamWindow(0, "HomeCam3");
@@ -117,34 +131,8 @@ namespace CPAS.Views
                 Vision.Vision.Instance.DetachCamWindow(0, "HomeCam6");
             }
         }
-
-        private void BenMenuShowImageInCurrentPage_Click(object sender, RoutedEventArgs e)
-        {
-            Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam1", Cam1.HalconWindow);
-            Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam2", Cam2.HalconWindow);
-            Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam3", Cam3.HalconWindow);
-            Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam4", Cam4.HalconWindow);
-            Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam5", Cam5.HalconWindow);
-            Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam6", Cam6.HalconWindow);
-        }
-
         private void ThreadFunc()
-        {
-
-            //HOperatorSet.GrabImage(out ho_Image, hv_AcqHandle);     //会新生成Image，因为ho_Image初始是为null的，所以GrabImage肯定是内部new了Image
-            //HOperatorSet.GetImageSize(ho_Image, out HTuple width, out HTuple height);
-            //ho_Image.Dispose();
-            //for (int i = 0; i < HwindowList.Count; i++)
-            //{
-            //    HOperatorSet.SetPart(HwindowList[i], 0, 0, height, width);
-            //    HOperatorSet.SetLineWidth(HwindowList[i], 2);
-            //    HOperatorSet.SetColor(HwindowList[i], "red");
-            //    HOperatorSet.SetDraw(HwindowList[i], "margin");
-            //}
-            //HOperatorSet.GenRegionLine(out HObject reg, height / 2, 0, height / 2, width);
-            //HOperatorSet.GenRegionLine(out HObject reg1, 0, width / 2, height, width / 2);
-            //HOperatorSet.GenRectangle1(out HObject rect, height / 2 - 50, width / 2 - 50, height / 2 + 50, width / 2 + 50);
-            
+        { 
             while (!cts.Token.IsCancellationRequested)
             {
                 lock (_lock)
@@ -152,23 +140,11 @@ namespace CPAS.Views
                     bool ret = grabEvent.WaitOne(50);
                     if (ret)
                         continue;
-                    //HOperatorSet.GrabImage(out ho_Image, hv_AcqHandle);
-                    //for (int i = 0; i < HwindowList.Count; i++)
-                    //{
-                    //    HOperatorSet.DispObj(ho_Image, HwindowList[i]);
-                    //    HOperatorSet.DispObj(reg, HwindowList[i]);
-                    //    HOperatorSet.DispObj(reg1, HwindowList[i]);
-                    //    HOperatorSet.DispObj(rect, HwindowList[i]);
-                    //}
-                    //ho_Image.Dispose();
+
                     Vision.Vision.Instance.GrabImage(0);
-                    
                 }
             }
             Vision.Vision.Instance.CloseCam(0);
-            //reg.Dispose();
-            //reg1.Dispose();
-            //rect.Dispose();
         }
     }
 }

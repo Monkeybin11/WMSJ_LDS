@@ -28,6 +28,9 @@ namespace CPAS.ViewModels
         private string _strUserName="";
         private int _level;
         private ObservableCollection<MessageItem> _messageCollection=new ObservableCollection<MessageItem>();
+        private ObservableCollection<CameraItem> _cameraCollection = new ObservableCollection<CameraItem>();
+        private ObservableCollection<RoiItem> _roiCollection = new ObservableCollection<RoiItem>();
+        private ObservableCollection<TemplateItem> _templateCollection = new ObservableCollection<TemplateItem>();
         private Dictionary<string, string> LogInfoDic = new Dictionary<string, string>();
         
 
@@ -75,11 +78,7 @@ namespace CPAS.ViewModels
             get { return _level; }
         }
        
-        #endregion
 
-        #region MessageCollection
-        
-    
         public ObservableCollection<MessageItem> MessageCollection
         {
             get { return _messageCollection; }
@@ -87,11 +86,48 @@ namespace CPAS.ViewModels
                 if (_messageCollection != value)
                 {
                     _messageCollection = value;
-                    RaisePropertyChanged(() => MessageCollection);
+                    RaisePropertyChanged();
                 }
             }
         }
-  
+        public ObservableCollection<CameraItem> CameraCollection
+        {
+            get { return _cameraCollection; }
+            set
+            {
+                if (_cameraCollection != value)
+                {
+                    _cameraCollection = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+        public ObservableCollection<RoiItem> RoiCollection
+        {
+            get { return _roiCollection; }
+            set
+            {
+                if (_roiCollection != value)
+                {
+                    _roiCollection = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+        public ObservableCollection<TemplateItem> TemplateCollection
+        {
+            get { return _templateCollection; }
+            set
+            {
+                if (_templateCollection != value)
+                {
+                    _templateCollection = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+
         public void ShowMessage(MessageItem msgItem)
         {
             if (MessageCollection.Count > 100)
@@ -172,6 +208,21 @@ namespace CPAS.ViewModels
             LogInfoDic.Add("Operator","111");
             LogInfoDic.Add("Engineer", "222");
             LogInfoDic.Add("Manager", "333");
+
+            RoiCollection.Add(new RoiItem() { StrName = "ROI1" });
+            RoiCollection.Add(new RoiItem() { StrName = "ROI2" });
+
+            TemplateCollection.Add(new TemplateItem() { StrName="Template1" });
+            TemplateCollection.Add(new TemplateItem() { StrName = "Template2"});
+            TemplateCollection.Add(new TemplateItem() { StrName = "Template4" });
+            TemplateCollection.Add(new TemplateItem() { StrName = "Template5" });
+            TemplateCollection.Add(new TemplateItem() { StrName = "Template6" });
+            TemplateCollection.Add(new TemplateItem() { StrName = "Template7" });
+
+            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam1", StrCameraState="Connected"});
+            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam2" , StrCameraState = "Disconnected" });
+            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam3" , StrCameraState = "Connected" });
+
             MessageCollection.Add(new MessageItem(){ MsgType=MSGTYPE.ERROR, StrMsg="ErrorInfo"});
             MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = "WarningInfo" });
             MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.INFO, StrMsg = "Info" });
