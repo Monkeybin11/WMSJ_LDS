@@ -159,6 +159,7 @@
     <Compile Include="Converters\Level2IsVisible.cs" />
     <Compile Include="Converters\MsgType2ForeBrush.cs" />
     <Compile Include="Converters\MsgType2Image.cs" />
+    <Compile Include="Converters\RoiTemplate2Visibility.cs" />
     <Compile Include="Converters\Text2CameStateImage.cs" />
     <Compile Include="Converters\Text2RoiImage.cs" />
     <Compile Include="Converters\Text2Visibility.cs" />

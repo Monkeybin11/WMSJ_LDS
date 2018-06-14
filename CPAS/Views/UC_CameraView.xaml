@@ -11,10 +11,10 @@
              SizeChanged="UserControl_SizeChanged">
     <UserControl.Resources>
         <Storyboard x:Key="TemplateSb" Completed="Storyboard2TemplateCompleted">
-            <DoubleAnimation Storyboard.TargetName="SelectTrans"  Storyboard.TargetProperty="X" From="155" To="0" BeginTime="00:00:00" Duration="00:00:0.2"/>
+            <DoubleAnimation Storyboard.TargetName="SelectTrans"  Storyboard.TargetProperty="X" From="88" To="0" BeginTime="00:00:00" Duration="00:00:0.2"/>
         </Storyboard>
         <Storyboard x:Key="RoiSb" Completed="Storyboard2RoiCompleted">
-            <DoubleAnimation Storyboard.TargetName="SelectTrans"  Storyboard.TargetProperty="X" From="0" To="155" BeginTime="00:00:00" Duration="00:00:0.2"/>
+            <DoubleAnimation Storyboard.TargetName="SelectTrans"  Storyboard.TargetProperty="X" From="0" To="88" BeginTime="00:00:00" Duration="00:00:0.2"/>
         </Storyboard>
     </UserControl.Resources>
     
@@ -24,7 +24,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="352"/>
         </Grid.ColumnDefinitions>
         <halcon:HWindowControlWPF Grid.Row="0" Grid.Column="0" Margin="1" x:Name="Cam1"/>
         <Grid Grid.Row="0" Grid.Column="4" Grid.RowSpan="2">
@@ -46,28 +46,45 @@
             <Button Background="Transparent" Style="{StaticResource RoundButtonStyle1}" Height="50" ToolTip="单帧采集" Margin="5">
                 <Button.Content>
                     <Grid>
-                        <Image Source="/CPAS;component/Images/GrabOnce.png"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="/CPAS;component/Images/GrabOnce.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="单帧采集" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
                     </Grid>
                 </Button.Content>
             </Button>
             <Button Grid.Column="1" Background="Transparent" Style="{StaticResource RoundButtonStyle1}" Height="50" ToolTip="连续采集" Margin="5">
                 <Button.Content>
                     <Grid>
-                        <Image Source="/CPAS;component/Images/GrabRepeat.png" />
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="/CPAS;component/Images/GrabRepeat.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="连续采集" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
                     </Grid>
                 </Button.Content>
             </Button>
-            <Button Grid.Row="1" Style="{StaticResource RoundButtonStyle1}" Grid.ColumnSpan="2" Margin="5" Background="Transparent" ToolTip="停止采集">
+            <Button Grid.Row="1" Style="{StaticResource RoundButtonStyle1}"  Background="Transparent" ToolTip="停止采集" Margin="5" Height="50">
                 <Button.Content>
-                    <Image Source="/CPAS;component/Images/StopGrab.png" Margin="2"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="/CPAS;component/Images/StopGrab.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="停止采集" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
+                    </Grid>
                 </Button.Content>
             </Button>
-            <ComboBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" ItemsSource="{Binding CameraCollection}" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
+            <ComboBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5,12,5,12" ItemsSource="{Binding CameraCollection}" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="50"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Image Source="{Binding StrCameraState,Converter={StaticResource Text2CameStateImage}}" Margin="5"/>
@@ -77,15 +94,22 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <Rectangle Grid.Row="3" Grid.ColumnSpan="2" RadiusX="20" RadiusY="20" Margin="20,10,20,10"  StrokeThickness="1"  Stroke="Orange"/>
-            <TextBlock Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center" Text="ROI" FontSize="30" />
-            <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="模板" FontSize="30" />
-            <Rectangle Grid.Row="3" RadiusX="20" RadiusY="20" Margin="20,10,0,10" Fill="Orange" MouseDown="Rectangle_MouseDown">
+            <Rectangle Grid.Row="3" RadiusX="20" RadiusY="20" Margin="0,13,0,13"  StrokeThickness="1"  Stroke="Orange"/>
+            <TextBlock Grid.Row="3" VerticalAlignment="Center" Text="ROI" FontSize="25" Margin="15,0,0,0"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Text="模板" FontSize="25" Margin="105,0,0,0"/>
+            <Rectangle Grid.Row="3" RadiusX="20" RadiusY="20" Margin="0,13,88,13" Fill="Orange" MouseDown="Rectangle_MouseDown">
                 <Rectangle.RenderTransform>
                     <TranslateTransform x:Name="SelectTrans" />
                 </Rectangle.RenderTransform>
             </Rectangle>
-
+            <Grid Grid.Row="3" Grid.Column="1" Margin="10,0,0,0" Visibility="{Binding CurrentSelectRoiTemplate, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource RoiTemplate2Visibility}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <RadioButton VerticalAlignment="Center" Content="圆形" FontSize="20"/>
+                <RadioButton Grid.Column="1" VerticalAlignment="Center" Content="矩形" FontSize="20"/>
+            </Grid>
             <ListBox x:Name="ListBoxRoiTemplate" Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="3" Margin="5" SelectedIndex="0" ItemsSource="{Binding TemplateCollection}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>

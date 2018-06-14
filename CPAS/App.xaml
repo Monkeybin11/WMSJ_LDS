@@ -17,6 +17,7 @@
             <Convert:Level2IsVisible x:Key="Level2IsVisible"/>
             <Convert:Text2CameStateImage x:Key="Text2CameStateImage"/>
             <Convert:Text2RoiImage x:Key="Text2RoiImage"/>
+            <Convert:RoiTemplate2Visibility x:Key="RoiTemplate2Visibility"/>
             
         </ResourceDictionary>
     </Application.Resources>
