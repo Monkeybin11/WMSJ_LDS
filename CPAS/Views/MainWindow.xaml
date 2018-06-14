@@ -18,7 +18,7 @@
         xmlns:views="clr-namespace:CPAS.Views">
     <Window.Resources>
         <viewModels:MainWindowViewModel x:Key="Windows1ViewModel" />
-        <converters:IsBiggerThanConverter x:Key="IsBiggerThanConverter" />
+        <converters:IsBiggerThanConverter x:Key="IsBiggerThanConverter"/>
     </Window.Resources>
     <Grid DataContext="{StaticResource Windows1ViewModel}">
         <Grid.RowDefinitions>
@@ -72,6 +72,7 @@
                             Command="{Binding RibonCommand}" 
                             CommandParameter="Home"
                             IsVisible="{Binding Level, Converter={StaticResource Level2IsVisible},ConverterParameter=0}"/>
+  
                             <dxb:BarButtonItem
                             Name="btnChkPara"
                             Content="para" 

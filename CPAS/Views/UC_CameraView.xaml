@@ -3,9 +3,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        <TextBlock Text="Page Camera" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+             d:DesignHeight="300" d:DesignWidth="300"
+             Loaded="UserControl_Loaded"
+             IsVisibleChanged="UserControl_IsVisibleChanged"
+             SizeChanged="UserControl_SizeChanged">
+
+        <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
+        <halcon:HWindowControlWPF Margin="1" x:Name="Cam8"/>
+        <halcon:HWindowControlWPF Grid.Row="0" Grid.Column="1" Margin="1" x:Name="Cam1"/>
+        <halcon:HWindowControlWPF Grid.Row="0" Grid.Column="2" Margin="1" x:Name="Cam2"/>
+        <halcon:HWindowControlWPF Grid.Row="0" Grid.Column="3" Margin="1" x:Name="Cam3"/>
+        <halcon:HWindowControlWPF Grid.Row="1" Grid.Column="0" Margin="1" x:Name="Cam4"/>
+        <halcon:HWindowControlWPF Grid.Row="1" Grid.Column="1" Margin="1" x:Name="Cam5"/>
+        <halcon:HWindowControlWPF Grid.Row="1" Grid.Column="2" Margin="1" x:Name="Cam6"/>
+        <halcon:HWindowControlWPF Grid.Row="1" Grid.Column="3" Margin="1" x:Name="Cam7"/>
     </Grid>
 </UserControl>
