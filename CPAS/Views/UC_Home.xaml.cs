@@ -17,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CPAS.Vision;
 using GalaSoft.MvvmLight.Messaging;
+using CPAS.ViewModels;
 
 namespace CPAS.Views
 {
@@ -28,18 +29,37 @@ namespace CPAS.Views
         public UC_Home()
         {
             InitializeComponent();
-            Messenger.Default.Register<string>(this, "WindowChanged", str => { lock (_lock) { grabEvent.Set(); } });
+            Messenger.Default.Register<string>(this, "WindowSizeChanged", str => { lock (_lock) { grabEvent.Set(); } });
+            Messenger.Default.Register<string>(this, "SetCamState", strState => {
+                lock (_lock) {
+                    switch (strState.ToLower())
+                    {
+                        case "snapcontinues":
+                            StartContinusGrab();
+                            break;
+                        case "stopsnap":
+                            if (cts != null)
+                                cts.Cancel();
+                            break;
+                        case "snaponce":
+                            Vision.Vision.Instance.GrabImage(0);
+                            break;
+                        default:
+                            throw new Exception("Unknow cmd for camera!");
+                    }
+                }
+            });
         }
 
         ~UC_Home()
         {
+            Messenger.Default.Unregister("WindowSizeChanged");
             if (cts != null)
             {
                 cts.Cancel();
                 task.Wait(3000);
             }
             //Vision.Vision.Instance.CloseCam(0);
-
         }
 
         List<HTuple> HwindowList = new List<HTuple>();
@@ -85,11 +105,10 @@ namespace CPAS.Views
             }
         }
 
-        private void UserControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void  StartContinusGrab()
         {
             if (task == null || task.IsCompleted || task.IsCanceled)
             {
-                Vision.Vision.Instance.OpenCam(0);
                 cts = new CancellationTokenSource();
                 task = new Task(() => ThreadFunc(), cts.Token);
                 task.Start();
@@ -144,7 +163,7 @@ namespace CPAS.Views
                     Vision.Vision.Instance.GrabImage(0);
                 }
             }
-            Vision.Vision.Instance.CloseCam(0);
+            //Vision.Vision.Instance.CloseCam(0);
         }
     }
 }

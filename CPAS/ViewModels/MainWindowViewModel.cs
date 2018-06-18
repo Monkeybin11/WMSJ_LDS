@@ -9,6 +9,9 @@ using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight;
 using System.Collections.Generic;
 using CPAS.Interface;
+using CPAS.Classes;
+using CPAS.Config;
+using CPAS.Vision;
 
 namespace CPAS.ViewModels
 {
@@ -18,22 +21,34 @@ namespace CPAS.ViewModels
         ENGINNER,
         MANAGER
     }
+    public enum EnumCamSnapState
+    {
+        IDLE,
+        BUSY,
+        DISCONNECTED
+    }
     public class MainWindowViewModel : ViewModelBase
     {
-        #region Properties
-
-        #region MyDateTime
+    
+        #region Fields
         private string _strViewID = "Home";
         private DateTime _myDateTime;
         private string _strUserName="";
         private int _level;
+        private EnumCamSnapState _amSnapState;
         private ObservableCollection<MessageItem> _messageCollection=new ObservableCollection<MessageItem>();
         private ObservableCollection<CameraItem> _cameraCollection = new ObservableCollection<CameraItem>();
         private ObservableCollection<RoiItem> _roiCollection = new ObservableCollection<RoiItem>();
         private ObservableCollection<TemplateItem> _templateCollection = new ObservableCollection<TemplateItem>();
         private Dictionary<string, string> LogInfoDic = new Dictionary<string, string>();
-        
+        private FileHelper ModelFileHelper = new FileHelper(FileHelper.GetCurFilePathString()+"VisionData\\Model");
+        private FileHelper RoiFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Roi");
+        private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
+        private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
+        #endregion
 
+
+        #region Property
         public DateTime MyDateTime
         {
             get { return _myDateTime; }
@@ -46,30 +61,35 @@ namespace CPAS.ViewModels
                 }
             }
         }
-        public string StrCurViewID 
+        public string StrCurViewID
         {
-            set {
+            set
+            {
                 if (_strViewID != null && _strViewID != value)
                 {
                     _strViewID = value;
                     RaisePropertyChanged(() => StrCurViewID);
                 }
-            } 
-            get { return _strViewID; } 
+            }
+            get { return _strViewID; }
         }
-        public string StrUserName {
+        public string StrUserName
+        {
             set
             {
-                if (_strUserName.Replace("user: ","") != value)
+                if (_strUserName.Replace("user: ", "") != value)
                 {
-                    _strUserName = "user: "+value;
+                    _strUserName = "user: " + value;
                     RaisePropertyChanged();
-                }     
+                }
             }
             get { return _strUserName; }
         }
-        public int Level {
-            set { if (_level != value)
+        public int Level
+        {
+            set
+            {
+                if (_level != value)
                 {
                     _level = value;
                     RaisePropertyChanged();
@@ -77,12 +97,33 @@ namespace CPAS.ViewModels
             }
             get { return _level; }
         }
-       
-
+        public Enum_REGION_TYPE RegionType
+        {
+            get { return Vision.Vision.Instance.RegionType; }
+            set { Vision.Vision.Instance.RegionType = value; }
+        }
+        public Enum_REGION_OPERATOR RegionOperator
+        {
+            get { return Vision.Vision.Instance.RegionOperator; }
+            set { Vision.Vision.Instance.RegionOperator = value; }
+        }
+        public EnumCamSnapState CamSnapState
+        {
+            set
+            {
+                if (_amSnapState != value)
+                {
+                    _amSnapState = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _amSnapState;}
+        }
         public ObservableCollection<MessageItem> MessageCollection
         {
             get { return _messageCollection; }
-            set {
+            set
+            {
                 if (_messageCollection != value)
                 {
                     _messageCollection = value;
@@ -126,21 +167,35 @@ namespace CPAS.ViewModels
                 }
             }
         }
+        #endregion
 
 
-        public void ShowMessage(MessageItem msgItem)
+        #region  Method
+        private void ShowMessage(MessageItem msgItem)
         {
             if (MessageCollection.Count > 100)
                 MessageCollection.RemoveAt(0);
             if (msgItem != null)
                 MessageCollection.Add(msgItem);
         }
+        private void UpdateRoiCollect(int nCamID)
+        {
+            RoiCollection.Clear();
+            foreach (var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, RoiFileHelper.GetWorkDictoryProfileList()))
+                RoiCollection.Add(new RoiItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""), StrFullName = it });
+        }
+        private void UpdateModelCollect(int nCamID)
+        {
+            TemplateCollection.Clear();
+            foreach(var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, ModelFileHelper.GetWorkDictoryProfileList()))
+                TemplateCollection.Add(new TemplateItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""),StrFullName =it });
+        }
         #endregion
 
-        #endregion
+
+
 
         #region Commands
-
         public RelayCommand<string> RibonCommand { get { return new RelayCommand<string>(str => StrCurViewID = str); } }
         public RelayCommand<string> ShowInfoCommand
         {
@@ -199,33 +254,46 @@ namespace CPAS.ViewModels
             }
         }); } }
         public RelayCommand LogOutCommand { get { return new RelayCommand(() => { Level = 0; StrUserName = "Operator"; }); } }
+        public RelayCommand<string> SetSnapStateCommand { get { return new RelayCommand<string>(
+            str => {
+                Messenger.Default.Send<string>(str, "SetCamState");
+                if (str.ToLower() == "snapcontinues")
+                    CamSnapState = EnumCamSnapState.BUSY;
+                else
+                    CamSnapState = EnumCamSnapState.IDLE;
+            } ); } }
+        public RelayCommand<int> UpdateRoiTemplate { get { return new RelayCommand<int>(nCamID=> {
+            UpdateModelCollect(nCamID);
+            UpdateRoiCollect(nCamID);
+        }); } }
+       
         #endregion
 
-        #region Ctor
+        #region Ctor and DeCtor
         public MainWindowViewModel()
         {
+            #region Messages
+            Messenger.Default.Register<string>(this, "UpdateRoiFiles", str =>UpdateRoiCollect(Convert.ToInt16(str.Substring(3,1))));
+            Messenger.Default.Register<string>(this, "UpdateTemplateFiles", str => UpdateModelCollect(Convert.ToInt16(str.Substring(3, 1))));
+            #endregion
+
+
+            //User Manager
             Level = 0;
             LogInfoDic.Add("Operator","111");
             LogInfoDic.Add("Engineer", "222");
             LogInfoDic.Add("Manager", "333");
 
-            RoiCollection.Add(new RoiItem() { StrName = "ROI1" });
-            RoiCollection.Add(new RoiItem() { StrName = "ROI2" });
+            //Roi Model
+            UpdateModelCollect(0);
+            UpdateRoiCollect(0);
 
-            TemplateCollection.Add(new TemplateItem() { StrName="Template1" });
-            TemplateCollection.Add(new TemplateItem() { StrName = "Template2"});
-            TemplateCollection.Add(new TemplateItem() { StrName = "Template4" });
-            TemplateCollection.Add(new TemplateItem() { StrName = "Template5" });
-            TemplateCollection.Add(new TemplateItem() { StrName = "Template6" });
-            TemplateCollection.Add(new TemplateItem() { StrName = "Template7" });
-
+            //Camera
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam1", StrCameraState="Connected"});
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam2" , StrCameraState = "Disconnected" });
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam3" , StrCameraState = "Connected" });
 
-            MessageCollection.Add(new MessageItem(){ MsgType=MSGTYPE.ERROR, StrMsg="ErrorInfo"});
-            MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = "WarningInfo" });
-            MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.INFO, StrMsg = "Info" });
+            //Message
             Messenger.Default.Register<string>(this,"ShowError", str => {
                 Application.Current.Dispatcher.Invoke(()=>MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str}));
             });
@@ -236,6 +304,9 @@ namespace CPAS.ViewModels
                 Application.Current.Dispatcher.Invoke(() => MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = str }));
             });
             StrUserName = "Operator";
+
+            //Load Config
+            ConfigMgr.Instance.LoadConfig();
         }
         ~MainWindowViewModel()
         {
@@ -245,30 +316,7 @@ namespace CPAS.ViewModels
         }
         #endregion
 
-        #region Command Handlers
-
-        private void OnRefreshDate()
-        {
-            MyDateTime = DateTime.Now;
-        }
-
-        private void OnRefreshPersons()
-        {
-            
-        }
-
-        private void OnDoNothing()
-        {
-
-        }
-
-        private bool CanExecuteDoNothing()
-        {
-            return false;
-        }
-
-        #endregion
-
+       
       
     }
 }

@@ -149,13 +149,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Classes\FileHelper.cs" />
     <Compile Include="Classes\ListBoxBehavior.cs" />
-    <Compile Include="Classes\LDS.cs" />
-    <Compile Include="Classes\PowerMeter.cs" />
+    <Compile Include="Converters\EnumCamSnapState2SnapButtonEnable.cs" />
+    <Compile Include="Converters\IsChecked2RegionOperator.cs" />
+    <Compile Include="Converters\IsChecked2RegionType.cs" />
+    <Compile Include="Instrument\InstrumentBase.cs" />
+    <Compile Include="Instrument\InstrumentMgr.cs" />
+    <Compile Include="Instrument\LDS.cs" />
+    <Compile Include="Instrument\PowerMeter.cs" />
     <Compile Include="Classes\Sqlite3Helper.cs" />
     <Compile Include="Config\ConfigMgr.cs" />
-    <Compile Include="Config\StationConfig.cs" />
-    <Compile Include="Config\StationConfigMgr.cs" />
+    <Compile Include="Config\HardwareManager\HardwareCfgLevelManager1.cs" />
+    <Compile Include="Config\HardwareManager\HardwareCfgManager.cs" />
+    <Compile Include="Config\SoftwareManager\SoftwareCfgLevelManager1.cs" />
+    <Compile Include="Config\SoftwareManager\SoftwareCfgManager.cs" />
     <Compile Include="Converters\Level2IsVisible.cs" />
     <Compile Include="Converters\MsgType2ForeBrush.cs" />
     <Compile Include="Converters\MsgType2Image.cs" />
@@ -169,6 +177,12 @@
     <Compile Include="Models\RoiItem.cs" />
     <Compile Include="Models\SystemParaModel.cs" />
     <Compile Include="Models\TemplateItem.cs" />
+    <Compile Include="UserCtrl\UC_CamViewListItem.xaml.cs">
+      <DependentUpon>UC_CamViewListItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserCtrl\UC_MessageBox.xaml.cs">
+      <DependentUpon>UC_MessageBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserCtrl\UC_StationHeader.xaml.cs">
       <DependentUpon>UC_StationHeader.xaml</DependentUpon>
     </Compile>
@@ -189,7 +203,9 @@
       <DependentUpon>UC_ParaSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Vision\Vision.cs" />
+    <Compile Include="WorkFlow\WorkCalib.cs" />
     <Compile Include="WorkFlow\WorkFlowBase.cs" />
+    <Compile Include="WorkFlow\WorkFlowMgr.cs" />
     <Compile Include="WorkFlow\WorkRecord.cs" />
     <Compile Include="WorkFlow\WorkTune1.cs" />
     <Compile Include="WorkFlow\WorkTune2.cs" />
@@ -202,6 +218,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Resources\StylesResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserCtrl\UC_CamViewListItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserCtrl\UC_MessageBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

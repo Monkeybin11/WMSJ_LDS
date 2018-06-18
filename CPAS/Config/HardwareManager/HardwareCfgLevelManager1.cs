@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CPAS.Config.HardwareManager
+{
+    public class HardwareCfgLevelManager1
+    {
+        public bool Enabled { get; set; }
+        public string InstrumentName { get; set; }
+        public string ConnectMode { get; set; }
+        public string PortName { get; set; }
+    }
+    public class PowerMeteConfig : HardwareCfgLevelManager1
+    {
+
+    }
+    public class LDSConfig : HardwareCfgLevelManager1
+    {
+
+    }
+
+
+    public class ComportCfg
+    {
+        public string PortName { get; set; }
+        public string Port { get; set; }
+        public int BaudRate { get; set; }
+        public string Parity { get; set; }
+        public int DataBits { get; set; }
+        public int StopBits { get; set; }
+        public int TimeOut { get; set; }
+    }
+}

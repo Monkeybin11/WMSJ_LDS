@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace CPAS.WorkFlow
 {
-    public class WorkTune1 : WorkFlowBase
+    public class WorkCalib : WorkFlowBase
     {
-        public WorkTune1(WorkFlowConfig cfg) : base(cfg)
+        public WorkCalib(WorkFlowConfig cfg) : base(cfg)
         {
         }
     }

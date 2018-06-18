@@ -9,7 +9,6 @@
              xmlns:halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
              Loaded="UserControl_Loaded"
              SizeChanged="UserControl_SizeChanged"
-             MouseDoubleClick="UserControl_MouseDoubleClick"
              IsVisibleChanged="UserControl_IsVisibleChanged">
     <Grid>
         <Grid.RowDefinitions>
@@ -67,16 +66,16 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <halcon:HWindowControlWPF Margin="1" x:Name="Cam1"/>
+                    <halcon:HWindowControlWPF Margin="1" x:Name="Cam1" ToolTip="Cam1"/>
                     <!--<integration:WindowsFormsHost Background="Transparent" Panel.ZIndex="10">
                         <ElementHost Width="100" Height="100">
                             <TextBlock Text="Cam1" FontSize="20" Foreground="White"/>
                         </ElementHost>
                     </integration:WindowsFormsHost>-->
-                    <halcon:HWindowControlWPF Grid.Column="1" Margin="1" x:Name="Cam2"/>
+                    <halcon:HWindowControlWPF Grid.Column="1" Margin="0,1,1,1" x:Name="Cam2" ToolTip="Cam2"/>
                     
                 </Grid>
-                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam3"/>
+                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam3" ToolTip="Cam3"/>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="2" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
@@ -90,10 +89,10 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <halcon:HWindowControlWPF Margin="1" x:Name="Cam4"/>
-                    <halcon:HWindowControlWPF Grid.Column="1" Margin="1" x:Name="Cam5"/>
+                    <halcon:HWindowControlWPF Margin="1" x:Name="Cam4" ToolTip="Cam4"/>
+                    <halcon:HWindowControlWPF Grid.Column="1" Margin="0,1,1,1" x:Name="Cam5" ToolTip="Cam5"/>
                 </Grid>
-                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam6"/>
+                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam6" ToolTip="Cam6"/>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="3" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">

@@ -3,6 +3,7 @@ using CPAS.ViewModels;
 using GalaSoft.MvvmLight.Messaging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,11 @@ namespace CPAS.Views
     /// <summary>
     /// UC_CameraView.xaml 的交互逻辑
     /// </summary>
+    public enum FILETYPE
+    {
+        MODEL,
+        ROI
+    }
     public partial class UC_CameraView : UserControl , Iauthor
     {
         public UC_CameraView()
@@ -47,6 +53,7 @@ namespace CPAS.Views
         {
             
         }
+
         private async void LoadDelay()
         {
             await Task.Run(() => {
@@ -56,7 +63,6 @@ namespace CPAS.Views
                     bFirstLoaded = false;
                 }
                 SetAttachCamWindow(true);
-                Console.WriteLine("---------------------CameraView--------------------");
             });
         }
 
@@ -72,7 +78,7 @@ namespace CPAS.Views
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Messenger.Default.Send("","WindowChanged");
+            Messenger.Default.Send("","WindowSizeChanged");
         }
 
         private void BenMenuShowImageInCurrentPage_Click(object sender, RoutedEventArgs e)
@@ -87,9 +93,10 @@ namespace CPAS.Views
             else
                 Vision.Vision.Instance.DetachCamWindow(0, "CameraViewCam");
         }
+
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
+            (DataContext as MainWindowViewModel).UpdateRoiTemplate.Execute((sender as ComboBox).SelectedIndex);
         }
 
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
@@ -112,5 +119,6 @@ namespace CPAS.Views
         {
             ListBoxRoiTemplate.ItemsSource = (DataContext as MainWindowViewModel).RoiCollection;
         }
+
     }
 }

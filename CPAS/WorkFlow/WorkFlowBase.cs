@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CPAS.Config;
+using CPAS.Config.SoftwareManager;
 
 namespace CPAS.WorkFlow
 {
@@ -13,7 +13,7 @@ namespace CPAS.WorkFlow
         public bool Enable;
         public string StationName;
         public int StationIndex;
-        protected StationConfig cfg = null;
+        protected WorkFlowConfig cfg = null;
         protected CancellationTokenSource cts =new CancellationTokenSource();
         protected Stack<object> nStepStack=new Stack<object>();
         protected Task t = null; 
@@ -30,7 +30,7 @@ namespace CPAS.WorkFlow
         protected void ClearAllStep() { nStepStack.Clear(); }
         protected int GetCurStepCount() { return nStepStack.Count; }
         protected virtual bool UserInit() { return true; }
-        public WorkFlowBase() { t = new Task(() => ThreadFunc(this), cts.Token); }
+        public WorkFlowBase(WorkFlowConfig cfg) { this.cfg = cfg;  t = new Task(() => ThreadFunc(this), cts.Token); }
         public void ShowInfo(string strInfo=null)    //int msg, int iPara, object lParam
         {
             if (strInfo == null || strInfo.Trim().ToString() == "")
