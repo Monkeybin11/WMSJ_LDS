@@ -35,6 +35,7 @@ namespace CPAS.ViewModels
         private DateTime _myDateTime;
         private string _strUserName="";
         private int _level;
+        private string _strPLCErrorNumber, _strSystemErrorNumber;
         private EnumCamSnapState _amSnapState;
         private ObservableCollection<MessageItem> _messageCollection=new ObservableCollection<MessageItem>();
         private ObservableCollection<CameraItem> _cameraCollection = new ObservableCollection<CameraItem>();
@@ -84,6 +85,36 @@ namespace CPAS.ViewModels
                 }
             }
             get { return _strUserName; }
+        }
+        public string StrPLCErrorNumber
+        {
+            get
+            {
+                return _strPLCErrorNumber;
+            }
+            set
+            {
+                if (_strPLCErrorNumber != value)
+                {
+                    _strPLCErrorNumber = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+        public string StrSystemErrorNumber
+        {
+            get
+            {
+                return _strSystemErrorNumber;
+            }
+            set
+            {
+                if (_strSystemErrorNumber != value)
+                {
+                    _strSystemErrorNumber = value;
+                    RaisePropertyChanged();
+                }
+            }
         }
         public int Level
         {
@@ -266,17 +297,17 @@ namespace CPAS.ViewModels
             UpdateModelCollect(nCamID);
             UpdateRoiCollect(nCamID);
         }); } }
-       
+        
         #endregion
 
         #region Ctor and DeCtor
         public MainWindowViewModel()
         {
+            _messageCollection.CollectionChanged += _messageCollection_CollectionChanged;
             #region Messages
             Messenger.Default.Register<string>(this, "UpdateRoiFiles", str =>UpdateRoiCollect(Convert.ToInt16(str.Substring(3,1))));
             Messenger.Default.Register<string>(this, "UpdateTemplateFiles", str => UpdateModelCollect(Convert.ToInt16(str.Substring(3, 1))));
             #endregion
-
 
             //User Manager
             Level = 0;
@@ -308,6 +339,15 @@ namespace CPAS.ViewModels
             //Load Config
             ConfigMgr.Instance.LoadConfig();
         }
+
+        private void _messageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (MessageCollection.Count != 0)
+                StrPLCErrorNumber = string.Format("PLC {0} error", MessageCollection.Count);
+            else
+                StrPLCErrorNumber = "PLC";
+        }
+
         ~MainWindowViewModel()
         {
             Messenger.Default.Unregister<string>("ShowError");

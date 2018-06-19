@@ -17,10 +17,9 @@
         xmlns:cls="clr-namespace:CPAS.Classes"
         xmlns:views="clr-namespace:CPAS.Views">
     <Window.Resources>
-        <viewModels:MainWindowViewModel x:Key="Windows1ViewModel" />
         <converters:IsBiggerThanConverter x:Key="IsBiggerThanConverter"/>
     </Window.Resources>
-    <Grid DataContext="{StaticResource Windows1ViewModel}">
+    <Grid DataContext="{Binding VM_MainWindowViewModel,Source={StaticResource Locator}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -140,22 +139,49 @@
             </Grid>
         </ContentControl>
         <GridSplitter Grid.Row="2" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
-        <dxe:ListBoxEdit Grid.Row="3" ItemsSource="{Binding MessageCollection}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
-            <dxe:ListBoxEdit.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Clear" Command="{Binding ShowInfoCommand}" CommandParameter="Clear"/>
-                </ContextMenu>
-            </dxe:ListBoxEdit.ContextMenu>
-            <dxe:ListBoxEdit.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Height="25">
-                        <Image Source="{Binding MsgType,Converter={StaticResource MsgType2Image}}" VerticalAlignment="Center" Margin="3"/>
-                        <TextBlock Width="200" Text="{Binding StrTime}" VerticalAlignment="Center" Foreground="{Binding MsgType, Converter={StaticResource MsgType2ForeBrush}}" FontSize="12" Margin="10,0,0,0"/>
-                        <TextBlock Text="{Binding StrMsg}" VerticalAlignment="Center" FontSize="12" Foreground="{Binding MsgType, Converter={StaticResource MsgType2ForeBrush}}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </dxe:ListBoxEdit.ItemTemplate>
-        </dxe:ListBoxEdit>
+        <Grid Grid.Row="3">
+            <TabControl>
+                <TabItem Header="{Binding StrPLCErrorNumber,Mode=OneWay}" FontSize="20" Width="150">
+                    <dxe:ListBoxEdit ItemsSource="{Binding MessageCollection}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
+                        <dxe:ListBoxEdit.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Clear" Command="{Binding ShowInfoCommand}" CommandParameter="Clear"/>
+                            </ContextMenu>
+                        </dxe:ListBoxEdit.ContextMenu>
+                        <dxe:ListBoxEdit.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="25">
+                                    <Image Source="{Binding MsgType,Converter={StaticResource MsgType2Image}}" VerticalAlignment="Center" Margin="3"/>
+                                    <TextBlock Width="200" Text="{Binding StrTime}" VerticalAlignment="Center" Foreground="{Binding MsgType, Converter={StaticResource MsgType2ForeBrush}}" FontSize="12" Margin="10,0,0,0"/>
+                                    <TextBlock Text="{Binding StrMsg}" VerticalAlignment="Center" FontSize="12" Foreground="{Binding MsgType, Converter={StaticResource MsgType2ForeBrush}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxe:ListBoxEdit.ItemTemplate>
+                    </dxe:ListBoxEdit>
+                </TabItem>
+                <TabItem Header="System" FontSize="20" Width="150">
+                    <dxe:ListBoxEdit ItemsSource="{Binding MessageCollection}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
+                        <dxe:ListBoxEdit.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Clear" Command="{Binding ShowInfoCommand}" CommandParameter="Clear"/>
+                            </ContextMenu>
+                        </dxe:ListBoxEdit.ContextMenu>
+                        <dxe:ListBoxEdit.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="25">
+                                    <Image Source="{Binding MsgType,Converter={StaticResource MsgType2Image}}" VerticalAlignment="Center" Margin="3"/>
+                                    <TextBlock Width="200" Text="{Binding StrTime}" VerticalAlignment="Center" Foreground="{Binding MsgType, Converter={StaticResource MsgType2ForeBrush}}" FontSize="12" Margin="10,0,0,0"/>
+                                    <TextBlock Text="{Binding StrMsg}" VerticalAlignment="Center" FontSize="12" Foreground="{Binding MsgType, Converter={StaticResource MsgType2ForeBrush}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxe:ListBoxEdit.ItemTemplate>
+                    </dxe:ListBoxEdit>
+                </TabItem>
+            </TabControl>
+           
+           
+        </Grid>
+       
         <dxr:RibbonStatusBarControl Name="statusBarControl1"  Grid.Row="4">
             <dxr:RibbonStatusBarControl.LeftItems>
                 <dxb:BarStaticItem Content="V1.0.0.0"/>

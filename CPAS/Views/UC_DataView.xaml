@@ -4,8 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="600">
-    <Grid>
+             d:DesignHeight="600" d:DesignWidth="600"
+             x:Name="self"
+             >
+    <Grid DataContext="{Binding RelativeSource={RelativeSource AncestorLevel=1, Mode=FindAncestor, AncestorType={x:Type UserControl}}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
@@ -13,17 +15,31 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="400"/>
                 <ColumnDefinition Width="70"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="1" Margin="5,7,5,7" Style="{StaticResource RoundTextBox}"  FontSize="20"/>
-            <Button Background="Transparent" Margin="5"  Grid.Column="2" Style="{StaticResource RoundButtonStyle1}" BorderThickness="0">
+            <CheckBox Name="CbLike" Grid.Column="1" Content="模糊查询" VerticalContentAlignment="Center" FontSize="25"/>
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal" Visibility="{Binding IsHitTextVisable}">
+                <Image Source="/CPAS;component/Images/barcode_scanner.png" Margin="20,14,0,12" Opacity="0.3"/>
+                <TextBlock  Text="请输入条码或者扫入条码" FontSize="20" VerticalAlignment="Center" Foreground="Gray" Margin="10" Opacity="0.4"/>
+            </StackPanel>
+            
+            <TextBox Name="TextBoxBarcode" Grid.Column="2" Margin="5,7,5,7" Style="{StaticResource RoundTextBox}"  FontSize="20" Background="Transparent"  TextChanged="TextBoxBarcode_TextChanged"/>
+            <Button Background="Transparent" Margin="5"  Grid.Column="3" Style="{StaticResource RoundButtonStyle1}" BorderThickness="0" Click="Button_Click">
                 <Button.Content>
                     <Image Source="/CPAS;component/Images/search.png" Margin="7"/>
                 </Button.Content>
             </Button>
             
         </Grid>
-        <DataGrid Grid.Row="1" Margin="3"/>
+        <DataGrid Grid.Row="1" Margin="3" Name="DataGrid1" ItemsSource="{Binding LogDataCollect}"  AutoGenerateColumns="False" ColumnHeaderHeight="40" FontSize="20">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="SN" Width="200" Binding="{Binding Path=SN}" FontSize="20" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Time" Width="300" Binding="{Binding Path=Time}" FontSize="20" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Result" Width="100" Binding="{Binding Path=Result}" FontSize="20" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Reason" Width="800" Binding="{Binding Path=Reason}" FontSize="20" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>
