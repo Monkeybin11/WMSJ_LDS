@@ -19,6 +19,7 @@ using CPAS.Vision;
 using GalaSoft.MvvmLight.Messaging;
 using CPAS.ViewModels;
 
+
 namespace CPAS.Views
 {
     /// <summary>

@@ -13,7 +13,10 @@ namespace CPAS.Instrument
     {
         private byte[] byteRecv = new byte[64];
         ComportCfg comportCfg = null;
-        public PowerMeter(HardwareCfgLevelManager1 cfg) : base(cfg) { }
+        public double[] MeasureValue=new double[4] { 0.0f,0.0f,0.0f,0.0f};
+        public PowerMeter(HardwareCfgLevelManager1 cfg) : base(cfg)
+        {
+        }
         public override bool Init()
         {
             try
@@ -60,6 +63,60 @@ namespace CPAS.Instrument
             }
             return true;
         }
+        public  object Excute(object objCmd)
+        {
+            try
+            {
+                lock (comPort)
+                {
+                    comPort.WriteLine(objCmd.ToString());
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public  object Query(object objCmd)
+        {
+            try
+            {
+                lock (comPort)
+                {
+                    comPort.WriteLine(objCmd.ToString());
+                    return comPort.ReadLine().Replace("\r", "").Replace("\n", "");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public double GetPowerValue()
+        {
 
+            return 0.0f;
+        }
+        public bool SetContinuous(bool bEnable)
+        {
+            string strCmd = string.Format(":INITiate:CONTinuous {0}", bEnable ? "ON" : "OFF");
+            return (bool)Excute(strCmd);
+        }
+        public  void Fetch(object o = null)
+        {
+            SetContinuous(false);
+            Thread.Sleep(50);
+            string ret = Query(":READ?").ToString();
+            string[] meas_ret = ret.Split(',');
+            if (meas_ret.Length == 1)
+            {
+                Double.TryParse(meas_ret[0], out MeasureValue[0]);
+            }
+        }
+        public void Abort()
+        {
+            Excute(":ABORt");
+        }
     }
 }

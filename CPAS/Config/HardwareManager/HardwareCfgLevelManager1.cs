@@ -21,6 +21,14 @@ namespace CPAS.Config.HardwareManager
     {
 
     }
+    public class PLCConfig : HardwareCfgLevelManager1
+    {
+
+    }
+    public class KeyenceReaderConfig : HardwareCfgLevelManager1
+    {
+
+    }
 
 
     public class ComportCfg
@@ -32,5 +40,21 @@ namespace CPAS.Config.HardwareManager
         public int DataBits { get; set; }
         public int StopBits { get; set; }
         public int TimeOut { get; set; }
+    }
+ 
+    public class EtherNetCfg
+    {
+        public string PortName { get; set; }
+        public string Mode { get; set; }
+        public string IP { get; set; }
+        public int Port { get; set; }
+        public string EOL { get; set; }
+        public int TimeOut { get; set; }
+    }
+    public class GPIBConfig
+    {
+        public string PortName { get; set; }
+        public int BoardAddress { get; set; }
+        public int Address { get; set; }
     }
 }

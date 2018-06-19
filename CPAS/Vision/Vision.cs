@@ -48,6 +48,7 @@ namespace CPAS.Vision
         private HObject Region = null;
         public Enum_REGION_OPERATOR RegionOperator = Enum_REGION_OPERATOR.ADD;
         public Enum_REGION_TYPE RegionType = Enum_REGION_TYPE.CIRCLE;
+        private HObject ImageTemp = null;
         #endregion
 
         #region public method 
@@ -189,7 +190,14 @@ namespace CPAS.Vision
                         Messenger.Default.Send<string>(string.Format("打开相机{0}失败", nCamID), "ShowError");
                         return;
                     }
+                    if (ImageTemp != null)
+                    {
+                        ImageTemp.Dispose();
+                        ImageTemp = null;
+                    }
                     HOperatorSet.GrabImage(out image, AcqHandleList[nCamID]);
+                    HOperatorSet.GenEmptyObj(out ImageTemp);
+                    HOperatorSet.ConcatObj(ImageTemp, image, out ImageTemp);
                     foreach (var it in HwindowDic[nCamID])
                         HOperatorSet.DispObj(image, it.Value);
                 }
@@ -201,7 +209,10 @@ namespace CPAS.Vision
             finally
             {
                 if (bDispose && image != null)
+                {
+
                     image.Dispose();
+                }
             }
         }
         public bool ProcessImage(IMAGEPROCESS_STEP nStep, int nCamID, object para, out object result)
@@ -242,38 +253,43 @@ namespace CPAS.Vision
             {
                 lock (_lockList[nCamID])
                 {
-                    HTuple window = HwindowDic[nCamID]["CameraViewCam"];
-                    HTuple row, column, phi, length1, length2, radius;
-                    HObject newRegion = null;
-                    HOperatorSet.SetColor(window, "green");
-                    switch (RegionType)
+                    if (HwindowDic.Keys.Contains(nCamID) && HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
                     {
-                        case Enum_REGION_TYPE.RECTANGLE:
-                            HOperatorSet.DrawRectangle2(window, out row, out column, out phi, out length1, out length2);
-                            HOperatorSet.GenRectangle2(out newRegion, row, column, phi, length1, length2);
-                            break;
-                        case Enum_REGION_TYPE.CIRCLE:
-                            HOperatorSet.DrawCircle(window, out row, out column, out radius);
-                            HOperatorSet.GenCircle(out newRegion, row, column, radius);
-                            break;
-                        default:
-                            break;
+                        HTuple window = HwindowDic[nCamID]["CameraViewCam"];
+                        HTuple row, column, phi, length1, length2, radius;
+                        HObject newRegion = null;
+                        HOperatorSet.SetColor(window, "green");
+                        switch (RegionType)
+                        {
+                            case Enum_REGION_TYPE.RECTANGLE:
+                                HOperatorSet.DrawRectangle2(window, out row, out column, out phi, out length1, out length2);
+                                HOperatorSet.GenRectangle2(out newRegion, row, column, phi, length1, length2);
+                                break;
+                            case Enum_REGION_TYPE.CIRCLE:
+                                HOperatorSet.DrawCircle(window, out row, out column, out radius);
+                                HOperatorSet.GenCircle(out newRegion, row, column, radius);
+                                break;
+                            default:
+                                break;
+                        }
+                        if (RegionOperator == Enum_REGION_OPERATOR.ADD)
+                        {
+                            HOperatorSet.Union2(Region, newRegion, out Region);
+                        }
+                        else
+                        {
+                            HOperatorSet.Difference(Region, newRegion, out Region);
+                        }
+
+                        HOperatorSet.SetDraw(window, "fill");
+                        HOperatorSet.SetColor(window, "red");
+                        HOperatorSet.ClearWindow(window);
+                        HOperatorSet.DispObj(ImageTemp, window);
+                        HOperatorSet.DispObj(Region, window);
+                        return true;
                     }
-                    if (RegionOperator == Enum_REGION_OPERATOR.ADD)
-                    {
-                        HOperatorSet.Union2(Region, newRegion, out Region);
-                    }
-                    else
-                    {
-                        HOperatorSet.Difference(Region, newRegion, out Region);
-                    }
-                    
-                    HOperatorSet.SetDraw(window, "fill");
-                    HOperatorSet.SetColor(window, "red");
-                    //HOperatorSet.ClearWindow(window);
-                    HOperatorSet.DispObj(Region, window);
-                    HOperatorSet.ClearObj(Region);
-                    return true;
+                    Messenger.Default.Send<String>("绘制模板窗口没有打开,或者该相机未关联绘制模板窗口", "ShowError");
+                    return false;
                 }
             }
             catch (Exception ex)

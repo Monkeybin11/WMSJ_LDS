@@ -41,9 +41,15 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AxInterop.ActUtlTypeLib">
+      <HintPath>Extdll\AxInterop.ActUtlTypeLib.dll</HintPath>
+    </Reference>
     <Reference Include="CommonServiceLocator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>bin\Debug\CommonServiceLocator.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Communication">
+      <HintPath>Extdll\Communication.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.CodeParser.v17.1, Version=17.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Data.v17.1, Version=17.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
@@ -79,6 +85,13 @@
     <Reference Include="halcondotnet, Version=10.0.0.0, Culture=neutral, PublicKeyToken=4973bed59ddbf2b8, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\halcondotnet.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.ActUtlTypeLib">
+      <HintPath>Extdll\Interop.ActUtlTypeLib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Keyence.AutoID.SDK">
+      <HintPath>Extdll\Keyence.AutoID.SDK.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=3.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -133,6 +146,12 @@
     <Reference Include="UIAutomationTypes">
       <Private>True</Private>
     </Reference>
+    <Reference Include="VncClientControlCommon">
+      <HintPath>Extdll\VncClientControlCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="VncClientControlCommonLib">
+      <HintPath>Extdll\VncClientControlCommonLib.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase">
       <Private>True</Private>
     </Reference>
@@ -156,6 +175,7 @@
     <Compile Include="Converters\IsChecked2RegionType.cs" />
     <Compile Include="Instrument\InstrumentBase.cs" />
     <Compile Include="Instrument\InstrumentMgr.cs" />
+    <Compile Include="Instrument\Keyence_SR1000.cs" />
     <Compile Include="Instrument\LDS.cs" />
     <Compile Include="Instrument\PowerMeter.cs" />
     <Compile Include="Classes\Sqlite3Helper.cs" />
@@ -171,6 +191,7 @@
     <Compile Include="Converters\Text2CameStateImage.cs" />
     <Compile Include="Converters\Text2RoiImage.cs" />
     <Compile Include="Converters\Text2Visibility.cs" />
+    <Compile Include="Instrument\QSerisePlc.cs" />
     <Compile Include="Interface\Iauthor.cs" />
     <Compile Include="Models\CameraItem.cs" />
     <Compile Include="Models\MessageItem.cs" />
