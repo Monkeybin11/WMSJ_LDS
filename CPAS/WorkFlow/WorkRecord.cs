@@ -62,13 +62,23 @@ namespace CPAS.WorkFlow
                 {
                     case STEP.INIT:
                         PopAndPushStep(STEP.DO_NOTHING);
-                        ShowInfo("12422435");
-                        Thread.Sleep(200);
+                        //ShowInfo("12422435");
+                        Vision.Vision.Instance.GrabImage(0);
+                        ShowInfo();
+                        Thread.Sleep(100);
                         break;
                     case STEP.DO_NOTHING:
-                        PopAndPushStep(STEP.INIT);
+                        PopAndPushStep(STEP.READ_ICC);
+                        ShowInfo();
                         ShowInfo("jksjfkjfiwf");
-                        Thread.Sleep(200);
+                        Vision.Vision.Instance.GrabImage(0);
+                        Thread.Sleep(100);
+                        break;
+                    case STEP.READ_ICC:
+                        PopAndPushStep(STEP.INIT);
+                        ShowInfo();
+                        Vision.Vision.Instance.GrabImage(0);
+                        Thread.Sleep(1000);
                         break;
                     case STEP.EMG:
                         ClearAllStep();

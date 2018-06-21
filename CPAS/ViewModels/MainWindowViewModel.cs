@@ -21,12 +21,7 @@ namespace CPAS.ViewModels
         ENGINNER,
         MANAGER
     }
-    public enum EnumCamSnapState
-    {
-        IDLE,
-        BUSY,
-        DISCONNECTED
-    }
+   
     public class MainWindowViewModel : ViewModelBase
     {
     
@@ -37,7 +32,8 @@ namespace CPAS.ViewModels
         private int _level;
         private string _strPLCErrorNumber, _strSystemErrorNumber;
         private EnumCamSnapState _amSnapState;
-        private ObservableCollection<MessageItem> _messageCollection=new ObservableCollection<MessageItem>();
+        private ObservableCollection<MessageItem> _plcMessageCollection=new ObservableCollection<MessageItem>();
+        private ObservableCollection<MessageItem> _systemMessageCollection = new ObservableCollection<MessageItem>();
         private ObservableCollection<CameraItem> _cameraCollection = new ObservableCollection<CameraItem>();
         private ObservableCollection<RoiItem> _roiCollection = new ObservableCollection<RoiItem>();
         private ObservableCollection<TemplateItem> _templateCollection = new ObservableCollection<TemplateItem>();
@@ -150,14 +146,26 @@ namespace CPAS.ViewModels
             }
             get { return _amSnapState;}
         }
-        public ObservableCollection<MessageItem> MessageCollection
+        public ObservableCollection<MessageItem> PLCMessageCollection
         {
-            get { return _messageCollection; }
+            get { return _plcMessageCollection; }
             set
             {
-                if (_messageCollection != value)
+                if (_plcMessageCollection != value)
                 {
-                    _messageCollection = value;
+                    _plcMessageCollection = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+        public ObservableCollection<MessageItem> SystemMessageCollection
+        {
+            get { return _systemMessageCollection; }
+            set
+            {
+                if (_systemMessageCollection != value)
+                {
+                    _systemMessageCollection = value;
                     RaisePropertyChanged();
                 }
             }
@@ -198,16 +206,17 @@ namespace CPAS.ViewModels
                 }
             }
         }
+        public ObservableCollection<string>[] StepCollection { get; set; }
         #endregion
 
 
         #region  Method
         private void ShowMessage(MessageItem msgItem)
         {
-            if (MessageCollection.Count > 100)
-                MessageCollection.RemoveAt(0);
+            if (PLCMessageCollection.Count > 100)
+                PLCMessageCollection.RemoveAt(0);
             if (msgItem != null)
-                MessageCollection.Add(msgItem);
+                PLCMessageCollection.Add(msgItem);
         }
         private void UpdateRoiCollect(int nCamID)
         {
@@ -221,6 +230,22 @@ namespace CPAS.ViewModels
             foreach(var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, ModelFileHelper.GetWorkDictoryProfileList()))
                 TemplateCollection.Add(new TemplateItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""),StrFullName =it });
         }
+        private void PLCMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            var collect = from msg in PLCMessageCollection where msg.MsgType == MSGTYPE.ERROR select msg;
+            if (collect.Count() != 0)
+                StrPLCErrorNumber = string.Format("{0}", collect.Count());
+            else
+                StrPLCErrorNumber = "PLC";
+        }
+        private void SystemMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            var collect = from msg in SystemMessageCollection where msg.MsgType == MSGTYPE.ERROR select msg;
+            if (collect.Count() != 0)
+                StrSystemErrorNumber = string.Format("{0}", collect.Count());
+            else
+                StrSystemErrorNumber = "System";
+        }
         #endregion
 
 
@@ -228,15 +253,20 @@ namespace CPAS.ViewModels
 
         #region Commands
         public RelayCommand<string> RibonCommand { get { return new RelayCommand<string>(str => StrCurViewID = str); } }
-        public RelayCommand<string> ShowInfoCommand
+        public RelayCommand<string> ClearMessageCommand
         {
             get
             {
                 return new RelayCommand<string>(str => {
                     switch (str)
                     { 
-                        case "Clear":
-                            MessageCollection.Clear();
+                        case "ClearPLCMessage":
+                            PLCMessageCollection.Clear();
+                            break;
+                        case "ClearSystemMessage":
+                            SystemMessageCollection.Clear();
+                            break;
+                        default:
                             break;
                     }
                 });
@@ -245,7 +275,7 @@ namespace CPAS.ViewModels
         }
         public RelayCommand StartCommand { get {
                 return new RelayCommand(() => {
-                   Messenger.Default.Send<string>("Start from UI", "ShowError");
+                    WorkFlow.WorkFlowMgr.Instance.StartAllStation();
                 });
             } }
         public RelayCommand StopCommand
@@ -253,7 +283,7 @@ namespace CPAS.ViewModels
             get
             {
                 return new RelayCommand(() => {
-                    Messenger.Default.Send<string>("Stop from UI", "ShowInfo");
+                    WorkFlow.WorkFlowMgr.Instance.StopAllStation();
                 });
             }
         }
@@ -303,11 +333,52 @@ namespace CPAS.ViewModels
         #region Ctor and DeCtor
         public MainWindowViewModel()
         {
-            _messageCollection.CollectionChanged += _messageCollection_CollectionChanged;
+            PLCMessageCollection.CollectionChanged += PLCMessageCollection_CollectionChanged;
+            SystemMessageCollection.CollectionChanged += SystemMessageCollection_CollectionChanged;
+            StrPLCErrorNumber = "PLC";
+            StrSystemErrorNumber = "System";
             #region Messages
             Messenger.Default.Register<string>(this, "UpdateRoiFiles", str =>UpdateRoiCollect(Convert.ToInt16(str.Substring(3,1))));
             Messenger.Default.Register<string>(this, "UpdateTemplateFiles", str => UpdateModelCollect(Convert.ToInt16(str.Substring(3, 1))));
+            Messenger.Default.Register<Tuple<string, string>>(this, "ShowStepInfo", tuple =>
+                {
+                    switch (tuple.Item1)
+                    {
+                        case "WorkRecord":
+                            Application.Current.Dispatcher.Invoke(()=>StepCollection[0].Add(tuple.Item2));
+                            break;
+                        case "WorkTune1":
+                            Application.Current.Dispatcher.Invoke(() => StepCollection[1].Add(tuple.Item2));
+                            break;
+                        case "WorkTune2":
+                            Application.Current.Dispatcher.Invoke(() => StepCollection[2].Add(tuple.Item2));
+                            break;
+                        case "WorkCalib":
+                            Application.Current.Dispatcher.Invoke(() => StepCollection[3].Add(tuple.Item2));
+                            break;
+                        default:
+                            break;
+                    }
+                });
+
+            Messenger.Default.Register<string>(this, "ShowError", str => {
+                Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str }));
+            });
+            Messenger.Default.Register<string>(this, "ShowInfo", str => {
+                Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.INFO, StrMsg = str }));
+            });
+            Messenger.Default.Register<string>(this, "ShowWarning", str => {
+                Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = str }));
+            });
             #endregion
+
+            //StepInfo  init
+            StepCollection = new ObservableCollection<string>[]{
+                    new ObservableCollection<string>(),
+                    new ObservableCollection<string>(),
+                    new ObservableCollection<string>(),
+                    new ObservableCollection<string>()
+                };
 
             //User Manager
             Level = 0;
@@ -324,30 +395,12 @@ namespace CPAS.ViewModels
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam2" , StrCameraState = "Disconnected" });
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam3" , StrCameraState = "Connected" });
 
-            //Message
-            Messenger.Default.Register<string>(this,"ShowError", str => {
-                Application.Current.Dispatcher.Invoke(()=>MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str}));
-            });
-            Messenger.Default.Register<string>(this,"ShowInfo", str => {
-                Application.Current.Dispatcher.Invoke(() => MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.INFO, StrMsg = str }));
-            });
-            Messenger.Default.Register<string>(this,"ShowWarning", str => {
-                Application.Current.Dispatcher.Invoke(() => MessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = str }));
-            });
+           
             StrUserName = "Operator";
 
             //Load Config
             ConfigMgr.Instance.LoadConfig();
         }
-
-        private void _messageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (MessageCollection.Count != 0)
-                StrPLCErrorNumber = string.Format("PLC {0} error", MessageCollection.Count);
-            else
-                StrPLCErrorNumber = "PLC";
-        }
-
         ~MainWindowViewModel()
         {
             Messenger.Default.Unregister<string>("ShowError");

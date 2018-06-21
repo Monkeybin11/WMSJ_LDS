@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CPAS.Config.SoftwareManager;
+using GalaSoft.MvvmLight.Messaging;
 
 namespace CPAS.WorkFlow
 {
@@ -35,6 +36,8 @@ namespace CPAS.WorkFlow
         {
             if (strInfo == null || strInfo.Trim().ToString() == "")
                 strInfo = nStep.ToString();
+            DateTime dt = DateTime.Now;
+            Messenger.Default.Send<Tuple<string,string>>(new Tuple<string, string>(cfg.Name, string.Format("{0:D2}:{1:D2}:{2:D2}  {3:D2}", dt.Hour, dt.Minute, dt.Second, strInfo)), "ShowStepInfo");
         }
         public bool Start()
         {

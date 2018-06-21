@@ -81,11 +81,6 @@ namespace CPAS.Views
             Messenger.Default.Send("","WindowSizeChanged");
         }
 
-        private void BenMenuShowImageInCurrentPage_Click(object sender, RoutedEventArgs e)
-        {
-            SetAttachCamWindow(true);
-        }
-
         private void SetAttachCamWindow(bool bAttach=true)
         {
             if (bAttach)

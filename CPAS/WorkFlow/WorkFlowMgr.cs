@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CPAS.WorkFlow
 {
-    class WorkFlowMgr
+    public class WorkFlowMgr
     {
         private WorkFlowMgr() { }
         private static readonly Lazy<WorkFlowMgr> _instance = new Lazy<WorkFlowMgr>(() => new WorkFlowMgr());

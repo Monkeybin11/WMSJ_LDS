@@ -12,6 +12,12 @@ namespace CPAS.Vision
 {
     public enum Enum_REGION_OPERATOR { ADD,SUB}
     public enum Enum_REGION_TYPE { RECTANGLE,CIRCLE}
+    public enum EnumCamSnapState
+    {
+        IDLE,
+        BUSY,
+        DISCONNECTED
+    }
     public class Vision
     {
         #region constructor
@@ -24,6 +30,7 @@ namespace CPAS.Vision
                 _lockList.Add(new object());
             }
             HOperatorSet.GenEmptyObj(out Region);
+            HOperatorSet.GenEmptyObj(out ImageTemp);
         }
         private static readonly Lazy<Vision> _instance = new Lazy<Vision>(() => new Vision());
         public static Vision Instance
@@ -196,10 +203,12 @@ namespace CPAS.Vision
                         ImageTemp = null;
                     }
                     HOperatorSet.GrabImage(out image, AcqHandleList[nCamID]);
+                    HOperatorSet.GenEmptyObj(out Region);
                     HOperatorSet.GenEmptyObj(out ImageTemp);
                     HOperatorSet.ConcatObj(ImageTemp, image, out ImageTemp);
                     foreach (var it in HwindowDic[nCamID])
-                        HOperatorSet.DispObj(image, it.Value);
+                        if (it.Value != -1)
+                            HOperatorSet.DispObj(image, it.Value);
                 }
             }
             catch (Exception ex)

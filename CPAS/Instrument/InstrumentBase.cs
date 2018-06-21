@@ -1,4 +1,5 @@
-﻿using CPAS.Config.HardwareManager;
+﻿using CPAS.Communication;
+using CPAS.Config.HardwareManager;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -25,7 +26,7 @@ namespace CPAS.Instrument
         protected HardwareCfgLevelManager1 Config = null;
         //Comport
         protected SerialPort comPort = null;
-
+        protected EtherNet EtherNetPort = null;
         public int Index = -1;
         protected object _lock = new object();
         public abstract bool Init();

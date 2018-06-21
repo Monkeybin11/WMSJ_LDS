@@ -125,11 +125,6 @@ namespace CPAS.Views
                 SetAttachWindow(false);
             }
         }
-
-        private void BenMenuShowImageInCurrentPage_Click(object sender, RoutedEventArgs e)
-        {
-            SetAttachWindow(true);
-        }
         private void SetAttachWindow(bool bAttach)
         {
             if (bAttach)

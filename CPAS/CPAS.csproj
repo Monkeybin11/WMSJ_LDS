@@ -170,6 +170,7 @@
     </ApplicationDefinition>
     <Compile Include="Classes\FileHelper.cs" />
     <Compile Include="Classes\ListBoxBehavior.cs" />
+    <Compile Include="Communication\EtherNet.cs" />
     <Compile Include="Converters\EnumCamSnapState2SnapButtonEnable.cs" />
     <Compile Include="Converters\IsChecked2RegionOperator.cs" />
     <Compile Include="Converters\IsChecked2RegionType.cs" />
@@ -263,7 +264,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Converters\IsBiggerThanConverter.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
