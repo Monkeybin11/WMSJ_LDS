@@ -28,9 +28,10 @@ namespace CPAS.ViewModels
         #region Fields
         private string _strViewID = "Home";
         private DateTime _myDateTime;
-        private string _strUserName="";
-        private int _level;
-        private string _strPLCErrorNumber, _strSystemErrorNumber;
+        private string _strUserName="Operator";
+        private int _level=0;
+        private string _strPLCErrorNumber="", _strSystemErrorNumber="";
+        private bool _showPlcErrorListEdit;
         private EnumCamSnapState _amSnapState;
         private ObservableCollection<MessageItem> _plcMessageCollection=new ObservableCollection<MessageItem>();
         private ObservableCollection<MessageItem> _systemMessageCollection = new ObservableCollection<MessageItem>();
@@ -74,9 +75,9 @@ namespace CPAS.ViewModels
         {
             set
             {
-                if (_strUserName.Replace("user: ", "") != value)
+                if (_strUserName!= value)
                 {
-                    _strUserName = "user: " + value;
+                    _strUserName = value;
                     RaisePropertyChanged();
                 }
             }
@@ -123,6 +124,18 @@ namespace CPAS.ViewModels
                 }
             }
             get { return _level; }
+        }
+        public bool ShowPlcErrorListEdit
+        {
+            set
+            {
+                if (_showPlcErrorListEdit != value)
+                {
+                    _showPlcErrorListEdit = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _showPlcErrorListEdit; }
         }
         public Enum_REGION_TYPE RegionType
         {
@@ -236,7 +249,7 @@ namespace CPAS.ViewModels
             if (collect.Count() != 0)
                 StrPLCErrorNumber = string.Format("{0}", collect.Count());
             else
-                StrPLCErrorNumber = "PLC";
+                StrPLCErrorNumber = "";
         }
         private void SystemMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -244,12 +257,9 @@ namespace CPAS.ViewModels
             if (collect.Count() != 0)
                 StrSystemErrorNumber = string.Format("{0}", collect.Count());
             else
-                StrSystemErrorNumber = "System";
+                StrSystemErrorNumber = "";
         }
         #endregion
-
-
-
 
         #region Commands
         public RelayCommand<string> RibonCommand { get { return new RelayCommand<string>(str => StrCurViewID = str); } }
@@ -289,30 +299,15 @@ namespace CPAS.ViewModels
         }
         public RelayCommand<Tuple<string,string>> LogInCommand { get { return new RelayCommand<Tuple<string,string>>(t=> {
             Tuple<string, string> tuple = t as Tuple<string, string>;
-            string usr = tuple.Item1;
-            string psd = tuple.Item2;
-            if(LogInfoDic.Keys.Contains(usr))
+            foreach (var it in ConfigMgr.UserCfgMgr.Users)
             {
-                if (psd == LogInfoDic[usr])
+                if (it.User == tuple.Item1 && it.Password == tuple.Item2)
                 {
-                    StrUserName = usr;
-                    switch (usr)
-                    {
-                        case "Operator":
-                            Level = 0;
-                            break;
-                        case "Engineer":
-                            Level = 1;
-                            break;
-                        case "Manager":
-                            Level = 2;
-                            break;
-                        default:
-                            break;
-                    }
+                    Level = it.Level;
+                    StrUserName = it.User;
                 }
-
             }
+ 
         }); } }
         public RelayCommand LogOutCommand { get { return new RelayCommand(() => { Level = 0; StrUserName = "Operator"; }); } }
         public RelayCommand<string> SetSnapStateCommand { get { return new RelayCommand<string>(
@@ -327,7 +322,20 @@ namespace CPAS.ViewModels
             UpdateModelCollect(nCamID);
             UpdateRoiCollect(nCamID);
         }); } }
-        
+        public RelayCommand<string> ShowErrorListEditCommand
+        { get { return new RelayCommand<string>(str=>{
+            switch (str)
+            {
+                case "PLC":
+                    ShowPlcErrorListEdit = true;
+                    break;
+                case "Sys":
+                    ShowPlcErrorListEdit = false;
+                    break;
+                default:
+                    break;
+            }
+        }); } }
         #endregion
 
         #region Ctor and DeCtor
@@ -335,8 +343,7 @@ namespace CPAS.ViewModels
         {
             PLCMessageCollection.CollectionChanged += PLCMessageCollection_CollectionChanged;
             SystemMessageCollection.CollectionChanged += SystemMessageCollection_CollectionChanged;
-            StrPLCErrorNumber = "PLC";
-            StrSystemErrorNumber = "System";
+
             #region Messages
             Messenger.Default.Register<string>(this, "UpdateRoiFiles", str =>UpdateRoiCollect(Convert.ToInt16(str.Substring(3,1))));
             Messenger.Default.Register<string>(this, "UpdateTemplateFiles", str => UpdateModelCollect(Convert.ToInt16(str.Substring(3, 1))));
@@ -380,12 +387,6 @@ namespace CPAS.ViewModels
                     new ObservableCollection<string>()
                 };
 
-            //User Manager
-            Level = 0;
-            LogInfoDic.Add("Operator","111");
-            LogInfoDic.Add("Engineer", "222");
-            LogInfoDic.Add("Manager", "333");
-
             //Roi Model
             UpdateModelCollect(0);
             UpdateRoiCollect(0);
@@ -395,8 +396,6 @@ namespace CPAS.ViewModels
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam2" , StrCameraState = "Disconnected" });
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam3" , StrCameraState = "Connected" });
 
-           
-            StrUserName = "Operator";
 
             //Load Config
             ConfigMgr.Instance.LoadConfig();

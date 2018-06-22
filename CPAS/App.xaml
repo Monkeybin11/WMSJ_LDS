@@ -23,6 +23,8 @@
             <Convert:EnumCamSnapState2SnapButtonEnable x:Key="EnumCamSnapState2SnapButtonEnable"/>
             <Convert:IsChecked2RegionOperator x:Key="IsChecked2RegionOperator"/>
             <Convert:IsChecked2RegionType x:Key="IsChecked2RegionType"/>
+            <Convert:Boolean2ErrorListEditVisibility x:Key="Boolean2ErrorListEditVisibility"/>
+            <Convert:Boolean2FontSize x:Key="Boolean2FontSize"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

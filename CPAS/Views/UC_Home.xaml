@@ -7,7 +7,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:UserCtrl="clr-namespace:CPAS.UserCtrl"
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="800"
+             d:DesignHeight="600" d:DesignWidth="800"
              xmlns:halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
              Loaded="UserControl_Loaded"
              SizeChanged="UserControl_SizeChanged"
@@ -16,7 +16,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="200"/>
+            <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -106,12 +106,32 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Rectangle Fill="LightGreen" RadiusX="5" RadiusY="5" Margin="3" Cursor="Hand"/>
-                <TextBlock Text="{Binding StrPLCErrorNumber,Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightGreen"/>
-                <Rectangle Grid.Row="1" Fill="LightGreen" RadiusX="5" RadiusY="5" Margin="3" Cursor="Hand"/>
-                <TextBlock Grid.Row="1" Text="{Binding StrSystemErrorNumber, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Button Grid.Row="0" Margin="1" Command="{Binding ShowErrorListEditCommand}" CommandParameter="PLC">
+                    <Button.Content>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock  Text="PLC" VerticalAlignment="Center" FontSize="{Binding ShowPlcErrorListEdit,ConverterParameter=PLC,Converter={StaticResource Boolean2FontSize}}"/>
+                            <TextBlock Grid.Row="1" Text="{Binding StrPLCErrorNumber}" Margin="0,5,0,0" FontSize="15" Foreground="Red"/>
+                        </Grid>
+                    </Button.Content>
+                </Button>
+                <Button Grid.Row="1" Margin="1" Command="{Binding ShowErrorListEditCommand}" CommandParameter="Sys">
+                    <Button.Content>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock  Text="Sys" FontSize="{Binding ShowPlcErrorListEdit,ConverterParameter=Sys,Converter={StaticResource Boolean2FontSize}}" Name="block"/>
+                            <TextBlock Grid.Row="1" Text="{Binding StrSystemErrorNumber,Mode=OneWay}" Margin="0,5,0,0" FontSize="15" Foreground="Red"/>
+                        </Grid>
+                    </Button.Content>
+                </Button>
             </Grid>
-            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding PLCMessageCollection}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
+            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding PLCMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=PLC,Converter={StaticResource Boolean2ErrorListEditVisibility}}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
                 <dxe:ListBoxEdit.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Clear" Command="{Binding ClearMessageCommand}" CommandParameter="ClearPLCMessage"/>
@@ -127,7 +147,7 @@
                     </DataTemplate>
                 </dxe:ListBoxEdit.ItemTemplate>
             </dxe:ListBoxEdit>
-            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding SystemMessageCollection}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
+            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding SystemMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=Sys,Converter={StaticResource Boolean2ErrorListEditVisibility}}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
                 <dxe:ListBoxEdit.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Clear" Command="{Binding ClearMessageCommand}" CommandParameter="ClearSystemMessage"/>

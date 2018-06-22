@@ -1,12 +1,14 @@
 ﻿using CPAS.Classes;
 using CPAS.Config.HardwareManager;
 using CPAS.Config.SoftwareManager;
+using CPAS.Config.UserManager;
 using CPAS.Instrument;
 using CPAS.WorkFlow;
 using GalaSoft.MvvmLight.Messaging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -24,8 +26,14 @@ namespace CPAS.Config
         }
         private string File_HardwareCfg = FileHelper.GetCurFilePathString() + "Config\\HardwareCfg.json";
         private string File_SoftwareCfg = FileHelper.GetCurFilePathString() + "Config\\SoftwareCfg.json";
+        private string File_UserCfg= FileHelper.GetCurFilePathString() + "User.json";
+        private string File_PLCError= FileHelper.GetCurFilePathString() + "Config\\PLCError.xls";
+        private LogExcel logexcel = null;
         public static HardwareCfgManager HardwareCfgMgr = null;
         public static SoftwareCfgManager SoftwareCfgMgr = null;
+        public static UserCfgManager UserCfgMgr = null;
+        public static DataTable PLCErrorDataTable = new DataTable();
+        //public static 
         public void LoadConfig()
         {
             #region >>>>Hardware init
@@ -77,7 +85,7 @@ namespace CPAS.Config
             }
             catch (Exception ex)
             {
-                Messenger.Default.Send<string>(String.Format("Unable to load config file {0}, {1}", File_HardwareCfg, ex.Message), "ShowError");
+                Messenger.Default.Send<string>(String.Format("Unable to load config file {0}, {1}", File_SoftwareCfg, ex.Message), "ShowError");
                 throw new Exception(ex.Message);
             }
 
@@ -97,7 +105,25 @@ namespace CPAS.Config
                     }
                 }
             }
-            #endregion    
+            #endregion
+
+            #region >>>> User init
+            try
+            {
+                var json_string = File.ReadAllText(File_UserCfg);
+                UserCfgMgr = JsonConvert.DeserializeObject<UserCfgManager>(json_string);
+            }
+            catch (Exception ex)
+            {
+                Messenger.Default.Send<string>(String.Format("Unable to load config file {0}, {1}", File_UserCfg, ex.Message), "ShowError");
+                throw new Exception(ex.Message);
+            }
+            #endregion
+
+            #region >>>>PLCError Init
+            logexcel = new LogExcel(File_PLCError);
+            logexcel.ExcelToDataTable(ref PLCErrorDataTable, "Sheet1");
+            #endregion
         }
     }
 }
