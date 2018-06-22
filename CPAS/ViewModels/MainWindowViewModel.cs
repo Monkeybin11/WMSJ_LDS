@@ -12,6 +12,7 @@ using CPAS.Interface;
 using CPAS.Classes;
 using CPAS.Config;
 using CPAS.Vision;
+using CPAS.UserCtrl;
 
 namespace CPAS.ViewModels
 {
@@ -32,6 +33,8 @@ namespace CPAS.ViewModels
         private int _level=0;
         private string _strPLCErrorNumber="", _strSystemErrorNumber="";
         private bool _showPlcErrorListEdit;
+        private int _currentSelectPrescription = 0;
+        private PrescriptionGridModel _prescriptionPropertyCurSelectedObject = new PrescriptionGridModel();
         private EnumCamSnapState _amSnapState;
         private ObservableCollection<MessageItem> _plcMessageCollection=new ObservableCollection<MessageItem>();
         private ObservableCollection<MessageItem> _systemMessageCollection = new ObservableCollection<MessageItem>();
@@ -43,6 +46,7 @@ namespace CPAS.ViewModels
         private FileHelper RoiFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Roi");
         private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
         private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
+        
         #endregion
 
 
@@ -124,6 +128,18 @@ namespace CPAS.ViewModels
                 }
             }
             get { return _level; }
+        }
+        public int CurrentSelectPrescription
+        {
+            set
+            {
+                if (_currentSelectPrescription != value)
+                {
+                    _currentSelectPrescription = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _currentSelectPrescription; }
         }
         public bool ShowPlcErrorListEdit
         {
@@ -220,6 +236,27 @@ namespace CPAS.ViewModels
             }
         }
         public ObservableCollection<string>[] StepCollection { get; set; }
+        public ObservableCollection<PrescriptionGridModel> PrescriptionCollection { get; set; }
+        public PrescriptionGridModel PrescriptionPropertyCurSelectedObject
+        {
+            set
+            {
+                if (_prescriptionPropertyCurSelectedObject != value)
+                {
+                    _prescriptionPropertyCurSelectedObject.Name = value.Name;
+                    _prescriptionPropertyCurSelectedObject.Record = value.Record;
+                    _prescriptionPropertyCurSelectedObject.Remark = value.Remark;
+                    _prescriptionPropertyCurSelectedObject.Calib = value.Calib;
+                    _prescriptionPropertyCurSelectedObject.Tune1 = value.Tune1;
+                    _prescriptionPropertyCurSelectedObject.Tune2 = value.Tune2;
+                    _prescriptionPropertyCurSelectedObject.TuneLaser = value.TuneLaser;
+                    _prescriptionPropertyCurSelectedObject.UnLock = value.UnLock;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _prescriptionPropertyCurSelectedObject; }
+        }
+
         #endregion
 
 
@@ -336,6 +373,50 @@ namespace CPAS.ViewModels
                     break;
             }
         }); } }
+        public RelayCommand<PrescriptionGridModel> PrescriptionChangedCommand
+        {
+            get
+            {
+                return new RelayCommand<PrescriptionGridModel>(model =>
+                {
+                    PrescriptionPropertyCurSelectedObject = model;
+                });
+            }
+        }
+        public RelayCommand<PrescriptionGridModel> SavePrescriptionCommand
+        {
+            get
+            {
+                return new RelayCommand<PrescriptionGridModel>(model =>
+                {
+                    if (model.Name.Trim() == "")
+                    {
+                        UC_MessageBox.Instance.ShowBox("请输入正确的配方名称");
+                    }
+                    else
+                    {
+                        int nIndex = 0;
+                        bool bExist = false;
+                        foreach (var it in PrescriptionCollection)
+                        {
+                            if (it.Name == model.Name)
+                            {
+                                bExist = true;
+                                if (MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 已经存在,是否覆盖", model.Name)))
+                                {
+                                    PrescriptionCollection[nIndex] = model;
+                                    break;
+                                }                             
+                            }
+                            nIndex++;
+                        }
+                        if (!bExist && MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 不存在,是否新建配方", model.Name)))
+                            PrescriptionCollection.Add(model);
+                        
+                    }
+                });
+            }
+        }
         #endregion
 
         #region Ctor and DeCtor
@@ -398,7 +479,13 @@ namespace CPAS.ViewModels
 
 
             //Load Config
+            PrescriptionCollection = new ObservableCollection<PrescriptionGridModel>();
             ConfigMgr.Instance.LoadConfig();
+            foreach (var it in ConfigMgr.PrescriptionCfgMgr.Prescriptions)
+                PrescriptionCollection.Add(it);
+
+           
+
         }
         ~MainWindowViewModel()
         {

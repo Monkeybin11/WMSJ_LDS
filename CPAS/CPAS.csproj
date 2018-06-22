@@ -187,11 +187,13 @@
     <Compile Include="Classes\ListBoxBehavior.cs" />
     <Compile Include="Classes\LogExcel.cs" />
     <Compile Include="Communication\EtherNet.cs" />
+    <Compile Include="Config\PresciptionManager\PresciptionCfgManager.cs" />
     <Compile Include="Config\UserManager\UserModel.cs" />
     <Compile Include="Config\UserManager\UserCfgManager.cs" />
     <Compile Include="Converters\Boolean2FontSize.cs" />
     <Compile Include="Converters\Boolean2ErrorListEditVisibility.cs" />
     <Compile Include="Converters\EnumCamSnapState2SnapButtonEnable.cs" />
+    <Compile Include="Converters\Int2PrescriptionModel.cs" />
     <Compile Include="Converters\IsChecked2RegionOperator.cs" />
     <Compile Include="Converters\IsChecked2RegionType.cs" />
     <Compile Include="Instrument\InstrumentBase.cs" />
@@ -217,6 +219,7 @@
     <Compile Include="Models\CameraItem.cs" />
     <Compile Include="Models\LogDataItem.cs" />
     <Compile Include="Models\MessageItem.cs" />
+    <Compile Include="Models\PrescriptionGridModel.cs" />
     <Compile Include="Models\RoiItem.cs" />
     <Compile Include="Models\SystemParaModel.cs" />
     <Compile Include="Models\TemplateItem.cs" />
@@ -395,6 +398,13 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\barcode_scanner.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\close_window.png" />
+    <Resource Include="Images\minimize_window.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\save32x32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.108.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.108.0\build\net45\System.Data.SQLite.Core.targets')" />

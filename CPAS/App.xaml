@@ -25,6 +25,7 @@
             <Convert:IsChecked2RegionType x:Key="IsChecked2RegionType"/>
             <Convert:Boolean2ErrorListEditVisibility x:Key="Boolean2ErrorListEditVisibility"/>
             <Convert:Boolean2FontSize x:Key="Boolean2FontSize"/>
+            <Convert:Int2PrescriptionModel x:Key="Int2PrescriptionModel"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

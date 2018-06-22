@@ -1,5 +1,6 @@
 ﻿using CPAS.Interface;
 using CPAS.Models;
+using CPAS.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,8 @@ namespace CPAS.Views
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            PropertyGrid.SelectedObject = new SystemParaModel();
+            SystemGridProperty.SelectedObject = new SystemParaModel();
+            PrescriptionGridProperty.SelectedObject = new PrescriptionGridModel();
         }
 
         public int Level { get; set; }
@@ -43,5 +45,10 @@ namespace CPAS.Views
         {
             throw new NotImplementedException();
         }
+        private void PrescriptionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            (DataContext as MainWindowViewModel).PrescriptionChangedCommand.Execute(PrescriptionListBox.SelectedItem);
+        }
+
     }
 }

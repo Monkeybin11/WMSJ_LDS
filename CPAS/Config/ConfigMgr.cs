@@ -1,5 +1,6 @@
 ﻿using CPAS.Classes;
 using CPAS.Config.HardwareManager;
+using CPAS.Config.PrescriptionManager;
 using CPAS.Config.SoftwareManager;
 using CPAS.Config.UserManager;
 using CPAS.Instrument;
@@ -28,9 +29,11 @@ namespace CPAS.Config
         private string File_SoftwareCfg = FileHelper.GetCurFilePathString() + "Config\\SoftwareCfg.json";
         private string File_UserCfg= FileHelper.GetCurFilePathString() + "User.json";
         private string File_PLCError= FileHelper.GetCurFilePathString() + "Config\\PLCError.xls";
+        private string File_PrescriptionCfg= FileHelper.GetCurFilePathString() + "Config\\PrescriptionCfg.json";
         private LogExcel logexcel = null;
         public static HardwareCfgManager HardwareCfgMgr = null;
         public static SoftwareCfgManager SoftwareCfgMgr = null;
+        public static PrescriptionCfgManager PrescriptionCfgMgr = null;
         public static UserCfgManager UserCfgMgr = null;
         public static DataTable PLCErrorDataTable = new DataTable();
         //public static 
@@ -104,6 +107,19 @@ namespace CPAS.Config
                         WorkFlowMgr.Instance.AddStation(it.Name, workFlowBase);
                     }
                 }
+            }
+            #endregion
+
+            #region >>>>PrescriptionCfg Init
+            try
+            {
+                var json_string = File.ReadAllText(File_PrescriptionCfg);
+                PrescriptionCfgMgr = JsonConvert.DeserializeObject<PrescriptionCfgManager>(json_string);
+            }
+            catch (Exception ex)
+            {
+                Messenger.Default.Send<string>(String.Format("Unable to load config file {0}, {1}", File_SoftwareCfg, ex.Message), "ShowError");
+                throw new Exception(ex.Message);
             }
             #endregion
 

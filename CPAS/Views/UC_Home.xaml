@@ -131,7 +131,8 @@
                     </Button.Content>
                 </Button>
             </Grid>
-            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding PLCMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=PLC,Converter={StaticResource Boolean2ErrorListEditVisibility}}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
+            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding PLCMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=PLC,Converter={StaticResource Boolean2ErrorListEditVisibility}}" 
+                             IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True" BorderThickness="0">
                 <dxe:ListBoxEdit.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Clear" Command="{Binding ClearMessageCommand}" CommandParameter="ClearPLCMessage"/>
@@ -147,7 +148,8 @@
                     </DataTemplate>
                 </dxe:ListBoxEdit.ItemTemplate>
             </dxe:ListBoxEdit>
-            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding SystemMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=Sys,Converter={StaticResource Boolean2ErrorListEditVisibility}}" IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True">
+            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding SystemMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=Sys,Converter={StaticResource Boolean2ErrorListEditVisibility}}" 
+                             IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True" BorderThickness="0">
                 <dxe:ListBoxEdit.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Clear" Command="{Binding ClearMessageCommand}" CommandParameter="ClearSystemMessage"/>

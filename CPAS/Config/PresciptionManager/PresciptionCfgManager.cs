@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CPAS.Config.SoftwareManager
+namespace CPAS.Config.PrescriptionManager
 {
-    public class SoftwareCfgManager
+    public class PrescriptionCfgManager
     {
-        public WorkFlowConfig[] WorkFlowConfigs { get; set; }
+        public PrescriptionGridModel[] Prescriptions { get; set;}
     }
 }

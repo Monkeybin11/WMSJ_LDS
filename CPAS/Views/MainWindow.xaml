@@ -19,7 +19,10 @@
         xmlns:cls="clr-namespace:CPAS.Classes"
         xmlns:views="clr-namespace:CPAS.Views"
         Loaded="Window_Loaded"
-        Closing="Window_Closing">
+        Closing="Window_Closing"
+        WindowState="Maximized"
+        ResizeMode="CanMinimize"
+        WindowStyle="None">
     <Window.Resources>
       
     </Window.Resources>
@@ -38,9 +41,7 @@
                     <GradientStop Color="#FF5555AA" Offset="1"/>
                 </LinearGradientBrush>
             </Rectangle.Fill>
-            
         </Rectangle>
-
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -113,6 +114,7 @@
             </dxr:RibbonControl>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
@@ -120,11 +122,28 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal">
+                <Grid Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="25"/>
+                    </Grid.ColumnDefinitions>
+                    <Button ToolTip="最小化" Grid.Column="1" Name="BtnMin" Click="BtnMin_Click">
+                        <Button.Content>
+                            <Image Source="/CPAS;component/Images/minimize_window.png"/>
+                        </Button.Content>
+                    </Button>
+                    <Button ToolTip="关闭" Grid.Column="2" Name="CloseWindow" Click="CloseWindow_Click">
+                        <Button.Content>
+                            <Image Source="/CPAS;component/Images/close_window.png"/>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+                <StackPanel Orientation="Horizontal" Grid.Row="1">
                     <TextBlock Text="OK:" VerticalAlignment="Center" FontSize="20" Margin="50,0,0,0"/>
                     <TextBlock Text="123" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Column="1">
+                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
                     <TextBlock Text="NG:" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
                     <TextBlock Text="123" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
                 </StackPanel>
@@ -151,26 +170,20 @@
                 <dxb:BarStaticItem Content="{Binding StrUserName}"/>
             </dxr:RibbonStatusBarControl.RightItems>
         </dxr:RibbonStatusBarControl>-->
-        <StatusBar Grid.Row="2" Background="White">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="V1.0.0.0" FontSize="20"/>
-                <TextBlock Grid.Column="1" Text="当前用户:" FontSize="20"/>
-                <TextBlock Grid.Column="2" Text="{Binding StrUserName}" FontSize="20"/>
+        <Grid Grid.Row="2" Name="statusBar" Height="25" Background="#007ACC">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="V1.0.0.0" FontSize="20"/>
+            <TextBlock Grid.Column="1" Text="当前用户:" FontSize="20"/>
+            <TextBlock Grid.Column="2" Text="{Binding StrUserName}" FontSize="20"/>
 
-                <TextBlock Grid.Column="3" Text="系统状态:" FontSize="20"/>
-                <TextBlock Grid.Column="4" Text="手动" FontSize="20"/>
-
-
-            </Grid>
-        </StatusBar>
+            <TextBlock Grid.Column="3" Text="系统状态:" FontSize="20"/>
+            <TextBlock Grid.Column="4" Text="手动" FontSize="20"/>
+        </Grid>
     </Grid>
 </Window>

@@ -5,16 +5,92 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" xmlns:dxprg="http://schemas.devexpress.com/winfx/2008/xaml/propertygrid" x:Class="CPAS.Views.UC_ParaSetting" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="300" d:DesignWidth="600"
             Loaded="UserControl_Loaded">
     <Grid>
         <dx:DXTabControl >
-            <dx:DXTabItem Header="SystemSetting" AllowHide="Default" ToolTip="Set system para" Height="40">
+            <dx:DXTabItem Header="系统设置" AllowHide="Default" ToolTip="Set system para" Height="40" Width="100" HorizontalContentAlignment="Center">
                 <Grid Background="Transparent">
-                    <dxprg:PropertyGridControl  Name="PropertyGrid"/>
+                    <dxprg:PropertyGridControl  Name="SystemGridProperty" FontSize="20" ExpandCategoriesWhenSelectedObjectChanged="True"/>
+                </Grid>
+            </dx:DXTabItem>
+            <dx:DXTabItem Header="配方" AllowHide="Default" ToolTip="Set system para" Height="40" Width="100" HorizontalContentAlignment="Center">
+                <Grid Background="Transparent">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="400"/>
+                    </Grid.ColumnDefinitions>
+                    <dxprg:PropertyGridControl  Name="PrescriptionGridProperty" FontSize="20" BorderThickness="0" BorderBrush="Transparent" ExpandCategoriesWhenSelectedObjectChanged="True" SelectedObject="{Binding PrescriptionPropertyCurSelectedObject}"/>
+                    <GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Center" Background="Transparent"/>
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="100"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="2"/>
+                            </Grid.RowDefinitions>
+                            <Button Name="DeletePrescription" Grid.Column="1" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" Margin="5" Command="{Binding DeletePrescriptionCommand}" CommandParameter="{Binding SelectedIndex, ElementName=PrescriptionListBox}">
+                                <Button.Content>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="35"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Source="/CPAS;component/Images/Delete.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="删除" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
+                                    </Grid>
+                                </Button.Content>
+                            </Button>
+                            <Button Name="BtnSavePrescription" Grid.Column="0" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" Margin="5"  Command="{Binding SavePrescriptionCommand}" CommandParameter="{Binding SelectedObject, ElementName=PrescriptionGridProperty}">
+                                <Button.Content>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="35"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Source="/CPAS;component/Images/save32x32.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="保存" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
+                                    </Grid>
+                                </Button.Content>
+                            </Button>
+                            <TextBlock Text="当前配方:" Grid.Row="1" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Text="配方2" Grid.Row="1" Grid.Column="1"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Rectangle Grid.Row="2" Grid.ColumnSpan="3" Fill="Orange"/>
+
+                        </Grid>
+                        <ListBox Name="PrescriptionListBox" Grid.Row="1" BorderThickness="0" ItemsSource="{Binding PrescriptionCollection}" SelectedIndex="0" SelectionChanged="PrescriptionListBox_SelectionChanged">
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="选择此配方" FontSize="15"/>
+                                    <MenuItem Header="删除此配方" FontSize="15"/>
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="200"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" FontSize="20" Foreground="Black" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Remark}" FontSize="20" HorizontalAlignment="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
                 </Grid>
             </dx:DXTabItem>
         </dx:DXTabControl>
-
     </Grid>
 </UserControl>

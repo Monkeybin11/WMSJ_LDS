@@ -36,7 +36,7 @@ namespace CPAS.Views
                         foreach (DataRow it in dtError.Rows)
                         {
                             Messenger.Default.Send<string>(it["RegisterBit"].ToString() +"  "+ it["ErrorMessage"].ToString(),"ShowError");
-                            Thread.Sleep(200);
+                            Thread.Sleep(300);
                         }
                     }
                 },cts.Token);
@@ -51,6 +51,16 @@ namespace CPAS.Views
                 cts.Cancel();
                 taskMonitor.Wait(2000);
             }
+        }
+
+        private void BtnMin_Click(object sender, RoutedEventArgs e) //
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void CloseWindow_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }
