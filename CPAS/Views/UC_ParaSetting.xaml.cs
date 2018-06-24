@@ -47,7 +47,8 @@ namespace CPAS.Views
         }
         private void PrescriptionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            (DataContext as MainWindowViewModel).PrescriptionChangedCommand.Execute(PrescriptionListBox.SelectedItem);
+            if(PrescriptionListBox.SelectedItem!=null)
+                PrescriptionGridProperty.SelectedObject = (PrescriptionListBox.SelectedItem as PrescriptionGridModel).Clone();
         }
 
     }

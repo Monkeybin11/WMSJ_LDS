@@ -34,28 +34,40 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Vertical" Margin="0,20,0,0">
+                <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,20,0,0">
                     <TextBlock Text="SN1:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0"/>
-                </StackPanel>
-                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" Margin="0,20,0,0">
-                    <TextBlock Text="SN2:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0"/>
-                </StackPanel>
-
-                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical" Margin="0,20,0,0">
-                    <TextBlock Text="Power1:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="12345678" FontSize="20" Foreground="Orange"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Margin="0,20,0,0">
-                    <TextBlock Text="Power2:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                    <TextBlock Text="SN2:" HorizontalAlignment="Center" FontSize="20"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="12345678" FontSize="20" Foreground="Orange"/>
                 </StackPanel>
+                <Grid Grid.Row="0" Grid.Column="0">
+                    <Rectangle Fill="White" RadiusX="20" RadiusY="20" Stroke="Orange" StrokeThickness="2" Height="50" Margin="20"/>
+                    <TextBlock Text="等待解锁1" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Grid.Row="0" Grid.Column="1">
+                    <Rectangle Fill="White" RadiusX="20" RadiusY="20" Stroke="Orange" StrokeThickness="2" Height="50" Margin="20"/>
+                    <TextBlock Text="等待解锁2" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Grid.Row="0" Grid.Column="1">
+
+                </Grid>
+                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical" Margin="0,20,0,0">
+                    <TextBlock Text="Power1:" HorizontalAlignment="Center" FontSize="20"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="0 W" FontSize="40" Foreground="Orange"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" Margin="0,20,0,0">
+                    <TextBlock Text="Power2:" HorizontalAlignment="Center" FontSize="20"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="0 W" FontSize="40" Foreground="Orange"/>
+                </StackPanel>
+
             </Grid>
         </Border >
         <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
@@ -99,14 +111,14 @@
         <Grid Grid.Row="2" Grid.ColumnSpan="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="1" Panel.ZIndex="1" Margin="0,0,30,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Button Grid.Row="0" Margin="1" Command="{Binding ShowErrorListEditCommand}" CommandParameter="PLC">
+                <Button Grid.Row="0" Margin="1" Command="{Binding ShowErrorListEditCommand}" CommandParameter="PLC" Style="{StaticResource RoundButtonStyle1}" Background="Transparent">
                     <Button.Content>
                         <Grid>
                             <Grid.RowDefinitions>
@@ -118,7 +130,7 @@
                         </Grid>
                     </Button.Content>
                 </Button>
-                <Button Grid.Row="1" Margin="1" Command="{Binding ShowErrorListEditCommand}" CommandParameter="Sys">
+                <Button Grid.Row="1" Margin="1" Command="{Binding ShowErrorListEditCommand}" CommandParameter="Sys" Style="{StaticResource RoundButtonStyle1}" Background="Transparent">
                     <Button.Content>
                         <Grid>
                             <Grid.RowDefinitions>
@@ -131,7 +143,7 @@
                     </Button.Content>
                 </Button>
             </Grid>
-            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding PLCMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=PLC,Converter={StaticResource Boolean2ErrorListEditVisibility}}" 
+            <dxe:ListBoxEdit Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding PLCMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=PLC,Converter={StaticResource Boolean2ErrorListEditVisibility}}" 
                              IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True" BorderThickness="0">
                 <dxe:ListBoxEdit.ContextMenu>
                     <ContextMenu>
@@ -148,7 +160,7 @@
                     </DataTemplate>
                 </dxe:ListBoxEdit.ItemTemplate>
             </dxe:ListBoxEdit>
-            <dxe:ListBoxEdit Grid.Column="0" ItemsSource="{Binding SystemMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=Sys,Converter={StaticResource Boolean2ErrorListEditVisibility}}" 
+            <dxe:ListBoxEdit Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding SystemMessageCollection}" Visibility="{Binding ShowPlcErrorListEdit,ConverterParameter=Sys,Converter={StaticResource Boolean2ErrorListEditVisibility}}" 
                              IsSynchronizedWithCurrentItem="True" cls:ListBoxBehavior.ScrollOnNewItem="True" BorderThickness="0">
                 <dxe:ListBoxEdit.ContextMenu>
                     <ContextMenu>

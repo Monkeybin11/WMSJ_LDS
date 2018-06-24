@@ -243,14 +243,7 @@ namespace CPAS.ViewModels
             {
                 if (_prescriptionPropertyCurSelectedObject != value)
                 {
-                    _prescriptionPropertyCurSelectedObject.Name = value.Name;
-                    _prescriptionPropertyCurSelectedObject.Record = value.Record;
-                    _prescriptionPropertyCurSelectedObject.Remark = value.Remark;
-                    _prescriptionPropertyCurSelectedObject.Calib = value.Calib;
-                    _prescriptionPropertyCurSelectedObject.Tune1 = value.Tune1;
-                    _prescriptionPropertyCurSelectedObject.Tune2 = value.Tune2;
-                    _prescriptionPropertyCurSelectedObject.TuneLaser = value.TuneLaser;
-                    _prescriptionPropertyCurSelectedObject.UnLock = value.UnLock;
+                    _prescriptionPropertyCurSelectedObject = value.Clone() as PrescriptionGridModel;
                     RaisePropertyChanged();
                 }
             }
@@ -389,7 +382,7 @@ namespace CPAS.ViewModels
             {
                 return new RelayCommand<PrescriptionGridModel>(model =>
                 {
-                    if (model.Name.Trim() == "")
+                    if (model.Name==null || model.Name.Trim() == "")
                     {
                         UC_MessageBox.Instance.ShowBox("请输入正确的配方名称");
                     }
@@ -417,6 +410,35 @@ namespace CPAS.ViewModels
                 });
             }
         }
+        public RelayCommand<PrescriptionGridModel> DeletePrescriptionCommand
+        {
+            get
+            {
+                return new RelayCommand<PrescriptionGridModel>(model =>
+                {
+                    bool bExist = false;
+                    if (model != null)
+                    {
+                        foreach (var it in PrescriptionCollection)
+                        {
+                            if (it.Name == model.Name)
+                            {
+                                if (MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("是否删除 {0} ?", model.Name)))
+                                {
+                                    bExist = true;
+                                    PrescriptionCollection.Remove(model);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!bExist)
+                            UC_MessageBox.Instance.ShowBox(string.Format("当前没有选中要删除的项目"));
+                   
+                });
+            }
+        }
+        
         #endregion
 
         #region Ctor and DeCtor

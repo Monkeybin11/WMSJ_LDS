@@ -7,29 +7,29 @@ using System.Threading.Tasks;
 
 namespace CPAS.Models
 {
-    public class PrescriptionGridModel : INotifyPropertyChanged
+    public class PrescriptionGridModel : INotifyPropertyChanged, ICloneable
     {
         private string _name;
         private string _remark;
-        private bool _record;
-        private bool _unLock;
-        private bool _turnLaser;
-        private bool _tune1;
-        private bool _tune2;
-        private bool _clib;
+        private bool _unLock;   //解锁
+        private bool _readBarcode;
+        private bool _adjustLaser;
+        private bool _adjustHoriz;
+        private bool _adjustFocus;
+        private bool _calibration;
 
 
-        public PrescriptionGridModel()
-        {
-            Name = "配方1";
-            Remark = "备注1";
-            Record = true;
-            UnLock = true;
-            TuneLaser = true;
-            Tune1 = true;
-            Tune2 = true;
-            Calib = true;
-        }
+        //public PrescriptionGridModel()
+        //{
+        //    Name = "配方1";
+        //    Remark = "备注1";
+        //    Record = true;
+        //    UnLock = true;
+        //    TuneLaser = true;
+        //    Tune1 = true;
+        //    Tune2 = true;
+        //    Calib = true;
+        //}
 
         [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
         public string Name
@@ -58,19 +58,6 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
-        public bool Record
-        {
-            get { return _record; }
-            set
-            {
-                if (_record != value)
-                {
-                    _record = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Record"));
-                }
-            }
-        }
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
         public bool UnLock
         {
             get { return _unLock; }
@@ -79,62 +66,90 @@ namespace CPAS.Models
                 if (_unLock != value)
                 {
                     _unLock = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Unlock"));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UnLock"));
                 }
             }
         }
         [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
-        public bool TuneLaser
+        public bool ReadBarcode
         {
-            get { return _turnLaser; }
+            get { return _readBarcode; }
             set
             {
-                if (_turnLaser != value)
+                if (_readBarcode != value)
                 {
-                    _turnLaser = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("TuneLaser"));
+                    _readBarcode = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ReadBarcode"));
                 }
             }
         }
         [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
-        public bool Tune1
+        public bool AdjustLaser
         {
-            get { return _tune1; }
+            get { return _adjustLaser; }
             set
             {
-                if (_tune1 != value)
+                if (_adjustLaser != value)
                 {
-                    _tune1 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Tune1"));
+                    _adjustLaser = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AdjustLaser"));
                 }
             }
         }
         [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
-        public bool Tune2
+        public bool AdjustHoriz
         {
-            get { return _tune2; }
+            get { return _adjustHoriz; }
             set
             {
-                if (_tune2 != value)
+                if (_adjustHoriz != value)
                 {
-                    _tune2 = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Tune2"));
+                    _adjustHoriz = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AdjustHoriz"));
                 }
             }
         }
         [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
-        public bool Calib
+        public bool AdjustFocus
         {
-            get { return _clib; }
+            get { return _adjustFocus; }
             set
             {
-                if (_clib != value)
+                if (_adjustFocus != value)
                 {
-                    _clib = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Calib"));
+                    _adjustFocus = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("AdjustFocus"));
+                }
+            }
+        }
+        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        public bool Calibration
+        {
+            get { return _calibration; }
+            set
+            {
+                if (_calibration != value)
+                {
+                    _calibration = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Calibration"));
                 }
             }
         }
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public object Clone()
+        {
+            return new PrescriptionGridModel()
+            {
+                Name = this.Name,
+                Remark = this.Remark,
+                UnLock = this.UnLock,
+                ReadBarcode = this.ReadBarcode,
+                AdjustLaser = this.AdjustLaser,
+                AdjustHoriz = this.AdjustHoriz,
+                AdjustFocus = this.AdjustFocus,
+                Calibration = this.Calibration
+            };
+        }
     }
 }

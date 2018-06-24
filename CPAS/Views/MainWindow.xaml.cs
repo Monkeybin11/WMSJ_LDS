@@ -41,16 +41,16 @@ namespace CPAS.Views
                     }
                 },cts.Token);
             }
-            taskMonitor.Start();
+            //taskMonitor.Start();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (cts != null)
-            {
-                cts.Cancel();
-                taskMonitor.Wait(2000);
-            }
+            //if (cts != null)
+            //{
+            //    cts.Cancel();
+            //    taskMonitor.Wait(2000);
+            //}
         }
 
         private void BtnMin_Click(object sender, RoutedEventArgs e) //
