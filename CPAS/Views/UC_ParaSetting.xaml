@@ -64,14 +64,13 @@
                                 </Button.Content>
                             </Button>
                             <TextBlock Text="当前配方:" Grid.Row="1" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <TextBlock Text="配方2" Grid.Row="1" Grid.Column="1"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding PrescriptionUsed.Name}" Grid.Row="1" Grid.Column="1"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <Rectangle Grid.Row="2" Grid.ColumnSpan="3" Fill="Orange"/>
-
                         </Grid>
                         <ListBox Name="PrescriptionListBox" Grid.Row="1" BorderThickness="0" ItemsSource="{Binding PrescriptionCollection}" SelectionChanged="PrescriptionListBox_SelectionChanged">
                             <ListBox.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="选择此配方" FontSize="15"/>
+                                    <MenuItem Name="SelectThisItem" Header="选择此配方" FontSize="15"  Click="SelectThisItem_Click"/>
                                     <MenuItem Header="删除此配方" FontSize="15"/>
                                 </ContextMenu>
                             </ListBox.ContextMenu>

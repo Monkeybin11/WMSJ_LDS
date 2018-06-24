@@ -29,8 +29,7 @@ namespace CPAS.Config.HardwareManager
     {
 
     }
-
-
+ 
     public class ComportCfg
     {
         public string PortName { get; set; }
@@ -57,4 +56,11 @@ namespace CPAS.Config.HardwareManager
         public int BoardAddress { get; set; }
         public int Address { get; set; }
     }
+    public class NIVasaCfg
+    {
+        public string PortName { get; set; }
+        public string KeyWord1 { get; set; }
+        public string KeyWord2 { get; set; }
+    }
+
 }

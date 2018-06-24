@@ -60,5 +60,10 @@ namespace CPAS.WorkFlow
         }
         private static int ThreadFunc(object o) { return (o as WorkFlowBase).WorkFlow(); }
         protected virtual int WorkFlow() { return 0; }
+        public void WaitComplete()
+        {
+            //if (t != null)
+            //    t.Wait(5000);
+        }
     }
 }

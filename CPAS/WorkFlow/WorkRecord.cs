@@ -1,5 +1,7 @@
 ﻿using CPAS.Config;
 using CPAS.Config.SoftwareManager;
+using CPAS.Instrument;
+using GalaSoft.MvvmLight.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,8 @@ namespace CPAS.WorkFlow
 {
     public class WorkRecord : WorkFlowBase
     {
+        private PowerMeter Pw1000USB_1 = null;
+        private PowerMeter Pw1000USB_2 = null;
         private enum STEP : int
         {
             INIT,
@@ -44,7 +48,9 @@ namespace CPAS.WorkFlow
 
         protected override bool UserInit()
         {
-            return true;
+            Pw1000USB_1 = InstrumentMgr.Instance.FindInstrumentByName("PowerMeter[0]") as PowerMeter;
+            Pw1000USB_2 = InstrumentMgr.Instance.FindInstrumentByName("PowerMeter[1]") as PowerMeter;
+            return Pw1000USB_1!=null;
         }
         public WorkRecord(WorkFlowConfig cfg) : base(cfg)
         {
@@ -62,23 +68,22 @@ namespace CPAS.WorkFlow
                 {
                     case STEP.INIT:
                         PopAndPushStep(STEP.DO_NOTHING);
-                        //ShowInfo("12422435");
+                        ShowPower(EnumUnit.μW);
                         Vision.Vision.Instance.GrabImage(0);
                         ShowInfo();
                         Thread.Sleep(100);
                         break;
                     case STEP.DO_NOTHING:
                         PopAndPushStep(STEP.READ_ICC);
-                        ShowInfo();
-                        ShowInfo("jksjfkjfiwf");
+                        ShowPower(EnumUnit.μW);
                         Vision.Vision.Instance.GrabImage(0);
                         Thread.Sleep(100);
                         break;
                     case STEP.READ_ICC:
                         PopAndPushStep(STEP.INIT);
-                        ShowInfo();
+                        ShowPower(EnumUnit.μW);
                         Vision.Vision.Instance.GrabImage(0);
-                        Thread.Sleep(1000);
+                        Thread.Sleep(100);
                         break;
                     case STEP.EMG:
                         ClearAllStep();
@@ -88,6 +93,18 @@ namespace CPAS.WorkFlow
                 }
             }
             return 0;
+        }
+
+        private void ShowPower(EnumUnit unit)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
+            sb.Append(" ");
+            sb.Append(unit.ToString());
+            sb.Append(",");
+            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
+            sb.Append(unit.ToString());
+            Messenger.Default.Send<Tuple<string, string, string>>(new Tuple<string, string, string>(cfg.Name, "ShowPower",sb.ToString()), "WorkFlowMessage");
         }
     }
 }

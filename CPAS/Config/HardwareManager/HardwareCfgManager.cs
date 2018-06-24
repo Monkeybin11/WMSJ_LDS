@@ -16,5 +16,6 @@ namespace CPAS.Config.HardwareManager
 
         public ComportCfg[] Comports { get; set; }
         public EtherNetCfg[] EtherNets { get; set; }
+        public NIVasaCfg[] NIVisas { get; set; }
     }
 }

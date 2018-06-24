@@ -58,7 +58,8 @@ namespace CPAS.Config
             PropertyInfo[] PropertyInfos = t.GetProperties();
             for (int i = 0; i < PropertyInfos.Length; i++)
             {
-                if (PropertyInfos[i].Name.ToUpper().Contains("COMPORT") || PropertyInfos[i].Name.ToUpper().Contains("ETHERNET") || PropertyInfos[i].Name.ToUpper().Contains("GPIB"))
+                if (PropertyInfos[i].Name.ToUpper().Contains("COMPORT") || PropertyInfos[i].Name.ToUpper().Contains("ETHERNET") || 
+                    PropertyInfos[i].Name.ToUpper().Contains("GPIB") || PropertyInfos[i].Name.ToUpper().Contains("NIVISA"))
                     continue;
                 PropertyInfo pi = PropertyInfos[i];
                 instCfgs = pi.GetValue(HardwareCfgMgr) as HardwareCfgLevelManager1[];

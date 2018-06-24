@@ -57,6 +57,8 @@ namespace CPAS.WorkFlow
             bool bRet = true;
             foreach (var it in stationDic)
                 bRet &= it.Value.Stop();
+            foreach (var it in stationDic)
+                it.Value.WaitComplete();
             return bRet;
         }
 

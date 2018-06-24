@@ -7,6 +7,7 @@ using System.Threading;
 using CPAS.Config.HardwareManager;
 using CPAS.Config;
 
+
 namespace CPAS.Instrument
 {
     public class LDS : InstrumentBase

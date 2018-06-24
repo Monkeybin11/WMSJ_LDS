@@ -46,6 +46,7 @@ namespace CPAS.Views
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            BtnStop.PerformClick();
             //if (cts != null)
             //{
             //    cts.Cancel();
@@ -53,7 +54,7 @@ namespace CPAS.Views
             //}
         }
 
-        private void BtnMin_Click(object sender, RoutedEventArgs e) //
+        private void BtnMin_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
         }

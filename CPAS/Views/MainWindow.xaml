@@ -52,12 +52,14 @@
                     <dxr:RibbonPage Caption="Menu" Name="ribbonPage1">
                         <dxr:RibbonPageGroup Caption="Run" AllowCollapse="True">
                             <dxb:BarButtonItem
+                            Name="BtnRun"
                             Content="Run" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/Start64_64.png"
                             Command="{Binding StartCommand}"
                             />
                             <dxb:BarButtonItem
+                            Name="BtnStop"
                             Content="Stop" 
                             RibbonStyle="Large"
                             LargeGlyph="/CPAS;component/Images/Stop64_64.png"

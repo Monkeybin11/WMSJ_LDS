@@ -22,31 +22,33 @@ namespace CPAS.ViewModels
         ENGINNER,
         MANAGER
     }
-   
+
     public class MainWindowViewModel : ViewModelBase
     {
-    
+
         #region Fields
         private string _strViewID = "Home";
         private DateTime _myDateTime;
-        private string _strUserName="Operator";
-        private int _level=0;
-        private string _strPLCErrorNumber="", _strSystemErrorNumber="";
+        private string _strUserName = "Operator";
+        private int _level = 0;
+        private string _strPLCErrorNumber = "", _strSystemErrorNumber = "";
         private bool _showPlcErrorListEdit;
         private int _currentSelectPrescription = 0;
+        private string _strPowerMeterValue1 = "NA", _strPowerMeterValue2 = "NA";
         private PrescriptionGridModel _prescriptionPropertyCurSelectedObject = new PrescriptionGridModel();
+        public PrescriptionGridModel _prescriptionUsed = new PrescriptionGridModel();
         private EnumCamSnapState _amSnapState;
-        private ObservableCollection<MessageItem> _plcMessageCollection=new ObservableCollection<MessageItem>();
+        private ObservableCollection<MessageItem> _plcMessageCollection = new ObservableCollection<MessageItem>();
         private ObservableCollection<MessageItem> _systemMessageCollection = new ObservableCollection<MessageItem>();
         private ObservableCollection<CameraItem> _cameraCollection = new ObservableCollection<CameraItem>();
         private ObservableCollection<RoiItem> _roiCollection = new ObservableCollection<RoiItem>();
         private ObservableCollection<TemplateItem> _templateCollection = new ObservableCollection<TemplateItem>();
         private Dictionary<string, string> LogInfoDic = new Dictionary<string, string>();
-        private FileHelper ModelFileHelper = new FileHelper(FileHelper.GetCurFilePathString()+"VisionData\\Model");
+        private FileHelper ModelFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Model");
         private FileHelper RoiFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Roi");
         private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
         private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
-        
+
         #endregion
 
 
@@ -79,7 +81,7 @@ namespace CPAS.ViewModels
         {
             set
             {
-                if (_strUserName!= value)
+                if (_strUserName != value)
                 {
                     _strUserName = value;
                     RaisePropertyChanged();
@@ -173,7 +175,31 @@ namespace CPAS.ViewModels
                     RaisePropertyChanged();
                 }
             }
-            get { return _amSnapState;}
+            get { return _amSnapState; }
+        }
+        public string StrPowerMeterValue1
+        {
+            set
+            {
+                if (_strPowerMeterValue1 != value)
+                {
+                    _strPowerMeterValue1 = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _strPowerMeterValue1; }
+        }
+        public string StrPowerMeterValue2
+        {
+            set
+            {
+                if (_strPowerMeterValue2 != value)
+                {
+                    _strPowerMeterValue2 = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _strPowerMeterValue2; }
         }
         public ObservableCollection<MessageItem> PLCMessageCollection
         {
@@ -249,7 +275,18 @@ namespace CPAS.ViewModels
             }
             get { return _prescriptionPropertyCurSelectedObject; }
         }
-
+        public PrescriptionGridModel PrescriptionUsed
+        {
+            set
+            {
+                if (_prescriptionUsed != value)
+                {
+                    _prescriptionUsed = value.Clone() as PrescriptionGridModel;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _prescriptionUsed; }
+        }
         #endregion
 
 
@@ -270,8 +307,8 @@ namespace CPAS.ViewModels
         private void UpdateModelCollect(int nCamID)
         {
             TemplateCollection.Clear();
-            foreach(var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, ModelFileHelper.GetWorkDictoryProfileList()))
-                TemplateCollection.Add(new TemplateItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""),StrFullName =it });
+            foreach (var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, ModelFileHelper.GetWorkDictoryProfileList()))
+                TemplateCollection.Add(new TemplateItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""), StrFullName = it });
         }
         private void PLCMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -280,6 +317,8 @@ namespace CPAS.ViewModels
                 StrPLCErrorNumber = string.Format("{0}", collect.Count());
             else
                 StrPLCErrorNumber = "";
+            if (PLCMessageCollection.Count > 50)
+                PLCMessageCollection.RemoveAt(0);
         }
         private void SystemMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -288,6 +327,8 @@ namespace CPAS.ViewModels
                 StrSystemErrorNumber = string.Format("{0}", collect.Count());
             else
                 StrSystemErrorNumber = "";
+            if (SystemMessageCollection.Count > 50)
+                SystemMessageCollection.RemoveAt(0);
         }
         #endregion
 
@@ -297,9 +338,10 @@ namespace CPAS.ViewModels
         {
             get
             {
-                return new RelayCommand<string>(str => {
+                return new RelayCommand<string>(str =>
+                {
                     switch (str)
-                    { 
+                    {
                         case "ClearPLCMessage":
                             PLCMessageCollection.Clear();
                             break;
@@ -310,62 +352,95 @@ namespace CPAS.ViewModels
                             break;
                     }
                 });
-            } 
-        
+            }
+
         }
-        public RelayCommand StartCommand { get {
-                return new RelayCommand(() => {
+        public RelayCommand StartCommand
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
                     WorkFlow.WorkFlowMgr.Instance.StartAllStation();
                 });
-            } }
+            }
+        }
         public RelayCommand StopCommand
         {
             get
             {
-                return new RelayCommand(() => {
+                return new RelayCommand(() =>
+                {
                     WorkFlow.WorkFlowMgr.Instance.StopAllStation();
+
                 });
             }
         }
-        public RelayCommand<Tuple<string,string>> LogInCommand { get { return new RelayCommand<Tuple<string,string>>(t=> {
-            Tuple<string, string> tuple = t as Tuple<string, string>;
-            foreach (var it in ConfigMgr.UserCfgMgr.Users)
+        public RelayCommand<Tuple<string, string>> LogInCommand
+        {
+            get
             {
-                if (it.User == tuple.Item1 && it.Password == tuple.Item2)
+                return new RelayCommand<Tuple<string, string>>(t =>
                 {
-                    Level = it.Level;
-                    StrUserName = it.User;
-                }
+                    Tuple<string, string> tuple = t as Tuple<string, string>;
+                    foreach (var it in ConfigMgr.UserCfgMgr.Users)
+                    {
+                        if (it.User == tuple.Item1 && it.Password == tuple.Item2)
+                        {
+                            Level = it.Level;
+                            StrUserName = it.User;
+                        }
+                    }
+
+                });
             }
- 
-        }); } }
+        }
         public RelayCommand LogOutCommand { get { return new RelayCommand(() => { Level = 0; StrUserName = "Operator"; }); } }
-        public RelayCommand<string> SetSnapStateCommand { get { return new RelayCommand<string>(
-            str => {
-                Messenger.Default.Send<string>(str, "SetCamState");
-                if (str.ToLower() == "snapcontinues")
-                    CamSnapState = EnumCamSnapState.BUSY;
-                else
-                    CamSnapState = EnumCamSnapState.IDLE;
-            } ); } }
-        public RelayCommand<int> UpdateRoiTemplate { get { return new RelayCommand<int>(nCamID=> {
-            UpdateModelCollect(nCamID);
-            UpdateRoiCollect(nCamID);
-        }); } }
-        public RelayCommand<string> ShowErrorListEditCommand
-        { get { return new RelayCommand<string>(str=>{
-            switch (str)
+        public RelayCommand<string> SetSnapStateCommand
+        {
+            get
             {
-                case "PLC":
-                    ShowPlcErrorListEdit = true;
-                    break;
-                case "Sys":
-                    ShowPlcErrorListEdit = false;
-                    break;
-                default:
-                    break;
+                return new RelayCommand<string>(str =>
+                {
+                    Messenger.Default.Send<string>(str, "SetCamState");
+                    if (str.ToLower() == "snapcontinues")
+                        CamSnapState = EnumCamSnapState.BUSY;
+                    else
+                        CamSnapState = EnumCamSnapState.IDLE;
+                });
             }
-        }); } }
+        }
+        public RelayCommand<int> UpdateRoiTemplate
+        {
+            get
+            {
+                return new RelayCommand<int>(nCamID =>
+                {
+                    UpdateModelCollect(nCamID);
+                    UpdateRoiCollect(nCamID);
+                });
+            }
+        }
+        public RelayCommand<string> ShowErrorListEditCommand
+        {
+            get
+            {
+                return new RelayCommand<string>(str =>
+                {
+                    switch (str)
+                    {
+                        case "PLC":
+                            ShowPlcErrorListEdit = true;
+                            break;
+                        case "Sys":
+                            ShowPlcErrorListEdit = false;
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            }
+        }
         public RelayCommand<PrescriptionGridModel> PrescriptionChangedCommand
         {
             get
@@ -382,7 +457,7 @@ namespace CPAS.ViewModels
             {
                 return new RelayCommand<PrescriptionGridModel>(model =>
                 {
-                    if (model.Name==null || model.Name.Trim() == "")
+                    if (model.Name == null || model.Name.Trim() == "")
                     {
                         UC_MessageBox.Instance.ShowBox("请输入正确的配方名称");
                     }
@@ -399,13 +474,13 @@ namespace CPAS.ViewModels
                                 {
                                     PrescriptionCollection[nIndex] = model;
                                     break;
-                                }                             
+                                }
                             }
                             nIndex++;
                         }
                         if (!bExist && MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 不存在,是否新建配方", model.Name)))
                             PrescriptionCollection.Add(model);
-                        
+
                     }
                 });
             }
@@ -433,12 +508,24 @@ namespace CPAS.ViewModels
                         }
                     }
                     if (!bExist)
-                            UC_MessageBox.Instance.ShowBox(string.Format("当前没有选中要删除的项目"));
-                   
+                        UC_MessageBox.Instance.ShowBox(string.Format("当前没有选中要删除的配方"));
+
                 });
             }
         }
-        
+        public RelayCommand<PrescriptionGridModel> SetPrescriptionUsedCommand
+        {
+            get
+            {
+                return new RelayCommand<PrescriptionGridModel>(model =>
+                {
+                    if (model == null)
+                        UC_MessageBox.Instance.ShowBox(string.Format("当前没有选中要使用的配方"));
+                    else
+                        PrescriptionUsed = model;
+                });
+            }
+        }
         #endregion
 
         #region Ctor and DeCtor
@@ -448,38 +535,72 @@ namespace CPAS.ViewModels
             SystemMessageCollection.CollectionChanged += SystemMessageCollection_CollectionChanged;
 
             #region Messages
-            Messenger.Default.Register<string>(this, "UpdateRoiFiles", str =>UpdateRoiCollect(Convert.ToInt16(str.Substring(3,1))));
+            Messenger.Default.Register<string>(this, "UpdateRoiFiles", str => UpdateRoiCollect(Convert.ToInt16(str.Substring(3, 1))));
             Messenger.Default.Register<string>(this, "UpdateTemplateFiles", str => UpdateModelCollect(Convert.ToInt16(str.Substring(3, 1))));
             Messenger.Default.Register<Tuple<string, string>>(this, "ShowStepInfo", tuple =>
                 {
-                    switch (tuple.Item1)
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
-                        case "WorkRecord":
-                            Application.Current.Dispatcher.Invoke(()=>StepCollection[0].Add(tuple.Item2));
-                            break;
-                        case "WorkTune1":
-                            Application.Current.Dispatcher.Invoke(() => StepCollection[1].Add(tuple.Item2));
-                            break;
-                        case "WorkTune2":
-                            Application.Current.Dispatcher.Invoke(() => StepCollection[2].Add(tuple.Item2));
-                            break;
-                        case "WorkCalib":
-                            Application.Current.Dispatcher.Invoke(() => StepCollection[3].Add(tuple.Item2));
-                            break;
-                        default:
-                            break;
-                    }
+                        switch (tuple.Item1)
+                        {
+                            case "WorkRecord":
+                                StepCollection[0].Add(tuple.Item2);
+                                if (StepCollection[0].Count > 50)
+                                    StepCollection[0].RemoveAt(0);
+                                break;
+                            case "WorkTune1":
+                                StepCollection[1].Add(tuple.Item2);
+                                if (StepCollection[1].Count > 50)
+                                    StepCollection[1].RemoveAt(0);
+                                break;
+                            case "WorkTune2":
+                                StepCollection[2].Add(tuple.Item2);
+                                if (StepCollection[2].Count > 50)
+                                    StepCollection[2].RemoveAt(0);
+                                break;
+                            case "WorkCalib":
+                                StepCollection[3].Add(tuple.Item2);
+                                if (StepCollection[3].Count > 50)
+                                    StepCollection[3].RemoveAt(0);
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
                 });
 
-            Messenger.Default.Register<string>(this, "ShowError", str => {
+            Messenger.Default.Register<string>(this, "ShowError", str =>
+            {
                 Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str }));
             });
-            Messenger.Default.Register<string>(this, "ShowInfo", str => {
+            Messenger.Default.Register<string>(this, "ShowInfo", str =>
+            {
                 Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.INFO, StrMsg = str }));
             });
-            Messenger.Default.Register<string>(this, "ShowWarning", str => {
+            Messenger.Default.Register<string>(this, "ShowWarning", str =>
+            {
                 Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = str }));
             });
+            Messenger.Default.Register<Tuple<string, string, string>>(this, "WorkFlowMessage", tuple =>
+            {
+                string strWorkFlowName = tuple.Item1;
+                string strMethodName = tuple.Item2;
+                string strPara = tuple.Item3;
+                switch (strWorkFlowName)
+                {
+                    case "WorkRecord":
+                        switch (strMethodName)
+                        {
+                            case "ShowPower":
+                                StrPowerMeterValue1 = strPara.Split(',')[0];
+                                StrPowerMeterValue2 = strPara.Split(',')[1];
+                                break;
+                        }
+                        break;
+                }
+            });
+
             #endregion
 
             //StepInfo  init
@@ -495,9 +616,9 @@ namespace CPAS.ViewModels
             UpdateRoiCollect(0);
 
             //Camera
-            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam1", StrCameraState="Connected"});
-            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam2" , StrCameraState = "Disconnected" });
-            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam3" , StrCameraState = "Connected" });
+            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam1", StrCameraState = "Connected" });
+            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam2", StrCameraState = "Disconnected" });
+            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam3", StrCameraState = "Connected" });
 
 
             //Load Config
@@ -506,7 +627,7 @@ namespace CPAS.ViewModels
             foreach (var it in ConfigMgr.PrescriptionCfgMgr.Prescriptions)
                 PrescriptionCollection.Add(it);
 
-           
+
 
         }
         ~MainWindowViewModel()
@@ -516,8 +637,5 @@ namespace CPAS.ViewModels
             Messenger.Default.Unregister<string>("ShowWarning");
         }
         #endregion
-
-       
-      
     }
 }
