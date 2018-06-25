@@ -46,6 +46,7 @@ namespace CPAS.Views
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Window_AddNewPrescription.Instance.SetCloseFlag(true);
             BtnStop.PerformClick();
             //if (cts != null)
             //{

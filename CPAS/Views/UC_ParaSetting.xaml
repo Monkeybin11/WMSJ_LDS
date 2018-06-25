@@ -5,13 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" xmlns:dxprg="http://schemas.devexpress.com/winfx/2008/xaml/propertygrid" x:Class="CPAS.Views.UC_ParaSetting" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="600"
-            Loaded="UserControl_Loaded">
+             d:DesignHeight="300" d:DesignWidth="600">
     <Grid>
         <dx:DXTabControl >
             <dx:DXTabItem Header="系统设置" AllowHide="Default" ToolTip="Set system para" Height="40" Width="100" HorizontalContentAlignment="Center">
                 <Grid Background="Transparent">
-                    <dxprg:PropertyGridControl  Name="SystemGridProperty" FontSize="20" ExpandCategoriesWhenSelectedObjectChanged="True"/>
+                    <dxprg:PropertyGridControl  Name="SystemGridProperty" FontSize="20" ExpandCategoriesWhenSelectedObjectChanged="True" SelectedObject="{Binding }"/>
                 </Grid>
             </dx:DXTabItem>
             <dx:DXTabItem Header="配方" AllowHide="Default" ToolTip="Set system para" Height="40" Width="100" HorizontalContentAlignment="Center">
@@ -21,7 +20,7 @@
                         <ColumnDefinition Width="5"/>
                         <ColumnDefinition Width="400"/>
                     </Grid.ColumnDefinitions>
-                    <dxprg:PropertyGridControl  Name="PrescriptionGridProperty" FontSize="20" BorderThickness="0" BorderBrush="Transparent" ExpandCategoriesWhenSelectedObjectChanged="True" SelectedObject="{Binding PrescriptionPropertyCurSelectedObject}"/>
+                    <dxprg:PropertyGridControl  Name="PrescriptionGridProperty" FontSize="20" BorderThickness="0" BorderBrush="Transparent" ExpandCategoriesWhenSelectedObjectChanged="True" SelectedObject="{Binding SelectedItem,ElementName=PrescriptionListBox}"/>
                     <GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Center" Background="Transparent"/>
                     <Grid Grid.Column="2">
                         <Grid.RowDefinitions>
@@ -39,19 +38,19 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="2"/>
                             </Grid.RowDefinitions>
-                            <Button Name="DeletePrescription" Grid.Column="1" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" Margin="5" Command="{Binding DeletePrescriptionCommand}" CommandParameter="{Binding SelectedItem, ElementName=PrescriptionListBox}">
+                            <Button Name="AddPrescription"  Style="{StaticResource RoundButtonStyle1}" Background="Transparent" Margin="5" Command="{Binding AddPrescriptionCommand}">
                                 <Button.Content>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="35"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Image Source="/CPAS;component/Images/Delete.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="删除" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
+                                        <Image Source="/CPAS;component/Images/New.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="新建" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
                                     </Grid>
                                 </Button.Content>
                             </Button>
-                            <Button Name="BtnSavePrescription" Grid.Column="0" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" Margin="5"  Command="{Binding SavePrescriptionCommand}" CommandParameter="{Binding SelectedObject, ElementName=PrescriptionGridProperty}">
+                            <Button Name="BtnSavePrescription" Grid.Column="1" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" Margin="5"  Command="{Binding SavePrescriptionCommand}" CommandParameter="{Binding SelectedObject, ElementName=PrescriptionGridProperty}">
                                 <Button.Content>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -63,11 +62,24 @@
                                     </Grid>
                                 </Button.Content>
                             </Button>
+                            <Button Name="DeletePrescription" Grid.Column="2" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" Margin="5" Command="{Binding DeletePrescriptionCommand}" CommandParameter="{Binding SelectedItem, ElementName=PrescriptionListBox}">
+                                <Button.Content>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="35"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Source="/CPAS;component/Images/Delete.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="删除" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
+                                    </Grid>
+                                </Button.Content>
+                            </Button>
+                            
                             <TextBlock Text="当前配方:" Grid.Row="1" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding PrescriptionUsed.Name}" Grid.Row="1" Grid.Column="1"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding PrescriptionUsed.Name}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <Rectangle Grid.Row="2" Grid.ColumnSpan="3" Fill="Orange"/>
                         </Grid>
-                        <ListBox Name="PrescriptionListBox" Grid.Row="1" BorderThickness="0" ItemsSource="{Binding PrescriptionCollection}" SelectionChanged="PrescriptionListBox_SelectionChanged">
+                        <ListBox Name="PrescriptionListBox" Grid.Row="1" BorderThickness="0" ItemsSource="{Binding PrescriptionCollection}">
                             <ListBox.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Name="SelectThisItem" Header="选择此配方" FontSize="15"  Click="SelectThisItem_Click"/>

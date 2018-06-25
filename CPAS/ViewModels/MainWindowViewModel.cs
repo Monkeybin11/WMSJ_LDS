@@ -13,6 +13,7 @@ using CPAS.Classes;
 using CPAS.Config;
 using CPAS.Vision;
 using CPAS.UserCtrl;
+using CPAS.Views;
 
 namespace CPAS.ViewModels
 {
@@ -35,7 +36,6 @@ namespace CPAS.ViewModels
         private bool _showPlcErrorListEdit;
         private int _currentSelectPrescription = 0;
         private string _strPowerMeterValue1 = "NA", _strPowerMeterValue2 = "NA";
-        private PrescriptionGridModel _prescriptionPropertyCurSelectedObject = new PrescriptionGridModel();
         public PrescriptionGridModel _prescriptionUsed = new PrescriptionGridModel();
         private EnumCamSnapState _amSnapState;
         private ObservableCollection<MessageItem> _plcMessageCollection = new ObservableCollection<MessageItem>();
@@ -263,18 +263,6 @@ namespace CPAS.ViewModels
         }
         public ObservableCollection<string>[] StepCollection { get; set; }
         public ObservableCollection<PrescriptionGridModel> PrescriptionCollection { get; set; }
-        public PrescriptionGridModel PrescriptionPropertyCurSelectedObject
-        {
-            set
-            {
-                if (_prescriptionPropertyCurSelectedObject != value)
-                {
-                    _prescriptionPropertyCurSelectedObject = value.Clone() as PrescriptionGridModel;
-                    RaisePropertyChanged();
-                }
-            }
-            get { return _prescriptionPropertyCurSelectedObject; }
-        }
         public PrescriptionGridModel PrescriptionUsed
         {
             set
@@ -441,48 +429,86 @@ namespace CPAS.ViewModels
                 });
             }
         }
-        public RelayCommand<PrescriptionGridModel> PrescriptionChangedCommand
+        
+        public RelayCommand AddPrescriptionCommand
         {
             get
             {
-                return new RelayCommand<PrescriptionGridModel>(model =>
+                return new RelayCommand(() =>
                 {
-                    PrescriptionPropertyCurSelectedObject = model;
+                    if (MessageBoxResult.Yes == Window_AddNewPrescription.Instance.ShowWindowNewDescription())
+                    {
+                        string strName = Window_AddNewPrescription.Instance.ProfileValue.Item1;
+                        string strRemark= Window_AddNewPrescription.Instance.ProfileValue.Item2;
+                        if (strName != "" && (from prescription in PrescriptionCollection where prescription.Name == strName select prescription).Count() == 0)
+                            PrescriptionCollection.Add(new PrescriptionGridModel()
+                            {
+                                Name = strName,
+                                Remark = strRemark,
+                                UnLock = true,
+                                ReadBarcode = true,
+                                AdjustLaser = true,
+                                AdjustHoriz = true,
+                                AdjustFocus = true,
+                                Calibration = true,
+                            });
+                        else if(strName=="")
+                            UC_MessageBox.Instance.ShowMsgBox("名称不能为空");
+                        else if((from prescription in PrescriptionCollection where prescription.Name == strName select prescription).Count()!=0)
+                            UC_MessageBox.Instance.ShowMsgBox("已经存此配方名称，请更换命名");
+                    }
                 });
             }
         }
-        public RelayCommand<PrescriptionGridModel> SavePrescriptionCommand
+        //public RelayCommand<PrescriptionGridModel> SavePrescriptionCommand
+        //{
+        //    get
+        //    {
+        //        return new RelayCommand<PrescriptionGridModel>(model =>
+        //        {
+        //            if (model.Name == null || model.Name.Trim() == "")
+        //            {
+        //                UC_MessageBox.Instance.ShowBox("请输入正确的配方名称");
+        //            }
+        //            else
+        //            {
+        //                int nIndex = 0;
+        //                bool bExist = false;
+        //                foreach (var it in PrescriptionCollection)
+        //                {
+        //                    if (it.Name == model.Name)
+        //                    {
+        //                        bExist = true;
+        //                        if (MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 已经存在,是否覆盖", model.Name)))
+        //                        {
+        //                            PrescriptionCollection[nIndex] = model;
+        //                            break;
+        //                        }
+        //                    }
+        //                    nIndex++;
+        //                }
+        //                if (!bExist && MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 不存在,是否新建配方", model.Name)))
+        //                    PrescriptionCollection.Add(model);
+
+
+        //                ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg);
+        //            }
+        //        });
+        //    }
+        //}
+        public RelayCommand SavePrescriptionCommand
         {
             get
             {
-                return new RelayCommand<PrescriptionGridModel>(model =>
+                return new RelayCommand(() =>
                 {
-                    if (model.Name == null || model.Name.Trim() == "")
+                    try
                     {
-                        UC_MessageBox.Instance.ShowBox("请输入正确的配方名称");
+                        ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg, PrescriptionCollection.ToArray());
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        int nIndex = 0;
-                        bool bExist = false;
-                        foreach (var it in PrescriptionCollection)
-                        {
-                            if (it.Name == model.Name)
-                            {
-                                bExist = true;
-                                if (MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 已经存在,是否覆盖", model.Name)))
-                                {
-                                    PrescriptionCollection[nIndex] = model;
-                                    break;
-                                }
-                            }
-                            nIndex++;
-                        }
-                        if (!bExist && MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 不存在,是否新建配方", model.Name)))
-                            PrescriptionCollection.Add(model);
-
-
-                        ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg);
+                        UC_MessageBox.Instance.ShowMsgBox(ex.Message);
                     }
                 });
             }
@@ -500,7 +526,7 @@ namespace CPAS.ViewModels
                         {
                             if (it.Name == model.Name)
                             {
-                                if (MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("是否删除 {0} ?", model.Name)))
+                                if (MessageBoxResult.Yes == UC_MessageBox.Instance.ShowMsgBox(string.Format("是否删除 {0} ?", model.Name)))
                                 {
                                     bExist = true;
                                     PrescriptionCollection.Remove(model);
@@ -510,7 +536,7 @@ namespace CPAS.ViewModels
                         }
                     }
                     if (!bExist)
-                        UC_MessageBox.Instance.ShowBox(string.Format("当前没有选中要删除的配方"));
+                        UC_MessageBox.Instance.ShowMsgBox(string.Format("当前没有选中要删除的配方"));
 
                 });
             }
@@ -522,7 +548,7 @@ namespace CPAS.ViewModels
                 return new RelayCommand<PrescriptionGridModel>(model =>
                 {
                     if (model == null)
-                        UC_MessageBox.Instance.ShowBox(string.Format("当前没有选中要使用的配方"));
+                        UC_MessageBox.Instance.ShowMsgBox(string.Format("当前没有选中要使用的配方"));
                     else
                         PrescriptionUsed = model;
                 });
@@ -622,7 +648,6 @@ namespace CPAS.ViewModels
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam2", StrCameraState = "Disconnected" });
             CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam3", StrCameraState = "Connected" });
 
-
             //Load Config
             PrescriptionCollection = new ObservableCollection<PrescriptionGridModel>();
             ConfigMgr.Instance.LoadConfig();
@@ -634,9 +659,14 @@ namespace CPAS.ViewModels
         }
         ~MainWindowViewModel()
         {
+            // Unregister
             Messenger.Default.Unregister<string>("ShowError");
             Messenger.Default.Unregister<string>("ShowInfo");
             Messenger.Default.Unregister<string>("ShowWarning");
+            Messenger.Default.Unregister<string>("UpdateRoiFiles");
+            Messenger.Default.Unregister<string>("UpdateTemplateFiles");
+            Messenger.Default.Unregister<Tuple<string, string>>("ShowStepInfo");
+            Messenger.Default.Unregister<Tuple<string, string, string>>("WorkFlowMessage");
         }
         #endregion
     }

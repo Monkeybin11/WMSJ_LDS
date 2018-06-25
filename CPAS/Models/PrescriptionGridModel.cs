@@ -136,7 +136,6 @@ namespace CPAS.Models
             }
         }
         public event PropertyChangedEventHandler PropertyChanged;
-
         public object Clone()
         {
             return new PrescriptionGridModel()

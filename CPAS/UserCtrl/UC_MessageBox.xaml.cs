@@ -37,7 +37,8 @@ namespace CPAS.UserCtrl
             StrCaption = "GPAS";
             StrContent = "Message";
         }
-        public MessageBoxResult ShowBox(string strContent, string strCaption = "GPAS")
+      
+        public MessageBoxResult ShowMsgBox(string strContent, string strCaption = "GPAS")
         {
             this.StrCaption = strCaption;
             this.StrContent = strContent;

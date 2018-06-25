@@ -258,6 +258,9 @@
     <Compile Include="Views\UC_ParaSetting.xaml.cs">
       <DependentUpon>UC_ParaSetting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Window_AddNewPrescription.xaml.cs">
+      <DependentUpon>Window_AddNewPrescription.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Vision\Vision.cs" />
     <Compile Include="WorkFlow\WorkCalib.cs" />
     <Compile Include="WorkFlow\WorkFlowBase.cs" />
@@ -319,6 +322,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\UC_ParaSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Window_AddNewPrescription.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

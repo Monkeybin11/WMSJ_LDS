@@ -148,28 +148,26 @@ namespace CPAS.Config
             logexcel.ExcelToDataTable(ref PLCErrorDataTable, "Sheet1");
             #endregion
         }
-        public void SaveConfig(EnumConfigType cfgType)
+        public void SaveConfig(EnumConfigType cfgType,object[] listObj)
         {
-            object objSaved = null;
+            if (listObj == null)
+                throw new Exception(string.Format("保存的{0}数据为空", cfgType.ToString())); 
             string fileSaved = null;
             switch (cfgType)
             {
                 case EnumConfigType.HardwareCfg:
-                    objSaved = HardwareCfgMgr;
                     fileSaved = File_HardwareCfg;
                     break;
                 case EnumConfigType.PrescriptionCfg:
-                    objSaved = PrescriptionCfgMgr;
                     fileSaved = File_PrescriptionCfg;
                     break;
                 case EnumConfigType.SoftwareCfg:
-                    objSaved = SoftwareCfgMgr;
                     fileSaved = File_SoftwareCfg;
                     break;
                 default:
                     break;
             }
-            string json_str = JsonConvert.SerializeObject(objSaved);
+            string json_str = JsonConvert.SerializeObject(listObj);
             using (FileStream fs = File.Open(fileSaved, FileMode.Create, FileAccess.Write))
             {
                 using (StreamWriter wr = new StreamWriter(fs))

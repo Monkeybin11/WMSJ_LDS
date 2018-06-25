@@ -25,16 +25,10 @@ namespace CPAS.Views
         public UC_ParaSetting()
         {
             InitializeComponent();
+            SystemGridProperty.SelectedObject = new SystemParaModel();
         }
 
        
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            SystemGridProperty.SelectedObject = new SystemParaModel();
-            PrescriptionGridProperty.SelectedObject = new PrescriptionGridModel();
-        }
-
         public int Level { get; set; }
         public static DependencyProperty LevelProperty = DependencyProperty.Register("Level", typeof(int), typeof(UC_ParaSetting));
         public int GetLever()
@@ -45,13 +39,6 @@ namespace CPAS.Views
         {
             throw new NotImplementedException();
         }
-        private void PrescriptionListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (PrescriptionListBox.SelectedItem != null)
-                PrescriptionGridProperty.SelectedObject = (PrescriptionListBox.SelectedItem as PrescriptionGridModel).Clone();
-        }
-
-  
         private void SelectThisItem_Click(object sender, RoutedEventArgs e)
         {
           
