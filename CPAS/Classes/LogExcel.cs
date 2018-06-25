@@ -28,7 +28,7 @@ namespace CPAS.Classes
             this.fileName = _fileName;
         }
 
-        public bool CreateExcelFile(string[] colName, string sheetName = "Sheet1")
+        public bool CreateExcelSheet(string[] colName, string sheetName = "Sheet1")
         {
             try
             {
@@ -62,6 +62,7 @@ namespace CPAS.Classes
                 return false;
             }
         }
+
         /// <summary>  
         /// 将DataTable数据导入到excel中  
         /// </summary>  
@@ -83,11 +84,13 @@ namespace CPAS.Classes
                 file.Close();
             }
         }
+
         private HSSFWorkbook NPOIOpenExcel(string fileName)
         {
             Stream MyExcelStream = OpenClasspathResource(fileName);
             return new HSSFWorkbook(MyExcelStream);
         }
+
         public int DataTableToExcel(DataTable dt, string sheetName, bool isColumnWritten,bool Append=true)
         {
             try
@@ -120,6 +123,7 @@ namespace CPAS.Classes
             }
             return 1;
         }
+
         public int DataRowToExcel(DataRow dr, string sheetName)
         {
             try
@@ -145,6 +149,7 @@ namespace CPAS.Classes
             }
             return 1;
         }
+
         public int ExcelToDataTable(ref DataTable dt,string sheetName)
         {
             try

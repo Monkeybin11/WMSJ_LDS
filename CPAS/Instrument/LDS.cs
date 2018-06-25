@@ -101,6 +101,10 @@ namespace CPAS.Instrument
         #endregion
 
         #region 烧录
+        /// <summary>
+        /// 准备烧录
+        /// </summary>
+        /// <returns></returns>
         private bool PrepareRecord()
         {
             if (comPort == null || !comPort.IsOpen)
@@ -131,6 +135,11 @@ namespace CPAS.Instrument
                 return true;
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private string GetSerial()
         {
             if (comPort == null || !comPort.IsOpen)
@@ -143,7 +152,12 @@ namespace CPAS.Instrument
                 return System.Text.Encoding.ASCII.GetString(byteRecv);
             }
         }
-        public bool RecodIDFlow(string strID)
+        /// <summary>
+        /// 烧录流程
+        /// </summary>
+        /// <param name="strID"></param>
+        /// <returns></returns>
+        public bool RecodIDFlow(string strID)   
         {
             PrepareRecord();
             DoRecord(strID);
@@ -153,6 +167,10 @@ namespace CPAS.Instrument
         #endregion
 
         #region 调水平
+        /// <summary>
+        /// 读取曝光值
+        /// </summary>
+        /// <returns></returns>
         public int GetExposeValue()
         {
             if (comPort == null || !comPort.IsOpen)
@@ -167,6 +185,9 @@ namespace CPAS.Instrument
                 return 0;
             }
         }
+        /// <summary>
+        /// 确定调整结果
+        /// </summary>
         public void HoldLDS()
         {
             if (comPort == null || !comPort.IsOpen)
@@ -197,6 +218,10 @@ namespace CPAS.Instrument
         #endregion
 
         #region 距离标定
+        /// <summary>
+        /// 得到中心值，不能发送太快
+        /// </summary>
+        /// <returns></returns>
         public int GetCenterValue()
         {
             if (comPort == null || !comPort.IsOpen)
@@ -212,6 +237,12 @@ namespace CPAS.Instrument
             }
         }
 
+        /// <summary>
+        /// 标定
+        /// </summary>
+        /// <param name="c1"></param>
+        /// <param name="c2"></param>
+        /// <returns></returns>
         public bool SetDataToLDS(int c1, int c2)
         {   
             if (comPort == null || !comPort.IsOpen)
@@ -232,7 +263,7 @@ namespace CPAS.Instrument
                 Thread.Sleep(50);
                 comPort.Write("getstatuscode$");     //注意这个返回值还没有判断
                 Thread.Sleep(50);
-                comPort.Write("holdlds$");       //注意这个返回值还没有判断 dddd   
+                comPort.Write("holdlds$");       //注意这个返回值还没有判断
                 return true;
             }
         }
