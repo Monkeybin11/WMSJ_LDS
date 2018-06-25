@@ -5,12 +5,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CPAS.Config.SoftwareManager;
+using CPAS.Models;
 using GalaSoft.MvvmLight.Messaging;
 
 namespace CPAS.WorkFlow
 {
     public class WorkFlowBase
     {
+        protected Dictionary<string, LDSModel> LdsDic = new Dictionary<string, LDSModel>();//dddd 扫描不到条码如何保存，建议使用数字保存
         public bool Enable;
         public string StationName;
         public int StationIndex;

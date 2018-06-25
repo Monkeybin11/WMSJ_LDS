@@ -48,9 +48,14 @@ namespace CPAS.WorkFlow
 
         protected override bool UserInit()
         {
+            bool bRet = false;
             Pw1000USB_1 = InstrumentMgr.Instance.FindInstrumentByName("PowerMeter[0]") as PowerMeter;
             Pw1000USB_2 = InstrumentMgr.Instance.FindInstrumentByName("PowerMeter[1]") as PowerMeter;
-            return Pw1000USB_1!=null;
+            bRet= Pw1000USB_1!=null;
+            if (!bRet)
+                ShowInfo("初始化失败");
+            return bRet;
+
         }
         public WorkRecord(WorkFlowConfig cfg) : base(cfg)
         {

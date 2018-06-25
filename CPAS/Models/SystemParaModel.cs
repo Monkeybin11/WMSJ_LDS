@@ -9,79 +9,33 @@ namespace CPAS.Models
 {
     public class SystemParaModel
     {
-        public enum TESTMODE { Normal, Contionus }
+        public enum BARCODESOURCE { FILE, SCANNER }
   
-        //DCTest
-        private double _att = 6;
-        private double _dcVoltValue = 3.3;
-        private double _dcCurrLimit = 0.3;
-        private double dc_power1 = -1.59f;
-        private double dc_power2 = -1.45f;
-        private double dc_power3 = -0.57f;
-        private double dc_power4 = -1.10f;
-        private string _snDc = "";
-        private TESTMODE dc_nTestMode = TESTMODE.Normal;
+        private BARCODESOURCE _barcodeSource;
+        private int _barcodeLength;
+        private double _ldsPower = 0.3;
 
-  
-        [CategoryAttribute("FileSetting"), DescriptionAttribute("Set the file path of log")]
-        public double Att
+
+        [CategoryAttribute("条码设置"), DescriptionAttribute("设置条码来源;FILE—》从*.xls文件读取，SCANNER—》扫码枪扫取")]
+        public BARCODESOURCE BarcodeSource
         {
-            get { return _att; }
-            set { _att = value; }
+            get { return _barcodeSource; }
+            set { _barcodeSource = value; }
         }
-        [CategoryAttribute("DCTest"), DescriptionAttribute("Set DC Value, the uinit is Volt(V)")]
-        public double DcVoltValue
+        [CategoryAttribute("条码设置"), DescriptionAttribute("设置条码长度")]
+        public int BarcodeLength
         {
-            get { return _dcVoltValue; }
-            set { _dcVoltValue = value; }
-        }
-        [CategoryAttribute("DCTest"), DescriptionAttribute("Set current limit, the uinit is Ampere(A)")]
-        public double DcCurrLimit
-        {
-            get { return _dcCurrLimit; }
-            set { _dcCurrLimit = value; }
-        }
-        [CategoryAttribute("DCTest"), DescriptionAttribute("Set sn number")]
-        public string SN_DC
-        {
-            get { return _snDc; }
-            set { _snDc = value; }
+            get { return _barcodeLength; }
+            set { _barcodeLength = value; }
         }
 
-        [CategoryAttribute("DCTest"), DescriptionAttribute("Set Power1,unit is dbm")]
-        public double DcPower1
+        [CategoryAttribute("LDS测试功率设置"), DescriptionAttribute("设置LDS的功率窗口")]
+        public double LDSPower
         {
-            get { return dc_power1; }
-            set { dc_power1 = value; }
+            get { return _ldsPower; }
+            set { _ldsPower = value; }
         }
-        [CategoryAttribute("DCTest"), DescriptionAttribute("Set Power2,unit is dbm")]
-        public double DcPower2
-        {
-            get { return dc_power2; }
-            set { dc_power2 = value; }
-        }
-        [CategoryAttribute("DCTest"), DescriptionAttribute("Set Power3,unit is dbm")]
-        public double DcPower3
-        {
-            get { return dc_power3; }
-            set { dc_power3 = value; }
-        }
-        [CategoryAttribute("DCTest"), DescriptionAttribute("Set Power4,unit is dbm")]
-        public double DcPower4
-        {
-            get { return dc_power4; }
-            set { dc_power4 = value; }
-        }
-        [CategoryAttribute("DCTest"),
-         DescriptionAttribute("Set the test mode,Normal=run once, Continus=run in loops."),
-         ReadOnlyAttribute(false),
-         BrowsableAttribute(true)
-         ]
-        public TESTMODE DcTestMode
-        {
-            get { return dc_nTestMode; }
-            set { dc_nTestMode = value; }
-        }
-       
+
+ 
     }
 }

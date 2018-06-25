@@ -228,6 +228,7 @@
     <Compile Include="Instrument\QSerisePlc.cs" />
     <Compile Include="Interface\Iauthor.cs" />
     <Compile Include="Models\CameraItem.cs" />
+    <Compile Include="Models\LDSModel.cs" />
     <Compile Include="Models\LogDataItem.cs" />
     <Compile Include="Models\MessageItem.cs" />
     <Compile Include="Models\PrescriptionGridModel.cs" />
@@ -383,10 +384,7 @@
     <Resource Include="Images\Info24_24.png" />
     <Resource Include="Images\Warning24_24.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="LogData\" />
-    <Folder Include="ParaData\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\bk.jpg" />
   </ItemGroup>
