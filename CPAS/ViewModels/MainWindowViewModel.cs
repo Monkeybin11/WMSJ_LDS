@@ -481,6 +481,8 @@ namespace CPAS.ViewModels
                         if (!bExist && MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 不存在,是否新建配方", model.Name)))
                             PrescriptionCollection.Add(model);
 
+
+                        ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg);
                     }
                 });
             }

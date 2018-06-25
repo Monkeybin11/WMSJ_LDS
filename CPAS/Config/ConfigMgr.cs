@@ -17,6 +17,12 @@ using System.Text;
 
 namespace CPAS.Config
 {
+    public enum EnumConfigType
+    {
+        HardwareCfg,
+        SoftwareCfg,
+        PrescriptionCfg,
+    }
     public class ConfigMgr
     {
         private ConfigMgr() { }
@@ -141,6 +147,38 @@ namespace CPAS.Config
             logexcel = new LogExcel(File_PLCError);
             logexcel.ExcelToDataTable(ref PLCErrorDataTable, "Sheet1");
             #endregion
+        }
+        public void SaveConfig(EnumConfigType cfgType)
+        {
+            object objSaved = null;
+            string fileSaved = null;
+            switch (cfgType)
+            {
+                case EnumConfigType.HardwareCfg:
+                    objSaved = HardwareCfgMgr;
+                    fileSaved = File_HardwareCfg;
+                    break;
+                case EnumConfigType.PrescriptionCfg:
+                    objSaved = PrescriptionCfgMgr;
+                    fileSaved = File_PrescriptionCfg;
+                    break;
+                case EnumConfigType.SoftwareCfg:
+                    objSaved = SoftwareCfgMgr;
+                    fileSaved = File_SoftwareCfg;
+                    break;
+                default:
+                    break;
+            }
+            string json_str = JsonConvert.SerializeObject(objSaved);
+            using (FileStream fs = File.Open(fileSaved, FileMode.Create, FileAccess.Write))
+            {
+                using (StreamWriter wr = new StreamWriter(fs))
+                {
+                    wr.Write(json_str);
+                    wr.Close();
+                }
+                fs.Close();
+            }
         }
     }
 }
