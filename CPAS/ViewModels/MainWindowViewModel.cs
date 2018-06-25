@@ -14,6 +14,7 @@ using CPAS.Config;
 using CPAS.Vision;
 using CPAS.UserCtrl;
 using CPAS.Views;
+using CPAS.Config.UserManager;
 
 namespace CPAS.ViewModels
 {
@@ -34,7 +35,6 @@ namespace CPAS.ViewModels
         private int _level = 0;
         private string _strPLCErrorNumber = "", _strSystemErrorNumber = "";
         private bool _showPlcErrorListEdit;
-        private int _currentSelectPrescription = 0;
         private string _strPowerMeterValue1 = "NA", _strPowerMeterValue2 = "NA";
         public PrescriptionGridModel _prescriptionUsed = new PrescriptionGridModel();
         private EnumCamSnapState _amSnapState;
@@ -131,18 +131,6 @@ namespace CPAS.ViewModels
             }
             get { return _level; }
         }
-        public int CurrentSelectPrescription
-        {
-            set
-            {
-                if (_currentSelectPrescription != value)
-                {
-                    _currentSelectPrescription = value;
-                    RaisePropertyChanged();
-                }
-            }
-            get { return _currentSelectPrescription; }
-        }
         public bool ShowPlcErrorListEdit
         {
             set
@@ -200,6 +188,18 @@ namespace CPAS.ViewModels
                 }
             }
             get { return _strPowerMeterValue2; }
+        }
+        public PrescriptionGridModel PrescriptionUsed
+        {
+            set
+            {
+                if (_prescriptionUsed != value)
+                {
+                    _prescriptionUsed = value.Clone() as PrescriptionGridModel;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _prescriptionUsed; }
         }
         public ObservableCollection<MessageItem> PLCMessageCollection
         {
@@ -263,18 +263,7 @@ namespace CPAS.ViewModels
         }
         public ObservableCollection<string>[] StepCollection { get; set; }
         public ObservableCollection<PrescriptionGridModel> PrescriptionCollection { get; set; }
-        public PrescriptionGridModel PrescriptionUsed
-        {
-            set
-            {
-                if (_prescriptionUsed != value)
-                {
-                    _prescriptionUsed = value.Clone() as PrescriptionGridModel;
-                    RaisePropertyChanged();
-                }
-            }
-            get { return _prescriptionUsed; }
-        }
+        public ObservableCollection<UserModel> UserModelCollection { get; set; }
         #endregion
 
 
@@ -319,6 +308,7 @@ namespace CPAS.ViewModels
                 SystemMessageCollection.RemoveAt(0);
         }
         #endregion
+
 
         #region Commands
         public RelayCommand<string> RibonCommand { get { return new RelayCommand<string>(str => StrCurViewID = str); } }
@@ -460,42 +450,6 @@ namespace CPAS.ViewModels
                 });
             }
         }
-        //public RelayCommand<PrescriptionGridModel> SavePrescriptionCommand
-        //{
-        //    get
-        //    {
-        //        return new RelayCommand<PrescriptionGridModel>(model =>
-        //        {
-        //            if (model.Name == null || model.Name.Trim() == "")
-        //            {
-        //                UC_MessageBox.Instance.ShowBox("请输入正确的配方名称");
-        //            }
-        //            else
-        //            {
-        //                int nIndex = 0;
-        //                bool bExist = false;
-        //                foreach (var it in PrescriptionCollection)
-        //                {
-        //                    if (it.Name == model.Name)
-        //                    {
-        //                        bExist = true;
-        //                        if (MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 已经存在,是否覆盖", model.Name)))
-        //                        {
-        //                            PrescriptionCollection[nIndex] = model;
-        //                            break;
-        //                        }
-        //                    }
-        //                    nIndex++;
-        //                }
-        //                if (!bExist && MessageBoxResult.Yes == UC_MessageBox.Instance.ShowBox(string.Format("配方 {0} 不存在,是否新建配方", model.Name)))
-        //                    PrescriptionCollection.Add(model);
-
-
-        //                ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg);
-        //            }
-        //        });
-        //    }
-        //}
         public RelayCommand SavePrescriptionCommand
         {
             get
@@ -505,6 +459,7 @@ namespace CPAS.ViewModels
                     try
                     {
                         ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg, PrescriptionCollection.ToArray());
+                        UC_MessageBox.Instance.ShowMsgBox("保存成功", "提示");
                     }
                     catch (Exception ex)
                     {
@@ -553,6 +508,25 @@ namespace CPAS.ViewModels
                         PrescriptionUsed = model;
                 });
             }
+        }
+        public RelayCommand<UserModel> SaveUserCfgCommand
+        {
+            get
+            {
+                return new RelayCommand<UserModel>(user =>
+                {
+                    try
+                    {
+                        ConfigMgr.Instance.SaveConfig(EnumConfigType.UserCfg, UserModelCollection.ToArray());
+                        UC_MessageBox.Instance.ShowMsgBox("修改密码成功","成功");
+                    }
+                    catch (Exception ex)
+                    {
+                        UC_MessageBox.Instance.ShowMsgBox(ex.Message);
+                    }
+                });
+            }
+
         }
         #endregion
 
@@ -654,7 +628,12 @@ namespace CPAS.ViewModels
             foreach (var it in ConfigMgr.PrescriptionCfgMgr.Prescriptions)
                 PrescriptionCollection.Add(it);
 
-
+            //User config
+            UserModelCollection = new ObservableCollection<UserModel>();
+            foreach (var it in ConfigMgr.UserCfgMgr.Users)
+            {
+                UserModelCollection.Add(it);
+            }
 
         }
         ~MainWindowViewModel()

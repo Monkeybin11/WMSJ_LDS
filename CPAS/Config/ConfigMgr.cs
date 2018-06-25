@@ -4,6 +4,7 @@ using CPAS.Config.PrescriptionManager;
 using CPAS.Config.SoftwareManager;
 using CPAS.Config.UserManager;
 using CPAS.Instrument;
+using CPAS.Models;
 using CPAS.WorkFlow;
 using GalaSoft.MvvmLight.Messaging;
 using Newtonsoft.Json;
@@ -22,6 +23,7 @@ namespace CPAS.Config
         HardwareCfg,
         SoftwareCfg,
         PrescriptionCfg,
+        UserCfg,
     }
     public class ConfigMgr
     {
@@ -153,21 +155,30 @@ namespace CPAS.Config
             if (listObj == null)
                 throw new Exception(string.Format("保存的{0}数据为空", cfgType.ToString())); 
             string fileSaved = null;
+            object objSaved = null;
             switch (cfgType)
             {
                 case EnumConfigType.HardwareCfg:
                     fileSaved = File_HardwareCfg;
+                    //objSaved=new HardwareCfgManager() {  }
                     break;
                 case EnumConfigType.PrescriptionCfg:
                     fileSaved = File_PrescriptionCfg;
+                    objSaved = new PrescriptionCfgManager();
+                    (objSaved as PrescriptionCfgManager).Prescriptions = listObj as PrescriptionGridModel[];
                     break;
                 case EnumConfigType.SoftwareCfg:
                     fileSaved = File_SoftwareCfg;
                     break;
+                case EnumConfigType.UserCfg:
+                    fileSaved = File_UserCfg;
+                    objSaved = new UserCfgManager();
+                    (objSaved as UserCfgManager).Users = listObj as UserModel[];
+                    break;
                 default:
                     break;
             }
-            string json_str = JsonConvert.SerializeObject(listObj);
+            string json_str = JsonConvert.SerializeObject(objSaved);
             using (FileStream fs = File.Open(fileSaved, FileMode.Create, FileAccess.Write))
             {
                 using (StreamWriter wr = new StreamWriter(fs))

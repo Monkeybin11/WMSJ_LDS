@@ -206,6 +206,7 @@
     <Compile Include="Converters\Int2PrescriptionModel.cs" />
     <Compile Include="Converters\IsChecked2RegionOperator.cs" />
     <Compile Include="Converters\IsChecked2RegionType.cs" />
+    <Compile Include="Converters\UserName2Visibility.cs" />
     <Compile Include="Instrument\InstrumentBase.cs" />
     <Compile Include="Instrument\InstrumentMgr.cs" />
     <Compile Include="Instrument\Keyence_SR1000.cs" />

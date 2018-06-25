@@ -26,6 +26,7 @@
             <Convert:Boolean2ErrorListEditVisibility x:Key="Boolean2ErrorListEditVisibility"/>
             <Convert:Boolean2FontSize x:Key="Boolean2FontSize"/>
             <Convert:Int2PrescriptionModel x:Key="Int2PrescriptionModel"/>
+            <Convert:UserName2Visibility x:Key="UserName2Visibility"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

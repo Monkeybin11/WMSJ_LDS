@@ -24,10 +24,10 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <UserCtrl:UC_StationHeader HeaderCaption="Record" HeaderBackground="Transparent" Margin="3" StepInfoCollection="{Binding StepCollection[0]}"/>
-        <UserCtrl:UC_StationHeader HeaderCaption="Tune1" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="1" Margin="3" StepInfoCollection="{Binding StepCollection[1]}"/>
-        <UserCtrl:UC_StationHeader HeaderCaption="Tune2" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="2" Margin="3" StepInfoCollection="{Binding StepCollection[2]}"/>
-        <UserCtrl:UC_StationHeader HeaderCaption="Unload" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="3" Margin="3" StepInfoCollection="{Binding StepCollection[3]}"/>
+        <UserCtrl:UC_StationHeader HeaderCaption="扫码-解锁-调功率" HeaderBackground="Transparent" Margin="3" StepInfoCollection="{Binding StepCollection[0]}"/>
+        <UserCtrl:UC_StationHeader HeaderCaption="调水平" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="1" Margin="3" StepInfoCollection="{Binding StepCollection[1]}"/>
+        <UserCtrl:UC_StationHeader HeaderCaption="调焦距" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="2" Margin="3" StepInfoCollection="{Binding StepCollection[2]}"/>
+        <UserCtrl:UC_StationHeader HeaderCaption="标定" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="3" Margin="3" StepInfoCollection="{Binding StepCollection[3]}"/>
 
         <Border  Grid.Row="1" Grid.Column="0" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
             <Grid>
