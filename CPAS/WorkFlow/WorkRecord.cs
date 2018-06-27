@@ -1,9 +1,11 @@
-﻿using CPAS.Config;
+﻿using CPAS.Classes;
+using CPAS.Config;
 using CPAS.Config.SoftwareManager;
 using CPAS.Instrument;
 using GalaSoft.MvvmLight.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,6 +17,8 @@ namespace CPAS.WorkFlow
     {
         private PowerMeter Pw1000USB_1 = null;
         private PowerMeter Pw1000USB_2 = null;
+        private string FILE_FAKE_BARCODE_FILE = FileHelper.GetCurFilePathString() + "UserData\\Barcode.xls";
+        private DataTable Fake_Barcode_Dt = new DataTable();
         private enum STEP : int
         {
             INIT=1,
@@ -53,7 +57,10 @@ namespace CPAS.WorkFlow
         public WorkRecord(WorkFlowConfig cfg) : base(cfg)
         {
             #region >>>>读取模块配置信息，初始化工序Enable信息
-
+            LogExcel Fake_Barcode_Excel = new LogExcel(FILE_FAKE_BARCODE_FILE);
+            Fake_Barcode_Excel.ExcelToDataTable(ref Fake_Barcode_Dt, "Sheet1");
+            foreach (DataRow it in Fake_Barcode_Dt.Rows)
+                Console.WriteLine(it["Barcode"]);
             #endregion
             #region >>>>初始化仪表信息
 

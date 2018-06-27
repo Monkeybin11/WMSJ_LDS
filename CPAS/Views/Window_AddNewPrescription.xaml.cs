@@ -24,7 +24,6 @@ namespace CPAS.Views
         {
             InitializeComponent();
         }
-
         private static MessageBoxResult _msgresult = MessageBoxResult.No;
         public static Tuple<string, string> ProfileValue = null;  
         private void BtnYes_Click(object sender, RoutedEventArgs e)
@@ -57,8 +56,6 @@ namespace CPAS.Views
                 DragMove();
             }
         }
-
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
