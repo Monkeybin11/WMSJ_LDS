@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CPAS.Config.SoftwareManager;
 using CPAS.Models;
+using CPSA.CLasses;
 using GalaSoft.MvvmLight.Messaging;
 
 namespace CPAS.WorkFlow
@@ -44,7 +45,10 @@ namespace CPAS.WorkFlow
         public bool Start()
         {
             if (!UserInit())
+            {
+                LogHelper.WriteLine($"工站{cfg.Name}初始化UserInit失败,无法启动流程");
                 return false;
+            }
             if (t.Status == TaskStatus.Created)
                 t.Start();
             else if (t.Status == TaskStatus.Canceled || t.Status == TaskStatus.RanToCompletion)
