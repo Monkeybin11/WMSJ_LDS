@@ -15,27 +15,28 @@ namespace CPAS.WorkFlow
         {
             INIT,
 
-            OPEN_ALL_RELAY,
-            READ_PARA_FROM_UI,
-            SET_POWER,
-            READ_BACK_CURR,
-            READ_ICC,
+            //调焦距
+            #region Station3
+            Check_Enable_Adjust_Focus,      //计算对接角度
+            Wait_Focus_Grab_Cmd,
+            Grab_Focus_Image,
+            Cacul_Focus_Servo_Angle,
+            Write_Focus_Servo_To_Register,
+            Write_Focus_Grab_Boolean_result,
+            Send_Focus_Calcu_Angle_Finish_Signal,
 
-            CLOSE_RELAY,    //从此初开始循环
-            READ_I_DARK_0,
-            CALC_I_DARK_1,  //
+            Wait_Adjust_Foucs_Cmd,
+            Read_Focus_Value,
+            Check_Foucs_Is_Ok,
+            Adjust_A_Small_Step,
+            Read_Focus_Value_For_GetDir,    //先判断方向,如果方向固定，那么就可以跳过这一步，大概计算要旋转多少度，根据角度计算每一度大概多少Value
+            Write_Angle_To_Register_i,
+            Wait_Servo_Finish_i,
+            Read_Focus_Value_i,
+            Check_Focus_Is_Ok_i,
 
-            SET_ATT,
-            OPEN_LIGHT,
-            READ_RSSI_0,
-            CALC_RSSI_1,
-            CALC_RESP,
-            OPEN_ALL_RELAY_FINNALY,
-
-
-            GEN_DATATABLE_FOR_EXCEL,
-            SAVE_DATA_TO_FILE,      //结束循环
-
+            Finis_Adjust_Focus,
+            #endregion
 
             EMG,
             EXIT,
@@ -44,6 +45,15 @@ namespace CPAS.WorkFlow
 
         protected override bool UserInit()
         {
+            #region >>>>读取模块配置信息，初始化工序Enable信息
+
+            #endregion
+            #region >>>>初始化仪表信息
+
+            #endregion
+            #region >>>>
+
+            #endregion
             return true;
         }
         public WorkTune2(WorkFlowConfig cfg) : base(cfg)

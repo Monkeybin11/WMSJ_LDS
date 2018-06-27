@@ -15,26 +15,22 @@ namespace CPAS.WorkFlow
         {
             INIT,
 
-            OPEN_ALL_RELAY,
-            READ_PARA_FROM_UI,
-            SET_POWER,
-            READ_BACK_CURR,
-            READ_ICC,
+            #region Station4
 
-            CLOSE_RELAY,    //从此初开始循环
-            READ_I_DARK_0,
-            CALC_I_DARK_1,  //
+            Check_Enable_Calib,
+            Wait_Calib_2m_Cmd,
+            Read_Center_Value_2m,
+            Write_Calib_2m_Boolean_Result,
+            Finish_Calib_2m,
+            Wait_Calib_4m_Cmd,
+            Read_Center_Value_4m,
+            Write_Calib_4m_Boolean_Result,
+            Finish_Calib_4m,
+            Calclate_From_2m_4m,
+            Write_To_LDS,
+            Finis_Calib,
 
-            SET_ATT,
-            OPEN_LIGHT,
-            READ_RSSI_0,
-            CALC_RSSI_1,
-            CALC_RESP,
-            OPEN_ALL_RELAY_FINNALY,
-
-
-            GEN_DATATABLE_FOR_EXCEL,
-            SAVE_DATA_TO_FILE,      //结束循环
+            #endregion
 
 
             EMG,
@@ -44,6 +40,15 @@ namespace CPAS.WorkFlow
 
         protected override bool UserInit()
         {
+            #region >>>>读取模块配置信息，初始化工序Enable信息
+
+            #endregion
+            #region >>>>初始化仪表信息
+
+            #endregion
+            #region >>>>
+
+            #endregion
             return true;
         }
         public WorkCalib(WorkFlowConfig cfg) : base(cfg)

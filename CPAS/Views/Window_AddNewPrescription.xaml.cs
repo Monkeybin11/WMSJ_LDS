@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CPAS.UserCtrl;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,40 +24,30 @@ namespace CPAS.Views
         {
             InitializeComponent();
         }
-        ~Window_AddNewPrescription()
-        {
-            _instance = null;
-        }
-        private static Window_AddNewPrescription _instance = null;
-        private MessageBoxResult _msgresult = MessageBoxResult.No;
-        public Tuple<string, string> ProfileValue = null;
-        private bool bClose = false;
 
-        public static Window_AddNewPrescription Instance{
-            get
-            {
-                if(_instance==null)
-                    _instance= new Window_AddNewPrescription();
-                return _instance;
-            }
-        }
+        private static MessageBoxResult _msgresult = MessageBoxResult.No;
+        public static Tuple<string, string> ProfileValue = null;  
         private void BtnYes_Click(object sender, RoutedEventArgs e)
         {
             _msgresult = MessageBoxResult.Yes;
-            ProfileValue= new Tuple<string, string>(EditBoxName.Text, EditBoxRemark.Text);
-            Hide();
+            if (EditBoxName.Text == "")
+                UC_MessageBox.ShowMsgBox("配方名称不能为空", "错误");
+            else
+            {
+                ProfileValue = new Tuple<string, string>(EditBoxName.Text, EditBoxRemark.Text);
+                Close();
+            }
         }
         private void BtnNo_Click(object sender, RoutedEventArgs e)
         {
             _msgresult = MessageBoxResult.No;
-            ProfileValue = null;
-            Hide();
+            ProfileValue = new Tuple<string, string>("", "");
+            Close();
         }
-        public MessageBoxResult ShowWindowNewDescription()
+        public static MessageBoxResult ShowWindowNewDescription()
         {
-            EditBoxName.Text = "";
-            EditBoxRemark.Text = "";
-            ShowDialog();
+            Window_AddNewPrescription dlg = new Window_AddNewPrescription();
+            dlg.ShowDialog();
             return _msgresult;
         }
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
@@ -66,14 +57,11 @@ namespace CPAS.Views
                 DragMove();
             }
         }
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            e.Cancel = !bClose;
-        }
-        public void SetCloseFlag(bool bClose)
-        {
-            this.bClose = bClose;
-            Close();
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
     }
 }

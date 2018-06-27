@@ -43,7 +43,7 @@ namespace CPAS.Models
                     sb.Append("VisionData\\Model\\");
                     sb.Append(item.StrFullName);
                     sb.Append(".shm");
-                    if (UC_MessageBox.Instance.ShowMsgBox(string.Format("确定要删除{0}吗?", item.StrName)) == System.Windows.MessageBoxResult.Yes)
+                    if (UC_MessageBox.ShowMsgBox(string.Format("确定要删除{0}吗?", item.StrName)) == System.Windows.MessageBoxResult.Yes)
                     {
                         FileHelper.DeleteFile(sb.ToString());
                         Messenger.Default.Send<string>(item.StrFullName, "UpdateTemplateFiles");

@@ -10,7 +10,7 @@
         DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
         Width="800"
         Height="500"
-        Closing="Window_Closing">
+        Loaded="Window_Loaded">
     <Grid Background="White" Margin="150" MouseDown="Grid_MouseDown">
         <Grid.Effect>
             <DropShadowEffect BlurRadius="80" Color="#FF301D1D" ShadowDepth="20"/>

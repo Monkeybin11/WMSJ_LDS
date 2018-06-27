@@ -42,7 +42,7 @@ namespace CPAS.Models
             sb.Append("VisionData\\Roi\\");
             sb.Append(item.StrFullName);
             sb.Append(".reg");
-            if (UC_MessageBox.Instance.ShowMsgBox(string.Format("确定要删除{0}吗?", item.StrName)) == System.Windows.MessageBoxResult.Yes)
+            if (UC_MessageBox.ShowMsgBox(string.Format("确定要删除{0}吗?", item.StrName)) == System.Windows.MessageBoxResult.Yes)
             {
                 FileHelper.DeleteFile(sb.ToString());
                 Messenger.Default.Send<string>(item.StrFullName, "UpdateRoiFiles");

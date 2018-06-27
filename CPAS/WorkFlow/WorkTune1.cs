@@ -15,26 +15,30 @@ namespace CPAS.WorkFlow
         {
             INIT,
 
-            OPEN_ALL_RELAY,
-            READ_PARA_FROM_UI,
-            SET_POWER,
-            READ_BACK_CURR,
-            READ_ICC,
+            #region Station 2
+            //调水平
+            Check_Enable_Adjust_Horiz,  //计算对接角度
+            Wait_Horiz_Grab_Cmd,
+            Horiz_Grab_Image,
+            Cacul_Horiz_Servo_Angle,
+            Write_Horiz_Servo_Angle_To_Register,
+            Write_Horiz_Grab_Boolean_Result,
+            Send_Horiz_Calcu_Angle_Finish_Signal,
 
-            CLOSE_RELAY,    //从此初开始循环
-            READ_I_DARK_0,
-            CALC_I_DARK_1,  //
+                
+            Wait_Adjust_Horiz_Cmd,      //计算单次旋转角度      可能需要再分一个线程分开调节
+            Turn_On_Laser_And_Light,
+            Grab_Laser_Blob,
+            Check_Blob_Is_OK,           //判断斑点是否在第四象限
+            Cacul_Blob_Angle,
+            Write_Blob_Angle_To_Register,
+            Write_Blob_Boolean_Result,
+            Wait_Servo_Finish_Step,        //——》GrabImage
 
-            SET_ATT,
-            OPEN_LIGHT,
-            READ_RSSI_0,
-            CALC_RSSI_1,
-            CALC_RESP,
-            OPEN_ALL_RELAY_FINNALY,
+            Finish_Adjust_Horiz,
 
-
-            GEN_DATATABLE_FOR_EXCEL,
-            SAVE_DATA_TO_FILE,      //结束循环
+           
+            #endregion
 
 
             EMG,
@@ -44,6 +48,15 @@ namespace CPAS.WorkFlow
 
         protected override bool UserInit()
         {
+            #region >>>>读取模块配置信息，初始化工序Enable信息
+
+            #endregion
+            #region >>>>初始化仪表信息
+
+            #endregion
+            #region >>>>
+
+            #endregion
             return true;
         }
         public  WorkTune1(WorkFlowConfig cfg) : base(cfg)

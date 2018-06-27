@@ -488,10 +488,10 @@ namespace CPAS.ViewModels
             {
                 return new RelayCommand(() =>
                 {
-                    if (MessageBoxResult.Yes == Window_AddNewPrescription.Instance.ShowWindowNewDescription())
+                    if (MessageBoxResult.Yes == Window_AddNewPrescription.ShowWindowNewDescription())
                     {
-                        string strName = Window_AddNewPrescription.Instance.ProfileValue.Item1;
-                        string strRemark= Window_AddNewPrescription.Instance.ProfileValue.Item2;
+                        string strName = Window_AddNewPrescription.ProfileValue.Item1;
+                        string strRemark= Window_AddNewPrescription.ProfileValue.Item2;
                         if (strName != "" && (from prescription in PrescriptionCollection where prescription.Name == strName select prescription).Count() == 0)
                         {
                             PrescriptionCollection.Add(new PrescriptionGridModel()
@@ -508,9 +508,9 @@ namespace CPAS.ViewModels
                             LogHelper.WriteLine($"新增配方{strName}:{strRemark}", LogHelper.LogType.NORMAL);
                         }
                         else if (strName == "")
-                            UC_MessageBox.Instance.ShowMsgBox("名称不能为空");
+                            UC_MessageBox.ShowMsgBox("名称不能为空");
                         else if ((from prescription in PrescriptionCollection where prescription.Name == strName select prescription).Count() != 0)
-                            UC_MessageBox.Instance.ShowMsgBox("已经存此配方名称，请更换命名");
+                            UC_MessageBox.ShowMsgBox("已经存此配方名称，请更换命名");
                     }
                 });
             }
@@ -524,12 +524,12 @@ namespace CPAS.ViewModels
                     try
                     {
                         ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg, PrescriptionCollection.ToArray());
-                        UC_MessageBox.Instance.ShowMsgBox("保存成功", "提示");
+                        UC_MessageBox.ShowMsgBox("保存成功", "提示");
                         LogHelper.WriteLine($"保存配方文件成功", LogHelper.LogType.NORMAL);
                     }
                     catch (Exception ex)
                     {
-                        UC_MessageBox.Instance.ShowMsgBox(ex.Message);
+                        UC_MessageBox.ShowMsgBox(ex.Message);
                     }
                 });
             }
@@ -547,7 +547,7 @@ namespace CPAS.ViewModels
                         {
                             if (it.Name == model.Name)
                             {
-                                if (MessageBoxResult.Yes == UC_MessageBox.Instance.ShowMsgBox(string.Format("是否删除 {0} ?", model.Name)))
+                                if (MessageBoxResult.Yes == UC_MessageBox.ShowMsgBox(string.Format("是否删除 {0} ?", model.Name)))
                                 {
                                     bExist = true;
                                     PrescriptionCollection.Remove(model);
@@ -558,7 +558,7 @@ namespace CPAS.ViewModels
                         }
                     }
                     if (!bExist)
-                        UC_MessageBox.Instance.ShowMsgBox(string.Format("当前没有选中要删除的配方"));
+                        UC_MessageBox.ShowMsgBox(string.Format("当前没有选中要删除的配方"));
 
                 });
             }
@@ -570,7 +570,7 @@ namespace CPAS.ViewModels
                 return new RelayCommand<PrescriptionGridModel>(model =>
                 {
                     if (model == null)
-                        UC_MessageBox.Instance.ShowMsgBox(string.Format("当前没有选中要使用的配方"));
+                        UC_MessageBox.ShowMsgBox(string.Format("当前没有选中要使用的配方"));
                     else
                         PrescriptionUsed = model;
                     LogHelper.WriteLine($"设置使用{model.Name}:{model.Remark}为当前配方", LogHelper.LogType.NORMAL);
@@ -586,12 +586,12 @@ namespace CPAS.ViewModels
                     try
                     {
                         ConfigMgr.Instance.SaveConfig(EnumConfigType.UserCfg, UserModelCollection.ToArray());
-                        UC_MessageBox.Instance.ShowMsgBox("修改密码成功","成功");
+                        UC_MessageBox.ShowMsgBox("修改密码成功","成功");
                         LogHelper.WriteLine($"设置用户密码并保存成功", LogHelper.LogType.NORMAL);
                     }
                     catch (Exception ex)
                     {
-                        UC_MessageBox.Instance.ShowMsgBox(ex.Message);
+                        UC_MessageBox.ShowMsgBox(ex.Message);
                     }
                 });
             }

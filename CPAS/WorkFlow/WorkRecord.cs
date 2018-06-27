@@ -17,29 +17,22 @@ namespace CPAS.WorkFlow
         private PowerMeter Pw1000USB_2 = null;
         private enum STEP : int
         {
-            INIT,
+            INIT=1,
 
-            OPEN_ALL_RELAY,
-            READ_PARA_FROM_UI,
-            SET_POWER,
-            READ_BACK_CURR,
-            READ_ICC,
+            #region Station 1
+            Check_Enable_UnLock,
+            Wait_UnLock_Cmd,
+            Write_Unlock_Result,
 
-            CLOSE_RELAY,    //从此初开始循环
-            READ_I_DARK_0,
-            CALC_I_DARK_1,  //
+            Check_Enable_ScanBarcode,
+            Wait_Scan_Barcode_Cmd,
+            Write_Barcode_To_Register,
+            Write_Scan_Result,
 
-            SET_ATT,
-            OPEN_LIGHT,
-            READ_RSSI_0,
-            CALC_RSSI_1,
-            CALC_RESP,
-            OPEN_ALL_RELAY_FINNALY,
-
-
-            GEN_DATATABLE_FOR_EXCEL,
-            SAVE_DATA_TO_FILE,      //结束循环
-
+            Check_Enable_Adjust_Laser_Power,
+            Wait_Adjust_Laser_Power_Cmd,
+            Write_Adjust_Laser_Power_Result,
+            #endregion
 
             EMG,
             EXIT,
@@ -59,7 +52,15 @@ namespace CPAS.WorkFlow
         }
         public WorkRecord(WorkFlowConfig cfg) : base(cfg)
         {
+            #region >>>>读取模块配置信息，初始化工序Enable信息
 
+            #endregion
+            #region >>>>初始化仪表信息
+
+            #endregion
+            #region >>>>
+
+            #endregion
         }
 
         protected override int WorkFlow()
@@ -79,17 +80,12 @@ namespace CPAS.WorkFlow
                         Thread.Sleep(100);
                         break;
                     case STEP.DO_NOTHING:
-                        PopAndPushStep(STEP.READ_ICC);
+                        PopAndPushStep(STEP.EXIT);
                         ShowPower(EnumUnit.μW);
                         Vision.Vision.Instance.GrabImage(0);
                         Thread.Sleep(100);
                         break;
-                    case STEP.READ_ICC:
-                        PopAndPushStep(STEP.INIT);
-                        ShowPower(EnumUnit.μW);
-                        Vision.Vision.Instance.GrabImage(0);
-                        Thread.Sleep(100);
-                        break;
+                  
                     case STEP.EMG:
                         ClearAllStep();
                         break;

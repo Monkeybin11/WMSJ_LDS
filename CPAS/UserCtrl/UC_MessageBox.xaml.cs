@@ -21,16 +21,7 @@ namespace CPAS.UserCtrl
     public partial class UC_MessageBox : Window
     {
         private static MessageBoxResult result;
-        private static UC_MessageBox _inst = null;
-        public static UC_MessageBox Instance
-        {
-            get
-            {
-                if (_inst == null)
-                    _inst = new UC_MessageBox();
-                return _inst;
-            }
-        }
+
         private UC_MessageBox()
         {
             InitializeComponent();
@@ -38,12 +29,13 @@ namespace CPAS.UserCtrl
             StrContent = "Message";
         }
       
-        public MessageBoxResult ShowMsgBox(string strContent, string strCaption = "GPAS")
+        public static MessageBoxResult ShowMsgBox(string strContent, string strCaption = "GPAS")
         {
-            this.StrCaption = strCaption;
-            this.StrContent = strContent;
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            ShowDialog();
+            UC_MessageBox dlg = new UC_MessageBox();
+            dlg.StrCaption = strCaption;
+            dlg.StrContent = strContent;
+            dlg.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            dlg.ShowDialog();
             return result;
         }
 
@@ -51,14 +43,12 @@ namespace CPAS.UserCtrl
         {
             result = MessageBoxResult.Yes;
             Close();
-            _inst = null;
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             result = MessageBoxResult.No;
             Close();
-            _inst = null;
         }
         public string StrCaption { get { return GetValue(StrCaptionProperty).ToString(); } set { SetValue(StrCaptionProperty, value); } }
         public string StrContent { get { return GetValue(StrContentProperty).ToString(); } set { SetValue(StrContentProperty, value); } }
