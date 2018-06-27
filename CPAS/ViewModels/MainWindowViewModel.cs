@@ -15,6 +15,10 @@ using CPAS.Vision;
 using CPAS.UserCtrl;
 using CPAS.Views;
 using CPAS.Config.UserManager;
+using CPSA.CLasses;
+using System.Text;
+using CPAS.Config.SoftwareManager;
+using CPAS.WorkFlow;
 
 namespace CPAS.ViewModels
 {
@@ -38,6 +42,7 @@ namespace CPAS.ViewModels
         private string _strPowerMeterValue1 = "NA", _strPowerMeterValue2 = "NA";
         public PrescriptionGridModel _prescriptionUsed = new PrescriptionGridModel();
         private EnumCamSnapState _amSnapState;
+        public Dictionary<string, WorkFlowBase> _workeFlowDic;
         private ObservableCollection<MessageItem> _plcMessageCollection = new ObservableCollection<MessageItem>();
         private ObservableCollection<MessageItem> _systemMessageCollection = new ObservableCollection<MessageItem>();
         private ObservableCollection<CameraItem> _cameraCollection = new ObservableCollection<CameraItem>();
@@ -48,7 +53,7 @@ namespace CPAS.ViewModels
         private FileHelper RoiFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Roi");
         private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
         private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
-
+        private List<string> CamList = new List<string>() { "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Cam6" };
         #endregion
 
 
@@ -189,6 +194,18 @@ namespace CPAS.ViewModels
             }
             get { return _strPowerMeterValue2; }
         }
+        public Dictionary<string,WorkFlowBase> WorkeFlowDic
+        {
+            get { return _workeFlowDic; }
+            set
+            {
+                if (_workeFlowDic != value)
+                {
+                    _workeFlowDic = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
         public PrescriptionGridModel PrescriptionUsed
         {
             set
@@ -264,6 +281,7 @@ namespace CPAS.ViewModels
         public ObservableCollection<string>[] StepCollection { get; set; }
         public ObservableCollection<PrescriptionGridModel> PrescriptionCollection { get; set; }
         public ObservableCollection<UserModel> UserModelCollection { get; set; }
+
         #endregion
 
 
@@ -274,44 +292,57 @@ namespace CPAS.ViewModels
                 PLCMessageCollection.RemoveAt(0);
             if (msgItem != null)
                 PLCMessageCollection.Add(msgItem);
+  
         }
         private void UpdateRoiCollect(int nCamID)
         {
             RoiCollection.Clear();
             foreach (var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, RoiFileHelper.GetWorkDictoryProfileList()))
                 RoiCollection.Add(new RoiItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""), StrFullName = it });
+            LogHelper.WriteLine($"更新相机{nCamID}的ROI文件", LogHelper.LogType.NORMAL);
         }
         private void UpdateModelCollect(int nCamID)
         {
             TemplateCollection.Clear();
             foreach (var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, ModelFileHelper.GetWorkDictoryProfileList()))
                 TemplateCollection.Add(new TemplateItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""), StrFullName = it });
+            LogHelper.WriteLine($"更新相机{nCamID}的模板文件", LogHelper.LogType.NORMAL);
         }
         private void PLCMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            var collect = from msg in PLCMessageCollection where msg.MsgType == MSGTYPE.ERROR select msg;
-            if (collect.Count() != 0)
-                StrPLCErrorNumber = string.Format("{0}", collect.Count());
-            else
-                StrPLCErrorNumber = "";
-            if (PLCMessageCollection.Count > 50)
-                PLCMessageCollection.RemoveAt(0);
+            lock (PLCMessageCollection)
+            {
+                var collect = from msg in PLCMessageCollection where msg.MsgType == MSGTYPE.ERROR select msg;
+                if (collect.Count() != 0)
+                    StrPLCErrorNumber = string.Format("{0}", collect.Count());
+                else
+                    StrPLCErrorNumber = "";
+                if (PLCMessageCollection.Count > 50)
+                    PLCMessageCollection.RemoveAt(0);
+            }
         }
         private void SystemMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            var collect = from msg in SystemMessageCollection where msg.MsgType == MSGTYPE.ERROR select msg;
-            if (collect.Count() != 0)
-                StrSystemErrorNumber = string.Format("{0}", collect.Count());
-            else
-                StrSystemErrorNumber = "";
-            if (SystemMessageCollection.Count > 50)
-                SystemMessageCollection.RemoveAt(0);
+            lock (SystemMessageCollection)
+            {
+                var collect = from msg in SystemMessageCollection where msg.MsgType == MSGTYPE.ERROR select msg;
+                if (collect.Count() != 0)
+                    StrSystemErrorNumber = string.Format("{0}", collect.Count());
+                else
+                    StrSystemErrorNumber = "";
+                if (SystemMessageCollection.Count > 50)
+                    SystemMessageCollection.RemoveAt(0);
+            }
         }
         #endregion
 
 
         #region Commands
-        public RelayCommand<string> RibonCommand { get { return new RelayCommand<string>(str => StrCurViewID = str); } }
+        public RelayCommand<string> RibonCommand { get {
+                return new RelayCommand<string>(str => { StrCurViewID = str;
+                    LogHelper.WriteLine($"切换到{str}视图", LogHelper.LogType.NORMAL);
+                });
+            } }
         public RelayCommand<string> ClearMessageCommand
         {
             get
@@ -322,9 +353,11 @@ namespace CPAS.ViewModels
                     {
                         case "ClearPLCMessage":
                             PLCMessageCollection.Clear();
+                            LogHelper.WriteLine($"清除PLC错误信息记录", LogHelper.LogType.NORMAL);
                             break;
                         case "ClearSystemMessage":
                             SystemMessageCollection.Clear();
+                            LogHelper.WriteLine($"清除System错误信息记录", LogHelper.LogType.NORMAL);
                             break;
                         default:
                             break;
@@ -340,6 +373,7 @@ namespace CPAS.ViewModels
                 return new RelayCommand(() =>
                 {
                     WorkFlow.WorkFlowMgr.Instance.StartAllStation();
+                    LogHelper.WriteLine($"开始运行按钮被按下", LogHelper.LogType.NORMAL);
                 });
             }
         }
@@ -350,7 +384,7 @@ namespace CPAS.ViewModels
                 return new RelayCommand(() =>
                 {
                     WorkFlow.WorkFlowMgr.Instance.StopAllStation();
-
+                    LogHelper.WriteLine($"结束运行按钮被按下", LogHelper.LogType.NORMAL);
                 });
             }
         }
@@ -369,25 +403,53 @@ namespace CPAS.ViewModels
                             StrUserName = it.User;
                         }
                     }
-
+                    LogHelper.WriteLine($"用户{tuple.Item1}登陆成功", LogHelper.LogType.NORMAL);
                 });
             }
         }
-        public RelayCommand LogOutCommand { get { return new RelayCommand(() => { Level = 0; StrUserName = "Operator"; }); } }
-        public RelayCommand<string> SetSnapStateCommand
+        public RelayCommand LogOutCommand { get { return new RelayCommand(() => {
+            Level = 0;
+            StrUserName = "Operator";
+            LogHelper.WriteLine($"注销登陆", LogHelper.LogType.NORMAL);
+        }); } }
+
+        public RelayCommand<int> SnapOnceCommand
         {
             get
             {
-                return new RelayCommand<string>(str =>
+                return new RelayCommand<int>(nCamID =>
                 {
-                    Messenger.Default.Send<string>(str, "SetCamState");
-                    if (str.ToLower() == "snapcontinues")
-                        CamSnapState = EnumCamSnapState.BUSY;
-                    else
-                        CamSnapState = EnumCamSnapState.IDLE;
+                    Messenger.Default.Send<Tuple<string,int>>(new Tuple<string, int>("SnapOnce",nCamID), "SetCamState");
+                    CamSnapState = EnumCamSnapState.IDLE;
+                    LogHelper.WriteLine($"单帧采集相机{nCamID}", LogHelper.LogType.NORMAL);
                 });
             }
         }
+        public RelayCommand<int> SnapContinuousCommand
+        {
+            get
+            {
+                return new RelayCommand<int>(nCamID =>
+                {
+                    Messenger.Default.Send<Tuple<string, int>>(new Tuple<string, int>("SnapContinuous", nCamID), "SetCamState");
+                    CamSnapState = EnumCamSnapState.BUSY;
+                    LogHelper.WriteLine($"点击连续采集相机{nCamID}", LogHelper.LogType.NORMAL);
+                });
+            }
+        }
+        public RelayCommand<int> StopSnapCommand
+        {
+            get
+            {
+                return new RelayCommand<int>(nCamID =>
+                {
+                    Messenger.Default.Send<Tuple<string, int>>(new Tuple<string, int>("StopSnap", nCamID), "SetCamState");
+                    CamSnapState = EnumCamSnapState.IDLE;
+                    LogHelper.WriteLine($"停止采集相机{nCamID}", LogHelper.LogType.NORMAL);
+                });
+            }
+        }
+
         public RelayCommand<int> UpdateRoiTemplate
         {
             get
@@ -431,6 +493,7 @@ namespace CPAS.ViewModels
                         string strName = Window_AddNewPrescription.Instance.ProfileValue.Item1;
                         string strRemark= Window_AddNewPrescription.Instance.ProfileValue.Item2;
                         if (strName != "" && (from prescription in PrescriptionCollection where prescription.Name == strName select prescription).Count() == 0)
+                        {
                             PrescriptionCollection.Add(new PrescriptionGridModel()
                             {
                                 Name = strName,
@@ -442,9 +505,11 @@ namespace CPAS.ViewModels
                                 AdjustFocus = true,
                                 Calibration = true,
                             });
-                        else if(strName=="")
+                            LogHelper.WriteLine($"新增配方{strName}:{strRemark}", LogHelper.LogType.NORMAL);
+                        }
+                        else if (strName == "")
                             UC_MessageBox.Instance.ShowMsgBox("名称不能为空");
-                        else if((from prescription in PrescriptionCollection where prescription.Name == strName select prescription).Count()!=0)
+                        else if ((from prescription in PrescriptionCollection where prescription.Name == strName select prescription).Count() != 0)
                             UC_MessageBox.Instance.ShowMsgBox("已经存此配方名称，请更换命名");
                     }
                 });
@@ -460,6 +525,7 @@ namespace CPAS.ViewModels
                     {
                         ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg, PrescriptionCollection.ToArray());
                         UC_MessageBox.Instance.ShowMsgBox("保存成功", "提示");
+                        LogHelper.WriteLine($"保存配方文件成功", LogHelper.LogType.NORMAL);
                     }
                     catch (Exception ex)
                     {
@@ -485,6 +551,7 @@ namespace CPAS.ViewModels
                                 {
                                     bExist = true;
                                     PrescriptionCollection.Remove(model);
+                                    LogHelper.WriteLine($"删除配方{model.Name}:{model.Remark}", LogHelper.LogType.NORMAL);
                                     break;
                                 }
                             }
@@ -506,6 +573,7 @@ namespace CPAS.ViewModels
                         UC_MessageBox.Instance.ShowMsgBox(string.Format("当前没有选中要使用的配方"));
                     else
                         PrescriptionUsed = model;
+                    LogHelper.WriteLine($"设置使用{model.Name}:{model.Remark}为当前配方", LogHelper.LogType.NORMAL);
                 });
             }
         }
@@ -519,6 +587,7 @@ namespace CPAS.ViewModels
                     {
                         ConfigMgr.Instance.SaveConfig(EnumConfigType.UserCfg, UserModelCollection.ToArray());
                         UC_MessageBox.Instance.ShowMsgBox("修改密码成功","成功");
+                        LogHelper.WriteLine($"设置用户密码并保存成功", LogHelper.LogType.NORMAL);
                     }
                     catch (Exception ex)
                     {
@@ -574,15 +643,22 @@ namespace CPAS.ViewModels
 
             Messenger.Default.Register<string>(this, "ShowError", str =>
             {
-                Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str }));
+                lock (SystemMessageCollection)
+                {
+                    Application.Current.Dispatcher.Invoke(() => {
+                        SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str });                      
+                    });}
+                    LogHelper.WriteLine(str, LogHelper.LogType.ERROR);
             });
             Messenger.Default.Register<string>(this, "ShowInfo", str =>
             {
                 Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.INFO, StrMsg = str }));
+                LogHelper.WriteLine(str, LogHelper.LogType.NORMAL);
             });
             Messenger.Default.Register<string>(this, "ShowWarning", str =>
             {
                 Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = str }));
+                LogHelper.WriteLine(str, LogHelper.LogType.NORMAL);
             });
             Messenger.Default.Register<Tuple<string, string, string>>(this, "WorkFlowMessage", tuple =>
             {
@@ -613,20 +689,43 @@ namespace CPAS.ViewModels
                     new ObservableCollection<string>()
                 };
 
+
+
             //Roi Model
             UpdateModelCollect(0);
             UpdateRoiCollect(0);
 
-            //Camera
-            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam1", StrCameraState = "Connected" });
-            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam2", StrCameraState = "Disconnected" });
-            CameraCollection.Add(new CameraItem() { CameraName = "CameraView_Cam3", StrCameraState = "Connected" });
+            #region Log init
+            LogHelper.LogEnabled = true;
 
+            StringBuilder sb = new StringBuilder();
+            sb.Append("\r\n\r\n\r\n");
+            sb.Append("> =================================================================\r\n");
+            sb.Append("> =                 LDS System                                    =\r\n");
+            sb.Append("> =                Copyright (C)                                  =\r\n");
+            sb.Append("> =================================================================\r\n\r\n");
+            sb.Append(">-------------------------启动系统---------------------------------\r\n");
+            LogHelper.WriteLine(sb.ToString());
+            #endregion
+
+
+            //Camera
+            int i = 0;
+            foreach(var it in CamList)
+            {
+                bool bOpen = Vision.Vision.Instance.OpenCam(i++);
+                CameraCollection.Add(new CameraItem() { CameraName = it, StrCameraState = bOpen? "Connected" : "DisConnected" });
+            }
+            
             //Load Config
             PrescriptionCollection = new ObservableCollection<PrescriptionGridModel>();
             ConfigMgr.Instance.LoadConfig();
             foreach (var it in ConfigMgr.PrescriptionCfgMgr.Prescriptions)
                 PrescriptionCollection.Add(it);
+
+
+            //Init workflow state
+            WorkeFlowDic= WorkFlowMgr.Instance.stationDic;
 
             //User config
             UserModelCollection = new ObservableCollection<UserModel>();
@@ -634,8 +733,8 @@ namespace CPAS.ViewModels
             {
                 UserModelCollection.Add(it);
             }
-
         }
+
         ~MainWindowViewModel()
         {
             // Unregister

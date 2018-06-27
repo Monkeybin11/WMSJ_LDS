@@ -27,6 +27,7 @@
             <Convert:Boolean2FontSize x:Key="Boolean2FontSize"/>
             <Convert:Int2PrescriptionModel x:Key="Int2PrescriptionModel"/>
             <Convert:UserName2Visibility x:Key="UserName2Visibility"/>
+            <Convert:Dictionary2StationHeaderBackagroundBrush x:Key="Dictionary2StationHeaderBackagroundBrush"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

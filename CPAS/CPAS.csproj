@@ -145,6 +145,10 @@
     <Reference Include="System.Windows.Forms">
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml">
       <Private>True</Private>
     </Reference>
@@ -196,12 +200,14 @@
     <Compile Include="Classes\FileHelper.cs" />
     <Compile Include="Classes\ListBoxBehavior.cs" />
     <Compile Include="Classes\LogExcel.cs" />
+    <Compile Include="Classes\LogHelper.cs" />
     <Compile Include="Communication\EtherNet.cs" />
     <Compile Include="Config\PresciptionManager\PresciptionCfgManager.cs" />
     <Compile Include="Config\UserManager\UserModel.cs" />
     <Compile Include="Config\UserManager\UserCfgManager.cs" />
     <Compile Include="Converters\Boolean2FontSize.cs" />
     <Compile Include="Converters\Boolean2ErrorListEditVisibility.cs" />
+    <Compile Include="Converters\Dictionary2StationHeaderBackagroundBrush.cs" />
     <Compile Include="Converters\EnumCamSnapState2SnapButtonEnable.cs" />
     <Compile Include="Converters\Int2PrescriptionModel.cs" />
     <Compile Include="Converters\IsChecked2RegionOperator.cs" />

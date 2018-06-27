@@ -19,17 +19,17 @@ namespace CPAS.Converters
             switch (strPata)
             {
                 case "SnapOnce":
-                    bRet = CamSnapState == EnumCamSnapState.IDLE;
-                    break;
-                case "SnapContinues":
-                    bRet = CamSnapState == EnumCamSnapState.IDLE;
-                    break;
-                case "StopSnap":
-                    bRet= CamSnapState == EnumCamSnapState.BUSY;
-                    break;
+                case "SnapContinuous":
                 case "ListBoxForRoiAndTemplate":
+                case "ComboBoxCameras":
                     bRet = CamSnapState == EnumCamSnapState.IDLE;
                     break;
+
+                case "StopSnap":
+                    bRet = CamSnapState == EnumCamSnapState.BUSY;
+                    break;
+               
+
                 default:
                     throw new Exception("Unknow cmd for converter named EnumCamSnapState2SnapButtonEnable");
             }

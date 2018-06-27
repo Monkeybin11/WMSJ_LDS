@@ -51,7 +51,7 @@ namespace CPAS.Views
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            
+            LoadDelay();
         }
 
         private async void LoadDelay()
@@ -62,17 +62,17 @@ namespace CPAS.Views
                     Task.Delay(1500).Wait();
                     bFirstLoaded = false;
                 }
-                SetAttachCamWindow(true);
+                Application.Current.Dispatcher.Invoke(()=> SetAttachCamWindow(Cb_Cameras.SelectedIndex, true));
             });
         }
 
-        private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        public void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if ((bool)e.NewValue)
-                LoadDelay();
+            if ((bool)e.NewValue && !bFirstLoaded)
+                SetAttachCamWindow(Cb_Cameras.SelectedIndex,true);
             else
             {
-                SetAttachCamWindow(false);
+                SetAttachCamWindow(Cb_Cameras.SelectedIndex,false);
             }
         }
 
@@ -81,19 +81,15 @@ namespace CPAS.Views
             Messenger.Default.Send("","WindowSizeChanged");
         }
 
-        private void SetAttachCamWindow(bool bAttach=true)
+        private void SetAttachCamWindow(int nCamID,bool bAttach=true)
         {
             if (bAttach)
-                Vision.Vision.Instance.AttachCamWIndow(0, "CameraViewCam", Cam1.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(nCamID, "CameraViewCam", Cam1.HalconWindow);
             else
-                Vision.Vision.Instance.DetachCamWindow(0, "CameraViewCam");
+                Vision.Vision.Instance.DetachCamWindow(nCamID, "CameraViewCam");
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            (DataContext as MainWindowViewModel).UpdateRoiTemplate.Execute((sender as ComboBox).SelectedIndex);
-        }
-
+        #region 动画
         private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Storyboard RoiSb = FindResource("RoiSb") as Storyboard;
@@ -115,5 +111,13 @@ namespace CPAS.Views
             ListBoxRoiTemplate.ItemsSource = (DataContext as MainWindowViewModel).RoiCollection;
         }
 
+
+        #endregion
+
+        private void Cb_Cameras_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(!bFirstLoaded)
+                Vision.Vision.Instance.AttachCamWIndow(Cb_Cameras.SelectedIndex, "CameraViewCam", Cam1.HalconWindow);
+        }
     }
 }

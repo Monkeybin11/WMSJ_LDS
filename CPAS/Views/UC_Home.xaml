@@ -24,10 +24,10 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <UserCtrl:UC_StationHeader HeaderCaption="扫码-解锁-调功率" HeaderBackground="Transparent" Margin="3" StepInfoCollection="{Binding StepCollection[0]}"/>
-        <UserCtrl:UC_StationHeader HeaderCaption="调水平" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="1" Margin="3" StepInfoCollection="{Binding StepCollection[1]}"/>
-        <UserCtrl:UC_StationHeader HeaderCaption="调焦距" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="2" Margin="3" StepInfoCollection="{Binding StepCollection[2]}"/>
-        <UserCtrl:UC_StationHeader HeaderCaption="标定" HeaderBackground="Transparent" Grid.Row="0" Grid.Column="3" Margin="3" StepInfoCollection="{Binding StepCollection[3]}"/>
+        <UserCtrl:UC_StationHeader HeaderCaption="扫码-解锁-调功率" HeaderBackground="{Binding WorkeFlowDic,Converter={StaticResource Dictionary2StationHeaderBackagroundBrush},ConverterParameter=WorkRecord}" Margin="3" StepInfoCollection="{Binding StepCollection[0]}"/>
+        <UserCtrl:UC_StationHeader HeaderCaption="调水平" HeaderBackground="{Binding WorkeFlowDic,Converter={StaticResource Dictionary2StationHeaderBackagroundBrush},ConverterParameter=WorkTune1}" Grid.Row="0" Grid.Column="1" Margin="3" StepInfoCollection="{Binding StepCollection[1]}"/>
+        <UserCtrl:UC_StationHeader HeaderCaption="调焦距" HeaderBackground="{Binding WorkeFlowDic, Converter={StaticResource Dictionary2StationHeaderBackagroundBrush},ConverterParameter=WorkTune2}" Grid.Row="0" Grid.Column="2" Margin="3" StepInfoCollection="{Binding StepCollection[2]}"/>
+        <UserCtrl:UC_StationHeader HeaderCaption="标定" HeaderBackground="{Binding WorkeFlowDic,Converter={StaticResource Dictionary2StationHeaderBackagroundBrush},ConverterParameter=WorkCalib}" Grid.Row="0" Grid.Column="3" Margin="3" StepInfoCollection="{Binding StepCollection[3]}"/>
 
         <Border  Grid.Row="1" Grid.Column="0" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
             <Grid>
@@ -76,16 +76,14 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <halcon:HWindowControlWPF Margin="1" x:Name="Cam1" ToolTip="Cam1"/>
-                    <halcon:HWindowControlWPF Grid.Column="1" Margin="0,1,1,1" x:Name="Cam2" ToolTip="Cam2"/>
-                    
-                </Grid>
-                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam3" ToolTip="Cam3"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <halcon:HWindowControlWPF Margin="1" x:Name="Cam1" ToolTip="Cam1"/>
+                <halcon:HWindowControlWPF Grid.Column="1" Margin="0,1,1,1" x:Name="Cam2" ToolTip="Cam2"/>
+                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam3" ToolTip="Cam3"  Margin="0,0,1,0"/>
+                <halcon:HWindowControlWPF Grid.Row="1" Grid.Column="1"  x:Name="Cam4" ToolTip="Cam4"/>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="2" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
@@ -94,15 +92,8 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <halcon:HWindowControlWPF Margin="1" x:Name="Cam4" ToolTip="Cam4"/>
-                    <halcon:HWindowControlWPF Grid.Column="1" Margin="0,1,1,1" x:Name="Cam5" ToolTip="Cam5"/>
-                </Grid>
-                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam6" ToolTip="Cam6"/>
+                <halcon:HWindowControlWPF Grid.Column="1" Margin="1" x:Name="Cam5" ToolTip="Cam5"/>
+                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam6" ToolTip="Cam6" Margin="1,0,1,1"/>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="3" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">

@@ -27,8 +27,10 @@ namespace CPAS.UserCtrl
         }
         public string HeaderCaption { get { return GetValue(HeaderCaptionProperty).ToString(); } set { SetValue(HeaderCaptionProperty, value); } }
         public static DependencyProperty HeaderCaptionProperty = DependencyProperty.Register("HeaderCaption", typeof(string), typeof(UC_StationHeader));
+
         public Brush HeaderBackground { get { return GetValue(HeaderBackgroundProperty) as Brush; } set { SetValue(HeaderBackgroundProperty, value); } }
         public static DependencyProperty HeaderBackgroundProperty = DependencyProperty.Register("HeaderBackground", typeof(Brush), typeof(UC_StationHeader));
+
         public ObservableCollection<string> StepInfoCollection { get { return GetValue(StepInfoCollectionProperty) as ObservableCollection<string>; } set { SetValue(StepInfoCollectionProperty, value); } }
         public static DependencyProperty StepInfoCollectionProperty = DependencyProperty.Register("StepInfoCollection", typeof(ObservableCollection<string>), typeof(UC_StationHeader));
 

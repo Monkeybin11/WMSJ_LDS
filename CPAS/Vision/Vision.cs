@@ -63,6 +63,7 @@ namespace CPAS.Vision
         {
             lock (_lockList[nCamID])
             {
+
                 //关联当前窗口
                 if (HwindowDic.Keys.Contains(nCamID))
                 {

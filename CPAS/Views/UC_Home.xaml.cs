@@ -31,19 +31,19 @@ namespace CPAS.Views
         {
             InitializeComponent();
             Messenger.Default.Register<string>(this, "WindowSizeChanged", str => { lock (_lock) { grabEvent.Set(); } });
-            Messenger.Default.Register<string>(this, "SetCamState", strState => {
+            Messenger.Default.Register<Tuple<string,int>>(this, "SetCamState", cmd => {
                 lock (_lock) {
-                    switch (strState.ToLower())
+                    switch (cmd.Item1.ToLower())
                     {
-                        case "snapcontinues":
-                            StartContinusGrab();
+                        case "snapcontinuous":
+                            StartContinusGrab(cmd.Item2);
                             break;
                         case "stopsnap":
                             if (cts != null)
                                 cts.Cancel();
                             break;
                         case "snaponce":
-                            Vision.Vision.Instance.GrabImage(0);
+                            Vision.Vision.Instance.GrabImage(cmd.Item2);
                             break;
                         default:
                             throw new Exception("Unknow cmd for camera!");
@@ -56,6 +56,7 @@ namespace CPAS.Views
         ~UC_Home()
         {
             Messenger.Default.Unregister("WindowSizeChanged");
+            Messenger.Default.Unregister("SetCamState");
             if (cts != null)
             {
                 cts.Cancel();
@@ -84,7 +85,7 @@ namespace CPAS.Views
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            
+            LoadDelay();
         }
 
         private async void LoadDelay()
@@ -107,20 +108,20 @@ namespace CPAS.Views
             }
         }
 
-        private void  StartContinusGrab()
+        private void  StartContinusGrab(int nCamID)
         {
             if (task == null || task.IsCompleted || task.IsCanceled)
             {
                 cts = new CancellationTokenSource();
-                task = new Task(() => ThreadFunc(), cts.Token);
+                task = new Task(() => ThreadFunc(nCamID), cts.Token);
                 task.Start();
             }
         }
 
         private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if ((bool)e.NewValue)
-                LoadDelay();
+            if ((bool)e.NewValue && !bFirstLoaded)
+                SetAttachWindow(true);
             else
             {
                 SetAttachWindow(false);
@@ -131,23 +132,23 @@ namespace CPAS.Views
             if (bAttach)
             {
                 Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam1", Cam1.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam2", Cam2.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam3", Cam3.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam4", Cam4.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam5", Cam5.HalconWindow);
-                Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam6", Cam6.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(1, "HomeCam2", Cam2.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(2, "HomeCam3", Cam3.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(3, "HomeCam4", Cam4.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(4, "HomeCam5", Cam5.HalconWindow);
+                Vision.Vision.Instance.AttachCamWIndow(5, "HomeCam6", Cam6.HalconWindow);
             }
             else
             {
                 Vision.Vision.Instance.DetachCamWindow(0, "HomeCam1");
-                Vision.Vision.Instance.DetachCamWindow(0, "HomeCam2");
-                Vision.Vision.Instance.DetachCamWindow(0, "HomeCam3");
-                Vision.Vision.Instance.DetachCamWindow(0, "HomeCam4");
-                Vision.Vision.Instance.DetachCamWindow(0, "HomeCam5");
-                Vision.Vision.Instance.DetachCamWindow(0, "HomeCam6");
+                Vision.Vision.Instance.DetachCamWindow(1, "HomeCam2");
+                Vision.Vision.Instance.DetachCamWindow(2, "HomeCam3");
+                Vision.Vision.Instance.DetachCamWindow(3, "HomeCam4");
+                Vision.Vision.Instance.DetachCamWindow(4, "HomeCam5");
+                Vision.Vision.Instance.DetachCamWindow(5, "HomeCam6");
             }
         }
-        private void ThreadFunc()
+        private void ThreadFunc(int nCamID)
         { 
             while (!cts.Token.IsCancellationRequested)
             {
@@ -157,7 +158,7 @@ namespace CPAS.Views
                     if (ret)
                         continue;
 
-                    Vision.Vision.Instance.GrabImage(0);
+                    Vision.Vision.Instance.GrabImage(nCamID);
                 }
             }
             //Vision.Vision.Instance.CloseCam(0);
