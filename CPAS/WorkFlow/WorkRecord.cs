@@ -19,6 +19,10 @@ namespace CPAS.WorkFlow
         PrescriptionGridModel Prescription = null;   //配方信息
         private PowerMeter Pw1000USB_1 = null;
         private PowerMeter Pw1000USB_2 = null;
+        private LDS lds1 = null;
+        private LDS lds2 = null;
+        private Keyence_SR1000 BarcodeScanner1 = null;
+        private Keyence_SR1000 BarcodeScanner2 = null;
         SystemParaModel sysPara = null;
         QSerisePlc PLC = null;
         private string FILE_FAKE_BARCODE_FILE = FileHelper.GetCurFilePathString() + "UserData\\Barcode.xls";
@@ -59,6 +63,11 @@ namespace CPAS.WorkFlow
             #region >>>>初始化仪表信息
             Pw1000USB_1 = InstrumentMgr.Instance.FindInstrumentByName("PowerMeter[0]") as PowerMeter;
             Pw1000USB_2 = InstrumentMgr.Instance.FindInstrumentByName("PowerMeter[1]") as PowerMeter;
+            lds1 = InstrumentMgr.Instance.FindInstrumentByName("LDS[0]") as LDS;
+            lds2 = InstrumentMgr.Instance.FindInstrumentByName("LDS[1]") as LDS;
+            BarcodeScanner1 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[0]") as Keyence_SR1000;
+            BarcodeScanner2 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[1]") as Keyence_SR1000;
+
             PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
             #endregion
 

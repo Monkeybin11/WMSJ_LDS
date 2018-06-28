@@ -1,5 +1,9 @@
 ﻿
+using CPAS.Classes;
+using CPAS.Config;
 using CPAS.Config.SoftwareManager;
+using CPAS.Instrument;
+using CPAS.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +15,14 @@ namespace CPAS.WorkFlow
 {
     public class WorkTune1 : WorkFlowBase
     {
+        private PrescriptionGridModel Prescription = null;   //配方信息
+        private QSerisePlc PLC = null;
+        private LDS lds1 = null;
+        private LDS lds2 = null;
+        public WorkTune1(WorkFlowConfig cfg) : base(cfg)
+        {
+
+        }
         private enum STEP : int
         {
             INIT,
@@ -49,20 +61,19 @@ namespace CPAS.WorkFlow
         protected override bool UserInit()
         {
             #region >>>>读取模块配置信息，初始化工序Enable信息
-
+            Prescription = ConfigMgr.PrescriptionCfgMgr.Prescriptions[0];
+            //sysPara=ConfigMg
             #endregion
+
             #region >>>>初始化仪表信息
-
+            PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
+            lds1 = InstrumentMgr.Instance.FindInstrumentByName("LDS[2]") as LDS;
+            lds2 = InstrumentMgr.Instance.FindInstrumentByName("LDS[3]") as LDS;
             #endregion
-            #region >>>>
 
-            #endregion
             return true;
         }
-        public  WorkTune1(WorkFlowConfig cfg) : base(cfg)
-        {
-           
-        }
+  
         protected override int WorkFlow()
         {
             ClearAllStep();
