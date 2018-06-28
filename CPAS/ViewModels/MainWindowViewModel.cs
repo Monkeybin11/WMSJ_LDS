@@ -33,6 +33,8 @@ namespace CPAS.ViewModels
     {
 
         #region Fields
+        private object PlcErrLock = new object();
+        private object SysErrLock = new object();
         private string _strViewID = "Home";
         private DateTime _myDateTime;
         private string _strUserName = "Operator";
@@ -212,7 +214,7 @@ namespace CPAS.ViewModels
             {
                 if (_prescriptionUsed != value)
                 {
-                    _prescriptionUsed = value.Clone() as PrescriptionGridModel;
+                    _prescriptionUsed = value;
                     RaisePropertyChanged();
                 }
             }
@@ -286,12 +288,12 @@ namespace CPAS.ViewModels
 
 
         #region  Method
-        private void ShowMessage(MessageItem msgItem)
+        public void ShowMessage(MessageItem msgItem)
         {
-            if (PLCMessageCollection.Count > 100)
-                PLCMessageCollection.RemoveAt(0);
-            if (msgItem != null)
-                PLCMessageCollection.Add(msgItem);
+            lock (PlcErrLock)
+            {
+               PLCMessageCollection.Add(msgItem);
+            }
   
         }
         private void UpdateRoiCollect(int nCamID)
@@ -310,7 +312,7 @@ namespace CPAS.ViewModels
         }
         private void PLCMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            lock (PLCMessageCollection)
+            lock (PlcErrLock)
             {
                 var collect = from msg in PLCMessageCollection where msg.MsgType == MSGTYPE.ERROR select msg;
                 if (collect.Count() != 0)
@@ -323,7 +325,7 @@ namespace CPAS.ViewModels
         }
         private void SystemMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            lock (SystemMessageCollection)
+            lock (SysErrLock)
             {
                 var collect = from msg in SystemMessageCollection where msg.MsgType == MSGTYPE.ERROR select msg;
                 if (collect.Count() != 0)
@@ -352,11 +354,17 @@ namespace CPAS.ViewModels
                     switch (str)
                     {
                         case "ClearPLCMessage":
-                            PLCMessageCollection.Clear();
+                            lock (PlcErrLock)
+                            {
+                                PLCMessageCollection.Clear();
+                            }
                             LogHelper.WriteLine($"清除PLC错误信息记录", LogHelper.LogType.NORMAL);
                             break;
                         case "ClearSystemMessage":
-                            SystemMessageCollection.Clear();
+                            lock (SysErrLock)
+                            {
+                                SystemMessageCollection.Clear();
+                            }
                             LogHelper.WriteLine($"清除System错误信息记录", LogHelper.LogType.NORMAL);
                             break;
                         default:
@@ -597,6 +605,25 @@ namespace CPAS.ViewModels
             }
 
         }
+        public RelayCommand SaveSystemCfgCommand
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    try
+                    {
+                        ConfigMgr.Instance.SaveConfig(EnumConfigType.SystemParaCfg, ConfigMgr.SystemParaCfgMgr.SystemParaModels);
+                        UC_MessageBox.ShowMsgBox("保存成功", "提示");
+                        LogHelper.WriteLine($"保存配方文件成功", LogHelper.LogType.NORMAL);
+                    }
+                    catch (Exception ex)
+                    {
+                        UC_MessageBox.ShowMsgBox(ex.Message);
+                    }
+                });
+            }
+        }
         #endregion
 
         #region Ctor and DeCtor
@@ -688,7 +715,6 @@ namespace CPAS.ViewModels
                     new ObservableCollection<string>(),
                     new ObservableCollection<string>()
                 };
-
 
 
             //Roi Model

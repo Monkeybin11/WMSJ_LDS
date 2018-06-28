@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace CPAS.Models
 {
-    public class PrescriptionGridModel : INotifyPropertyChanged, ICloneable
+    public class PrescriptionGridModel : INotifyPropertyChanged
     {
+        //工序设置
         private string _name;
         private string _remark;
         private bool _unLock;   //解锁
@@ -18,20 +19,17 @@ namespace CPAS.Models
         private bool _adjustFocus;
         private bool _calibration;
 
+        //LDS设置
+        public enum BARCODESOURCE { FILE, SCANNER }
+        private BARCODESOURCE _barcodeSource;
+        private int _barcodeLength;
+        private double[] _ldsPower = new double[] { 105, 107 };
+        private double[] _ldsHoriValue2m = new double[] { 400, 730 };
+        private double _ldsHoriValue6m = 170;
+        private Int32 _cMosPointNumber = 1536;
 
-        //public PrescriptionGridModel()
-        //{
-        //    Name = "配方1";
-        //    Remark = "备注1";
-        //    Record = true;
-        //    UnLock = true;
-        //    TuneLaser = true;
-        //    Tune1 = true;
-        //    Tune2 = true;
-        //    Calib = true;
-        //}
 
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
         public string Name
         {
             get { return _name; }
@@ -44,7 +42,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
         public string Remark
         {
             get { return _remark; }
@@ -57,7 +55,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
         public bool UnLock
         {
             get { return _unLock; }
@@ -70,7 +68,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
         public bool ReadBarcode
         {
             get { return _readBarcode; }
@@ -83,7 +81,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
         public bool AdjustLaser
         {
             get { return _adjustLaser; }
@@ -96,7 +94,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
         public bool AdjustHoriz
         {
             get { return _adjustHoriz; }
@@ -109,7 +107,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
         public bool AdjustFocus
         {
             get { return _adjustFocus; }
@@ -122,7 +120,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
         public bool Calibration
         {
             get { return _calibration; }
@@ -135,20 +133,91 @@ namespace CPAS.Models
                 }
             }
         }
-        public event PropertyChangedEventHandler PropertyChanged;
-        public object Clone()
+
+
+
+        [CategoryAttribute("条码设置"), DescriptionAttribute("设置条码来源;FILE—》从*.xls文件读取，SCANNER—》扫码枪扫取")]
+        public BARCODESOURCE BarcodeSource
         {
-            return new PrescriptionGridModel()
+            get { return _barcodeSource; }
+            set
             {
-                Name = this.Name,
-                Remark = this.Remark,
-                UnLock = this.UnLock,
-                ReadBarcode = this.ReadBarcode,
-                AdjustLaser = this.AdjustLaser,
-                AdjustHoriz = this.AdjustHoriz,
-                AdjustFocus = this.AdjustFocus,
-                Calibration = this.Calibration
-            };
+                if (_barcodeSource != value)
+                {
+                    _barcodeSource = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BarcodeSource"));
+                }
+            }
         }
+        [CategoryAttribute("条码设置"), DescriptionAttribute("设置条码长度")]
+        public int BarcodeLength
+        {
+            get { return _barcodeLength; }
+            set
+            {
+                if (_barcodeLength != value)
+                {
+                    _barcodeLength = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BarcodeLength"));
+                }
+            }
+        }
+
+
+
+        [CategoryAttribute("LDS设置"), DescriptionAttribute("设置LDS的功率")]
+        public double[] LDSPower
+        {
+            get { return _ldsPower; }
+            set
+            {
+                if (_ldsPower != value)
+                {
+                    _ldsPower = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LDSPower"));
+                }
+            }
+        }
+        [CategoryAttribute("LDS设置"), DescriptionAttribute("设置LDS在2米处的激光强度值")]
+        public double[] LDSHoriValue2m
+        {
+            get { return _ldsHoriValue2m; }
+            set
+            {
+                if (_ldsHoriValue2m != value)
+                {
+                    _ldsHoriValue2m = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LDSHoriValue2m"));
+                }
+            }
+        }
+        [CategoryAttribute("LDS设置"), DescriptionAttribute("设置LDS在6米处的激光强度值")]
+        public double LDSHoriValue6m
+        {
+            get { return _ldsHoriValue6m; }
+            set
+            {
+                if (_ldsHoriValue6m != value)
+                {
+                    _ldsHoriValue6m = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LDSHoriValue6m"));
+                }
+            }
+        }
+        [CategoryAttribute("LDS设置"), DescriptionAttribute("设置LDS的CMOS相机点数")]
+        public Int32 CMosPointNumber
+        {
+            get { return _cMosPointNumber; }
+            set
+            {
+                if (_cMosPointNumber != value)
+                {
+                    _cMosPointNumber = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CMosPointNumber"));
+                }
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+   
     }
 }

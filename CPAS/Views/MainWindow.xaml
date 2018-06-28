@@ -161,21 +161,15 @@
                 <views:UC_LogIn Visibility="{Binding StrCurViewID, Converter={StaticResource Text2Visibility},ConverterParameter=LogIn}" />
             </Grid>
         </ContentControl>
-        <!--<GridSplitter Grid.Row="2" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>-->
-       
-       
-        <!--<dxr:RibbonStatusBarControl Name="statusBarControl1"  Grid.Row="4" IsEnabled="False">
-            <dxr:RibbonStatusBarControl.LeftItems>
-                <dxb:BarStaticItem Content="V1.0.0.0"/>
-            </dxr:RibbonStatusBarControl.LeftItems>
-            <dxr:RibbonStatusBarControl.RightItems>
-                <dxb:BarStaticItem Content="{Binding StrUserName}"/>
-            </dxr:RibbonStatusBarControl.RightItems>
-        </dxr:RibbonStatusBarControl>-->
+
         <Grid Grid.Row="2" Name="statusBar" Height="25" Background="#007ACC">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="150"/>
                 <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="150"/>
+                
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="100"/>
@@ -183,9 +177,11 @@
             <TextBlock Text="V1.0.0.0" FontSize="20"/>
             <TextBlock Grid.Column="1" Text="当前用户:" FontSize="20"/>
             <TextBlock Grid.Column="2" Text="{Binding StrUserName}" FontSize="20"/>
-
-            <TextBlock Grid.Column="3" Text="系统状态:" FontSize="20"/>
-            <TextBlock Grid.Column="4" Text="手动" FontSize="20"/>
+            <TextBlock Grid.Column="3" Text="当前配方:" FontSize="20"/>
+            <TextBlock Grid.Column="4" Text="{Binding PrescriptionUsed.Name}" FontSize="20"/>
+            
+            <TextBlock Grid.Column="6" Text="系统状态:" FontSize="20"/>
+            <TextBlock Grid.Column="7" Text="手动" FontSize="20"/>
         </Grid>
     </Grid>
 </Window>

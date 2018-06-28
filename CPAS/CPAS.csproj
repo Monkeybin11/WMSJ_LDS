@@ -203,6 +203,7 @@
     <Compile Include="Classes\LogHelper.cs" />
     <Compile Include="Communication\EtherNet.cs" />
     <Compile Include="Config\PresciptionManager\PresciptionCfgManager.cs" />
+    <Compile Include="Config\SystemCfgManager\SystemCfgManager.cs" />
     <Compile Include="Config\UserManager\UserModel.cs" />
     <Compile Include="Config\UserManager\UserCfgManager.cs" />
     <Compile Include="Converters\Boolean2FontSize.cs" />

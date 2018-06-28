@@ -171,7 +171,7 @@ namespace CPAS.Instrument
         /// 读取曝光值
         /// </summary>
         /// <returns></returns>
-        public int GetExposeValue()
+        public int GetExposeValue()     //读取曝光值有什么用处
         {
             if (comPort == null || !comPort.IsOpen)
                 return 0;

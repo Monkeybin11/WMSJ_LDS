@@ -2,6 +2,7 @@
 using CPAS.Config;
 using CPAS.Config.SoftwareManager;
 using CPAS.Instrument;
+using CPAS.Models;
 using GalaSoft.MvvmLight.Messaging;
 using System;
 using System.Collections.Generic;
@@ -15,13 +16,16 @@ namespace CPAS.WorkFlow
 {
     public class WorkRecord : WorkFlowBase
     {
+        PrescriptionGridModel Prescription = null;   //配方信息
         private PowerMeter Pw1000USB_1 = null;
         private PowerMeter Pw1000USB_2 = null;
+        SystemParaModel sysPara = null;
+        QSerisePlc PLC = null;
         private string FILE_FAKE_BARCODE_FILE = FileHelper.GetCurFilePathString() + "UserData\\Barcode.xls";
         private DataTable Fake_Barcode_Dt = new DataTable();
         private enum STEP : int
         {
-            INIT=1,
+            INIT = 1,
 
             #region Station 1
             Check_Enable_UnLock,
@@ -46,9 +50,26 @@ namespace CPAS.WorkFlow
         protected override bool UserInit()
         {
             bool bRet = false;
+
+            #region >>>>读取模块配置信息，初始化工序Enable信息
+            Prescription = ConfigMgr.PrescriptionCfgMgr.Prescriptions[0];
+            //sysPara=ConfigMg
+            #endregion
+
+            #region >>>>初始化仪表信息
             Pw1000USB_1 = InstrumentMgr.Instance.FindInstrumentByName("PowerMeter[0]") as PowerMeter;
             Pw1000USB_2 = InstrumentMgr.Instance.FindInstrumentByName("PowerMeter[1]") as PowerMeter;
-            bRet= Pw1000USB_1!=null;
+            PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
+            #endregion
+
+
+            LogExcel Fake_Barcode_Excel = new LogExcel(FILE_FAKE_BARCODE_FILE);
+            Fake_Barcode_Excel.ExcelToDataTable(ref Fake_Barcode_Dt, "Sheet1");
+            foreach (DataRow it in Fake_Barcode_Dt.Rows)
+                Console.WriteLine(it["Barcode"]);
+
+
+            bRet = Pw1000USB_1 != null;
             if (!bRet)
                 ShowInfo("初始化失败");
             return bRet;
@@ -56,15 +77,8 @@ namespace CPAS.WorkFlow
         }
         public WorkRecord(WorkFlowConfig cfg) : base(cfg)
         {
-            #region >>>>读取模块配置信息，初始化工序Enable信息
-            LogExcel Fake_Barcode_Excel = new LogExcel(FILE_FAKE_BARCODE_FILE);
-            Fake_Barcode_Excel.ExcelToDataTable(ref Fake_Barcode_Dt, "Sheet1");
-            foreach (DataRow it in Fake_Barcode_Dt.Rows)
-                Console.WriteLine(it["Barcode"]);
-            #endregion
-            #region >>>>初始化仪表信息
-
-            #endregion
+            
+        
             #region >>>>
 
             #endregion
@@ -86,13 +100,45 @@ namespace CPAS.WorkFlow
                         ShowInfo();
                         Thread.Sleep(100);
                         break;
+
+
+                    case STEP.Check_Enable_UnLock:
+                        //if(Prescription.)
+                        break;
+                    case STEP.Wait_UnLock_Cmd:
+                        break;
+                    case STEP.Write_Unlock_Result:
+                        break;
+
+                    case STEP.Check_Enable_ScanBarcode:
+                        break;
+                    case STEP.Wait_Scan_Barcode_Cmd:
+                        break;
+                    case STEP.Write_Barcode_To_Register:
+                        break;
+                    case STEP.Write_Scan_Result:
+                        break;
+
+                    case STEP.Check_Enable_Adjust_Laser_Power:
+                        break;
+                    case STEP.Wait_Adjust_Laser_Power_Cmd:
+                        break;
+                    case STEP.Write_Adjust_Laser_Power_Result:
+                        break;
+
+
+
+
+
+
+
                     case STEP.DO_NOTHING:
                         PopAndPushStep(STEP.EXIT);
                         ShowPower(EnumUnit.μW);
                         Vision.Vision.Instance.GrabImage(0);
                         Thread.Sleep(100);
                         break;
-                  
+
                     case STEP.EMG:
                         ClearAllStep();
                         break;
@@ -112,7 +158,7 @@ namespace CPAS.WorkFlow
             sb.Append(",");
             sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
             sb.Append(unit.ToString());
-            Messenger.Default.Send<Tuple<string, string, string>>(new Tuple<string, string, string>(cfg.Name, "ShowPower",sb.ToString()), "WorkFlowMessage");
+            Messenger.Default.Send<Tuple<string, string, string>>(new Tuple<string, string, string>(cfg.Name, "ShowPower", sb.ToString()), "WorkFlowMessage");
         }
     }
 }
