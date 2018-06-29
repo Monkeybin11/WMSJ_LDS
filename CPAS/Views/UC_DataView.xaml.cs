@@ -55,7 +55,10 @@ namespace CPAS.Views
                         break;
 
                     case "Add":
-                        //string[] substring=para.Substring('&');
+                        //Barcode&Result&Result
+                        string[] substring=para.Split('&');
+                        DateTime now = DateTime.Now;
+                        sql.InsertValues(strTableName, new string[] { substring[0], $"{now.Year}-{now.Month}-{now.Day} {now.Hour}:{now.Minute}:{now.Second}.{now.Millisecond}", substring[1], substring[2],"NA","NA"});
                         break; ;
                     default:
                         break;
@@ -83,7 +86,8 @@ namespace CPAS.Views
         public void ButtonSearch_Click(object sender, RoutedEventArgs e)
         {
             //Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Delete", "OneWeek"), "OperateDatabase");
-
+            //Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Add", "3456789&OK&RecordFailed"), "OperateDatabase");
+            //return;
             if (TextBoxBarcode.Text.Trim() == "")
                 return;
             LogDataCollect.Clear();
