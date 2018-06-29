@@ -1,24 +1,24 @@
 ﻿using CPAS.Config;
 using CPAS.Config.HardwareManager;
-using Keyence.AutoID.SDK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CPAS.Instrument 
 {
     public class Keyence_SR1000 : InstrumentBase
     {
-        private byte[] byteRecv = new byte[1024 * 2];
+        private byte[] byteRecv = new byte[128];
         private ComportCfg comportCfg = null;
         private EtherNetCfg etherNetCfg=null;  
         public Keyence_SR1000(HardwareCfgLevelManager1 cfg) : base(cfg)
         {
 
         }
-        private ReaderAccessor BarcodeReader = null;
+     
         public override bool Init()
         {
             try
@@ -58,8 +58,6 @@ namespace CPAS.Instrument
                     }
                     if (etherNetCfg == null)
                         return false;
-                      ReaderAccessor BarcodeReader = new ReaderAccessor();
-                      BarcodeReader.IpAddress = etherNetCfg.IP;
                 }
                 return false;
             }
@@ -77,13 +75,44 @@ namespace CPAS.Instrument
             }
             return true;
         }
-        public bool Connect()
-        {
-            return BarcodeReader.Connect();
-        }
         public string Getbarcode()
         {
-            return BarcodeReader.ExecCommand("LON");
+            string strCode=Query("LON\r").ToString();
+            Excute("LOFF\r");
+            return strCode;
+        }
+        public object Excute(object objCmd)
+        {
+            try
+            {
+                lock (comPort)
+                {
+                    comPort.Write(objCmd.ToString());
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public object Query(object objCmd)
+        {
+            try
+            {
+                lock (comPort)
+                {
+                    Array.Clear(byteRecv, 0, byteRecv.Length);
+                    comPort.Write(objCmd.ToString());
+                    Thread.Sleep(100);
+                    comPort.Read(byteRecv,0,128);
+                    return System.Text.Encoding.ASCII.GetString(byteRecv).Replace("\0","").Replace("\r","");
+                }
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
         }
 
     }

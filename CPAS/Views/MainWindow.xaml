@@ -19,10 +19,10 @@
         xmlns:cls="clr-namespace:CPAS.Classes"
         xmlns:views="clr-namespace:CPAS.Views"
         Loaded="Window_Loaded"
-        Closing="Window_Closing"
-        WindowState="Maximized"
+        Closing="Window_Closing">
+<!--WindowState="Maximized"
         ResizeMode="CanMinimize"
-        WindowStyle="None">
+        WindowStyle="None">-->
     <Window.Resources>
       
     </Window.Resources>

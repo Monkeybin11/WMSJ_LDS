@@ -15,6 +15,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CPAS.Classes;
+using CPAS.Config;
+using CPAS.Instrument;
 using CPAS.Interface;
 using CPAS.Models;
 using GalaSoft.MvvmLight.Messaging;
@@ -85,9 +87,12 @@ namespace CPAS.Views
     
         public void ButtonSearch_Click(object sender, RoutedEventArgs e)
         {
+            Keyence_SR1000 sr700 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[0]") as Keyence_SR1000;
+            string strCode=sr700.Getbarcode();
+            Messenger.Default.Send<string>(strCode, "ShowInfo");
             //Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Delete", "OneWeek"), "OperateDatabase");
             //Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Add", "3456789&OK&RecordFailed"), "OperateDatabase");
-            //return;
+            return;
             if (TextBoxBarcode.Text.Trim() == "")
                 return;
             LogDataCollect.Clear();
