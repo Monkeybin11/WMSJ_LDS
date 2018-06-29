@@ -35,6 +35,9 @@ namespace CPAS.ViewModels
         #region Fields
         private object PlcErrLock = new object();
         private object SysErrLock = new object();
+
+            
+
         private string _strViewID = "Home";
         private DateTime _myDateTime;
         private string _strUserName = "Operator";
@@ -402,6 +405,7 @@ namespace CPAS.ViewModels
             {
                 return new RelayCommand<Tuple<string, string>>(t =>
                 {
+                    bool bSuccess = false;
                     Tuple<string, string> tuple = t as Tuple<string, string>;
                     foreach (var it in ConfigMgr.UserCfgMgr.Users)
                     {
@@ -409,9 +413,15 @@ namespace CPAS.ViewModels
                         {
                             Level = it.Level;
                             StrUserName = it.User;
+                            bSuccess = true;
+                            LogHelper.WriteLine($"用户{tuple.Item1}登陆成功", LogHelper.LogType.NORMAL);
                         }
                     }
-                    LogHelper.WriteLine($"用户{tuple.Item1}登陆成功", LogHelper.LogType.NORMAL);
+                    if (!bSuccess)
+                    {
+                        LogHelper.WriteLine($"用户{tuple.Item1}登陆失败", LogHelper.LogType.NORMAL);
+
+                    }
                 });
             }
         }
@@ -637,6 +647,7 @@ namespace CPAS.ViewModels
             Messenger.Default.Register<string>(this, "UpdateTemplateFiles", str => UpdateModelCollect(Convert.ToInt16(str.Substring(3, 1))));
             Messenger.Default.Register<Tuple<string, string>>(this, "ShowStepInfo", tuple =>
                 {
+                    //不需要加锁
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         switch (tuple.Item1)

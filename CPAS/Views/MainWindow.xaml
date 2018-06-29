@@ -47,7 +47,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="600"/>
             </Grid.ColumnDefinitions>
-            <dxr:RibbonControl Name="ribbonControl1" PageCategoryAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center" MinWidth="350">
+            <dxr:RibbonControl Name="ribbonControl1" PageCategoryAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center" MinWidth="350" AllowMinimizeRibbon="False">
                 <dxr:RibbonDefaultPageCategory Caption="defaultCategory" Name="ribbonDefaultPageCategory1">
                     <dxr:RibbonPage Caption="Menu" Name="ribbonPage1">
                         <dxr:RibbonPageGroup Caption="Run" AllowCollapse="True">

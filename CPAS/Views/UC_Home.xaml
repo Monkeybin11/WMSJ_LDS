@@ -42,18 +42,18 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,20,0,0">
                     <TextBlock Text="SN1:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="12345678" FontSize="20" Foreground="Orange"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="12345678" FontSize="20" Foreground="Red"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical" Margin="0,20,0,0">
                     <TextBlock Text="SN2:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="12345678" FontSize="20" Foreground="Orange"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="12345678" FontSize="20" Foreground="Red"/>
                 </StackPanel>
                 <Grid Grid.Row="0" Grid.Column="0">
-                    <Rectangle Fill="White" RadiusX="20" RadiusY="20" Stroke="Orange" StrokeThickness="2" Height="50" Margin="20"/>
-                    <TextBlock Text="等待解锁1" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <!--<Rectangle Fill="White" RadiusX="20" RadiusY="20" Stroke="Orange" StrokeThickness="2" Height="50" Margin="20"/>-->
+                    <TextBlock Text="等待解锁1" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Grid Grid.Row="0" Grid.Column="1">
-                    <Rectangle Fill="White" RadiusX="20" RadiusY="20" Stroke="Orange" StrokeThickness="2" Height="50" Margin="20"/>
+                    <!--<Rectangle Fill="White" RadiusX="20" RadiusY="20" Stroke="Orange" StrokeThickness="2" Height="50" Margin="20"/>-->
                     <TextBlock Text="等待解锁2" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
                 <Grid Grid.Row="0" Grid.Column="1">
@@ -61,11 +61,11 @@
                 </Grid>
                 <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical" Margin="0,20,0,0">
                     <TextBlock Text="Power1:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="{Binding StrPowerMeterValue1}" FontSize="40" Foreground="Orange"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="{Binding StrPowerMeterValue1}" FontSize="40" Foreground="Red"/>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" Margin="0,20,0,0">
                     <TextBlock Text="Power2:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="{Binding StrPowerMeterValue2}" FontSize="40" Foreground="Orange"/>
+                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="{Binding StrPowerMeterValue2}" FontSize="40" Foreground="Red"/>
                 </StackPanel>
 
             </Grid>
@@ -80,10 +80,39 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <halcon:HWindowControlWPF Margin="1" x:Name="Cam1" ToolTip="Cam1"/>
-                <halcon:HWindowControlWPF Grid.Column="1" Margin="0,1,1,1" x:Name="Cam2" ToolTip="Cam2"/>
-                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam3" ToolTip="Cam3"  Margin="0,0,1,0"/>
-                <halcon:HWindowControlWPF Grid.Row="1" Grid.Column="1"  x:Name="Cam4" ToolTip="Cam4"/>
+                <Grid Margin="1" Background="Black">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Cam1:LDS1调水平" Foreground="Green" FontSize="20" HorizontalAlignment="Center"/>
+                    <halcon:HWindowControlWPF Grid.Row="1"  x:Name="Cam1" ToolTip="Cam1"/>
+                </Grid>
+                <Grid Margin="0,1,1,1" Grid.Column="1" Background="Black">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Cam2:LDS2调水平" Foreground="Green" FontSize="20" HorizontalAlignment="Center"/>
+                    <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam2" ToolTip="Cam2"/>
+                </Grid>
+                <Grid  Grid.Row="1" Margin="0,0,1,0" Background="Black">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Cam3:LDS1光斑图像" Foreground="Green" FontSize="20" HorizontalAlignment="Center"/>
+                    <halcon:HWindowControlWPF  x:Name="Cam3" Grid.Row="3" ToolTip="Cam3" />
+                </Grid>
+                <Grid  Grid.Row="1" Grid.Column="1" Background="Black">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Cam4:LDS2光斑图像" Foreground="Green" FontSize="20" HorizontalAlignment="Center"/>
+                    <halcon:HWindowControlWPF  x:Name="Cam4" Grid.Row="1" ToolTip="Cam4"/>
+                </Grid>
+   
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="2" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
@@ -92,8 +121,22 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <halcon:HWindowControlWPF Grid.Column="1" Margin="1" x:Name="Cam5" ToolTip="Cam5"/>
-                <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam6" ToolTip="Cam6" Margin="1,0,1,1"/>
+                <Grid Background="Black" Margin="0,0,0,1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Cam5:LDS1调焦距" Foreground="Green" FontSize="20" HorizontalAlignment="Center"/>
+                    <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam5" ToolTip="Cam5"/>
+                </Grid>
+                <Grid Grid.Row="1" Background="Black">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Cam6:LDS2调焦距" Foreground="Green" FontSize="20" HorizontalAlignment="Center"/>
+                    <halcon:HWindowControlWPF Grid.Row="1" x:Name="Cam6" ToolTip="Cam6" />
+                </Grid>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="3" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
@@ -104,7 +147,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="1" Panel.ZIndex="1" Margin="0,0,30,0">
+            <Grid Grid.Column="1" Panel.ZIndex="1" Margin="0,0,20,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>

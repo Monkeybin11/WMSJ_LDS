@@ -7,22 +7,31 @@ using System.Threading.Tasks;
 
 namespace CPAS.Models
 {
+    public enum EnumBadBarcodeExpiration
+    {
+        OneWeek,
+        HalfMonth,
+        OneMonth
+    }
     public class SystemParaModel : INotifyPropertyChanged
     {
-        private string _currentPrescriptionUsed;
-        public string CurrentPrescriptionUsed
+        
+        private EnumBadBarcodeExpiration _badBarcodeExpiration;
+        public EnumBadBarcodeExpiration BadBarcodeExpiration
         {
-            get{ return _currentPrescriptionUsed; }
+            get { return _badBarcodeExpiration; }
             set
             {
-                if (_currentPrescriptionUsed != value)
+                if (_badBarcodeExpiration != value)
                 {
-                    _currentPrescriptionUsed = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurrentPrescriptionUsed"));
+                    _badBarcodeExpiration = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BadBarcodeExpiration"));
                 }
             }
         }
 
+
         public event PropertyChangedEventHandler PropertyChanged;
+       
     }
 }

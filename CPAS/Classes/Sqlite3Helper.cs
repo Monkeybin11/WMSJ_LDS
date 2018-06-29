@@ -171,6 +171,29 @@ namespace CPAS.Classes
             }
             return ExecuteQuery(queryString);
         }
+        /// <summary>
+        /// 删除指定数据，这个colValues不带单引号，主要用于有函数的情况
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="colNames"></param>
+        /// <param name="colValues"></param>
+        /// <param name="operations"></param>
+        /// <returns></returns>
+        public SQLiteDataReader DeleteValuesOR1(string tableName, string[] colNames, string[] colValues, string[] operations)
+        {
+            //当字段名称和字段数值不对应时引发异常
+            if (colNames.Length != colValues.Length || operations.Length != colNames.Length || operations.Length != colValues.Length)
+            {
+                throw new SQLiteException("colNames.Length!=colValues.Length || operations.Length!=colNames.Length || operations.Length!=colValues.Length");
+            }
+
+            string queryString = "DELETE FROM " + tableName + " WHERE " + colNames[0] + operations[0] + colValues[0] ;
+            for (int i = 1; i < colValues.Length; i++)
+            {
+                queryString += "OR " + colNames[i] + operations[0] + colValues[i] ;
+            }
+            return ExecuteQuery(queryString);
+        }
 
         /// <summary>
         /// 删除指定数据表内的数据
@@ -191,6 +214,30 @@ namespace CPAS.Classes
             for (int i = 1; i < colValues.Length; i++)
             {
                 queryString += " AND " + colNames[i] + operations[i] + "'" + colValues[i] + "'";
+            }
+            return ExecuteQuery(queryString);
+        }
+
+        /// <summary>
+        /// 删除指定数据，这个colValues不带单引号，主要用于有函数的情况
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="colNames"></param>
+        /// <param name="colValues"></param>
+        /// <param name="operations"></param>
+        /// <returns></returns>
+        public SQLiteDataReader DeleteValuesAND1(string tableName, string[] colNames, string[] colValues, string[] operations)
+        {
+            //当字段名称和字段数值不对应时引发异常
+            if (colNames.Length != colValues.Length || operations.Length != colNames.Length || operations.Length != colValues.Length)
+            {
+                throw new SQLiteException("colNames.Length!=colValues.Length || operations.Length!=colNames.Length || operations.Length!=colValues.Length");
+            }
+
+            string queryString = "DELETE FROM " + tableName + " WHERE " + colNames[0] + operations[0] +  colValues[0];
+            for (int i = 1; i < colValues.Length; i++)
+            {
+                queryString += " AND " + colNames[i] + operations[i]+ colValues[i];
             }
             return ExecuteQuery(queryString);
         }

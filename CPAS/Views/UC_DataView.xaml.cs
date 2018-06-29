@@ -17,6 +17,8 @@ using System.Windows.Shapes;
 using CPAS.Classes;
 using CPAS.Interface;
 using CPAS.Models;
+using GalaSoft.MvvmLight.Messaging;
+using NUnit.Framework;
 
 namespace CPAS.Views
 {
@@ -27,11 +29,38 @@ namespace CPAS.Views
     {
         private Sqlite3Helper sql=new Sqlite3Helper("data source = LogData/data.db");
         private SQLiteDataReader reader = null;
-        
+        private string strTableName = "NGLogTable";
         public UC_DataView()
         {
             InitializeComponent();
             LogDataCollect = new ObservableCollection<LogDataItem>();
+            Messenger.Default.Register<Tuple<string,string>>(this, "OperateDatabase", tuple => {
+                string cmd = tuple.Item1;
+                string para = tuple.Item2;
+                switch (cmd)
+                {
+                    case "Delete":
+                        switch (para)
+                        {
+                            case "OneWeek":
+                                sql.DeleteValuesOR1(strTableName, new string[] { @"date('now', '-7 day')" }, new string[] { @"date(Time)" }, new string[] { ">=" });
+                                break;
+                            case "HalfMonth":
+                                sql.DeleteValuesOR1(strTableName, new string[] { @"date('now', '-15 day')" }, new string[] { @"date(Time)" }, new string[] { ">=" });
+                                break;
+                            case "OneMonth":
+                                sql.DeleteValuesOR1(strTableName, new string[] { @"date('now', '-30 day')" }, new string[] { @"date(Time)" }, new string[] { ">=" });
+                                break;
+                        }
+                        break;
+
+                    case "Add":
+                        //string[] substring=para.Substring('&');
+                        break; ;
+                    default:
+                        break;
+                }
+            });
             
         }
 
@@ -50,8 +79,13 @@ namespace CPAS.Views
             throw new NotImplementedException();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+    
+        public void ButtonSearch_Click(object sender, RoutedEventArgs e)
         {
+            //Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Delete", "OneWeek"), "OperateDatabase");
+
+            if (TextBoxBarcode.Text.Trim() == "")
+                return;
             LogDataCollect.Clear();
             string strSql = "";
             if ((bool)CbLike.IsChecked)
@@ -71,11 +105,14 @@ namespace CPAS.Views
             } 
         }
 
+        
         private void TextBoxBarcode_TextChanged(object sender, TextChangedEventArgs e)
         {
             IsHitTextVisable = TextBoxBarcode.Text == "" ? Visibility.Visible : Visibility.Hidden;
         }
 
     }
+
     
+
 }

@@ -10,6 +10,6 @@ namespace CPAS.Config.SystemCfgManager
     public class SystemParaCfgManager
     {
         public SystemParaModel[] SystemParaModels { get; set; }
-
+     
     }
 }
