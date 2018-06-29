@@ -6,18 +6,19 @@ using System.IO.Ports;
 using System.Threading;
 using CPAS.Config.HardwareManager;
 using CPAS.Config;
-
+using CPAS.Models;
 
 namespace CPAS.Instrument
 {
     public class LDS : InstrumentBase
     {
-        private byte[] byteRecv = new byte[1024*2];
+        private byte[] byteRecv = new byte[1024 * 2];
         private ComportCfg comportCfg = null;
-        public  LDS(HardwareCfgLevelManager1 cfg) : base(cfg)
-        { 
-
+        public LDS(HardwareCfgLevelManager1 cfg) : base(cfg)
+        {
+            LDSResult = new LDSModel();
         }
+        public LDSModel LDSResult{get;set;}
 
         public override bool Init()
         {

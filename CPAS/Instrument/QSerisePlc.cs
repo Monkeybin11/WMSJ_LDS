@@ -82,6 +82,7 @@ namespace CPAS.Instrument
             {
                 if (plc != null)
                 {
+                    strRegisterName = strRegisterName.ToUpper();
                     string[] outValueList = new string[] { };
                     string strType = strRegisterName.Substring(0, 1);
                     int nAddress = Convert.ToInt16(strRegisterName.Substring(1, strRegisterName.Length - 1));
@@ -102,6 +103,7 @@ namespace CPAS.Instrument
             {
                 if (plc != null)
                 {
+                    strRegisterName = strRegisterName.ToUpper();
                     string strType = strRegisterName.Substring(0, 1);
                     int nAddress = Convert.ToInt16(strRegisterName.Substring(1, strRegisterName.Length - 1));
                     string strValue = string.Format("{0:X8}", nValue);
@@ -115,6 +117,7 @@ namespace CPAS.Instrument
 
             lock (_lock)
             {
+                strRegisterName = strRegisterName.ToUpper();
                 string[] outValueList = new string[] { };
                 string strType = strRegisterName.Substring(0, 1);
                 int nAddress = Convert.ToInt16(strRegisterName.Substring(1, strRegisterName.Length - 1));
@@ -127,9 +130,61 @@ namespace CPAS.Instrument
         {
             lock (_lock)
             {
+                strRegisterName = strRegisterName.ToUpper();
                 string strValue = string.Format("{0:X4}", nValue);
                 return 0 == plc.WriteDeviceRandom(new string[] { strRegisterName }, "1", new string[] { Convert.ToInt16(strValue, 16).ToString() });
             }
+        }
+        public bool WriteString(string strRegisterName, string str)
+        {
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            foreach (var ch in str)
+            {
+                i++;
+                sb.Append(string.Format("{0:X2}", ch));
+                if (i % 2 == 0)
+                {
+                    WriteInt(strRegisterName, Convert.ToInt16(sb.ToString()));
+                    sb.Clear();
+                }
+                else
+                {
+                    if (str.Length - i == 1)
+                    {
+                        sb.Append(string.Format("{0:X2}", ch));
+                        return WriteInt(strRegisterName, Convert.ToInt16(sb.ToString()));
+                    }
+                    else if (str.Length - i == 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return true;
+        }
+        public string ReadString(string strRegisterName, int nLength)
+        {
+            string strType = strRegisterName.Substring(0, 1);
+            List<byte> byteList = new List<byte>();
+            int nRegisterStart =Convert.ToInt16(strRegisterName.Substring(1, strRegisterName.Length - 1));
+
+            for (int i = 0; i < nLength % 2; i++)
+            {
+                string strRealRigster = string.Format("{0}{1}", strType, nRegisterStart);
+                string strRet = string.Format("{0:X4}", ReadInt(strRealRigster));
+                byteList.Add(Convert.ToByte(strRet.Substring(0, 2)));
+                byteList.Add(Convert.ToByte(strRet.Substring(2, 4)));
+                nRegisterStart++;
+            }
+
+            if (nLength % 2 != 0)   //还剩一个字符
+            {
+                string strRealRigster = string.Format("{0}{1}", strType, nRegisterStart);
+                string strRet = string.Format("{0:X2}", ReadInt(strRealRigster));
+                byteList.Add(Convert.ToByte(strRet.Substring(0, 2)));
+            }
+            return System.Text.Encoding.ASCII.GetString(byteList.ToArray());
         }
     }
 }

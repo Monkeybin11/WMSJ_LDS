@@ -17,13 +17,21 @@ namespace CPAS.WorkFlow
         private QSerisePlc PLC = null;
         private LDS lds1 = null;
         private LDS lds2 = null;
+
+        //cmd
+        private int nCmdFocus_Grab1 = -1;
+        private int nCmdFocus_Grab2 = -1;
+
+        private int nCmdAdjust_Foucs1 = -1;
+        private int nCmdAdjust_Foucs2 = -1;
+
         private enum STEP : int
         {
             INIT,
 
             //调焦距
             #region Station3
-            Check_Enable_Adjust_Focus,      //计算对接角度
+            Check_Enable_Adjust_Focus,      
             Wait_Focus_Grab_Cmd,
             Grab_Focus_Image,
             Cacul_Focus_Servo_Angle,
@@ -35,7 +43,7 @@ namespace CPAS.WorkFlow
             Read_Focus_Value,
             Check_Foucs_Is_Ok,
             Adjust_A_Small_Step,
-            Read_Focus_Value_For_GetDir,    //先判断方向,如果方向固定，那么就可以跳过这一步，大概计算要旋转多少度，根据角度计算每一度大概多少Value
+            Read_Focus_Value_For_GetDir,    //先判断方向
             Write_Angle_To_Register_i,
             Wait_Servo_Finish_i,
             Read_Focus_Value_i,

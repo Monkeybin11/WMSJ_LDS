@@ -18,6 +18,14 @@ namespace CPAS.WorkFlow
         private QSerisePlc PLC = null;
         private LDS lds1 = null;
         private LDS lds2 = null;
+
+        //cmd
+        private int nCmdCalib_2m1 = -1;
+        private int nCmdCalib_2m2 = -1;
+
+        private int nCmdCalib_4m1 = -1;
+        private int nCmdCalib_4m2 = -1;
+
         private enum STEP : int
         {
             INIT,
@@ -76,6 +84,17 @@ namespace CPAS.WorkFlow
                         ShowInfo("12422435");
                         Thread.Sleep(200);
                         break;
+
+
+
+
+
+
+
+
+
+
+
                     case STEP.DO_NOTHING:
                         PopAndPushStep(STEP.INIT);
                         ShowInfo("jksjfkjfiwf");

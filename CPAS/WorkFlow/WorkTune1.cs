@@ -19,6 +19,15 @@ namespace CPAS.WorkFlow
         private QSerisePlc PLC = null;
         private LDS lds1 = null;
         private LDS lds2 = null;
+
+        //cmd
+        private int nCmdHiriz_Grab1=-1;
+        private int nCmdHiriz_Grab2 = -1;
+
+        private int nCmdAdjust_Horiz1 = -1;
+        private int nCmdAdjust_Horiz2 = -1;
+
+
         public WorkTune1(WorkFlowConfig cfg) : base(cfg)
         {
 
