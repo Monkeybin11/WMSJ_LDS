@@ -84,7 +84,14 @@ namespace CPAS.WorkFlow
             BarcodeScanner1 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[0]") as Keyence_SR1000;
             BarcodeScanner2 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[1]") as Keyence_SR1000;
             PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
-            #endregion
+
+#if TEST
+            string strTest = "ABCDEFGHIJKPRicky124567IUTVNghj";
+            PLC.WriteString("R100", strTest);
+            string str = PLC.ReadString("R100", strTest.Length);
+#endif
+
+#endregion
 
             LogExcel Fake_Barcode_Excel = new LogExcel(FILE_FAKE_BARCODE_FILE);
             Fake_Barcode_Excel.ExcelToDataTable(ref Fake_Barcode_Dt, "Sheet1");

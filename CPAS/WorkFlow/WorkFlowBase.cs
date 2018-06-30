@@ -13,7 +13,7 @@ namespace CPAS.WorkFlow
 {
     public class WorkFlowBase
     {
-        protected Dictionary<string, LDSModel> LdsDic = new Dictionary<string, LDSModel>();//dddd 扫描不到条码如何保存，建议使用数字保存
+        protected Dictionary<string, LDSModel> LdsDic = new Dictionary<string, LDSModel>();//扫描不到直接NG
         public bool Enable;
         public string StationName;
         public int StationIndex;

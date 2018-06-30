@@ -77,7 +77,7 @@ namespace CPAS.Instrument
         }
         public Int32 ReadDint(string strRegisterName)
         {
-
+            strRegisterName = strRegisterName.ToUpper();
             lock (_lock)
             {
                 if (plc != null)
@@ -98,7 +98,7 @@ namespace CPAS.Instrument
         }
         public bool WriteDint(string strRegisterName, Int32 nValue)
         {
-
+            strRegisterName = strRegisterName.ToUpper();
             lock (_lock)
             {
                 if (plc != null)
@@ -114,7 +114,7 @@ namespace CPAS.Instrument
         }
         public Int16 ReadInt(string strRegisterName)
         {
-
+            strRegisterName = strRegisterName.ToUpper();
             lock (_lock)
             {
                 strRegisterName = strRegisterName.ToUpper();
@@ -128,6 +128,7 @@ namespace CPAS.Instrument
         }
         public bool WriteInt(string strRegisterName, int nValue)
         {
+            strRegisterName = strRegisterName.ToUpper();
             lock (_lock)
             {
                 strRegisterName = strRegisterName.ToUpper();
@@ -137,52 +138,55 @@ namespace CPAS.Instrument
         }
         public bool WriteString(string strRegisterName, string str)
         {
+            bool bRet = true;
+            strRegisterName = strRegisterName.ToUpper();
+            string strType = strRegisterName.Substring(0, 1);
+            int nRegisterStart = Convert.ToInt16(strRegisterName.Substring(1, strRegisterName.Length - 1));
+            string strRealRegister = "";
+            string strValue = "";
             StringBuilder sb = new StringBuilder();
-            int i = 0;
-            foreach (var ch in str)
+            bool bEven = str.Length % 2 == 0;
+            int len = bEven ? str.Length / 2 : str.Length / 2 + 1; 
+            int i;
+            for (i = 0; i < (bEven? len : len -1); i++)
             {
-                i++;
-                sb.Append(string.Format("{0:X2}", ch));
-                if (i % 2 == 0)
-                {
-                    WriteInt(strRegisterName, Convert.ToInt16(sb.ToString()));
-                    sb.Clear();
-                }
-                else
-                {
-                    if (str.Length - i == 1)
-                    {
-                        sb.Append(string.Format("{0:X2}", ch));
-                        return WriteInt(strRegisterName, Convert.ToInt16(sb.ToString()));
-                    }
-                    else if (str.Length - i == 0)
-                    {
-                        return true;
-                    }
-                }
+ 
+                strValue = string.Format("{0:X2}{1:X2}", (byte)str[i * 2], (byte)str[i * 2 + 1]);
+                strRealRegister = strType + nRegisterStart.ToString();
+                bRet &= WriteInt(strRealRegister, Convert.ToInt16(strValue.ToString(), 16));             
+                nRegisterStart++;
+            }
+            if (!bEven)
+            {
+                strValue = string.Format("{0:X2}00", (byte)str[i * 2]);
+                strRealRegister = strType + nRegisterStart.ToString();
+                bRet &= WriteInt(strRealRegister, Convert.ToInt16(strValue.ToString(), 16));
             }
             return true;
         }
         public string ReadString(string strRegisterName, int nLength)
         {
+            strRegisterName = strRegisterName.ToUpper();
             string strType = strRegisterName.Substring(0, 1);
+            string strRealRigster = "";
+            int nRegisterStart = Convert.ToInt16(strRegisterName.Substring(1, strRegisterName.Length - 1));
             List<byte> byteList = new List<byte>();
-            int nRegisterStart =Convert.ToInt16(strRegisterName.Substring(1, strRegisterName.Length - 1));
 
-            for (int i = 0; i < nLength % 2; i++)
+
+            for (int i = 0; i < nLength / 2; i++)
             {
-                string strRealRigster = string.Format("{0}{1}", strType, nRegisterStart);
+                strRealRigster = string.Format("{0}{1}", strType, nRegisterStart);
                 string strRet = string.Format("{0:X4}", ReadInt(strRealRigster));
-                byteList.Add(Convert.ToByte(strRet.Substring(0, 2)));
-                byteList.Add(Convert.ToByte(strRet.Substring(2, 4)));
+                byteList.Add(Convert.ToByte(strRet.Substring(0, 2), 16));
+                byteList.Add(Convert.ToByte(strRet.Substring(2, 2), 16));
                 nRegisterStart++;
             }
 
-            if (nLength % 2 != 0)   //还剩一个字符
+            if (nLength % 2 == 1)    //判断是否有最后一个字符
             {
-                string strRealRigster = string.Format("{0}{1}", strType, nRegisterStart);
+                strRealRigster = string.Format("{0}{1}", strType, nRegisterStart);
                 string strRet = string.Format("{0:X2}", ReadInt(strRealRigster));
-                byteList.Add(Convert.ToByte(strRet.Substring(0, 2)));
+                byteList.Add(Convert.ToByte(strRet.Substring(0, 2), 16));
             }
             return System.Text.Encoding.ASCII.GetString(byteList.ToArray());
         }
