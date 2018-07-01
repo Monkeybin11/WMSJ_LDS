@@ -50,6 +50,7 @@ namespace CPAS.Config
         public static UserCfgManager UserCfgMgr = null;
         public static SystemParaCfgManager SystemParaCfgMgr =null;
         public static DataTable PLCErrorDataTable = new DataTable();
+        public static CameraCfg[] CameraCfgs = null;
         //public static 
         public void LoadConfig()
         {
@@ -58,6 +59,7 @@ namespace CPAS.Config
             {
                 var json_string = File.ReadAllText(File_HardwareCfg);
                 HardwareCfgMgr = JsonConvert.DeserializeObject<HardwareCfgManager>(json_string);
+                CameraCfgs = HardwareCfgMgr.CameraCfgs;
             }
             catch (Exception ex)
             {
@@ -73,7 +75,8 @@ namespace CPAS.Config
             for (int i = 0; i < PropertyInfos.Length; i++)
             {
                 if (PropertyInfos[i].Name.ToUpper().Contains("COMPORT") || PropertyInfos[i].Name.ToUpper().Contains("ETHERNET") ||
-                    PropertyInfos[i].Name.ToUpper().Contains("GPIB") || PropertyInfos[i].Name.ToUpper().Contains("NIVISA"))
+                    PropertyInfos[i].Name.ToUpper().Contains("GPIB") || PropertyInfos[i].Name.ToUpper().Contains("NIVISA") ||
+                     PropertyInfos[i].Name.ToUpper().Contains("CAMERACFG"))
                     continue;
                 PropertyInfo pi = PropertyInfos[i];
                 instCfgs = pi.GetValue(HardwareCfgMgr) as HardwareCfgLevelManager1[];
@@ -203,15 +206,17 @@ namespace CPAS.Config
                     break;
             }
             string json_str = JsonConvert.SerializeObject(objSaved);
-            using (FileStream fs = File.Open(fileSaved, FileMode.Create, FileAccess.Write))
-            {
-                using (StreamWriter wr = new StreamWriter(fs))
-                {
-                    wr.Write(json_str);
-                    wr.Close();
-                }
-                fs.Close();
-            }
+            File.WriteAllText(fileSaved, json_str);
+            //using (FileStream fs = File.Open(fileSaved, FileMode.Create, FileAccess.Write))
+            //{
+            //    using (StreamWriter wr = new StreamWriter(fs))
+            //    {
+            //        wr.Write(json_str);
+            //        wr.Close();
+            //    }
+            //    fs.Flush();
+            //    fs.Close();
+            //}
         }
     }
 }

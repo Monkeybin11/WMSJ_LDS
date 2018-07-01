@@ -206,6 +206,7 @@
     <Compile Include="Classes\LogExcel.cs" />
     <Compile Include="Classes\LogHelper.cs" />
     <Compile Include="Communication\EtherNet.cs" />
+    <Compile Include="Config\HardwareManager\CameraCfg.cs" />
     <Compile Include="Config\PresciptionManager\PresciptionCfgManager.cs" />
     <Compile Include="Config\SystemCfgManager\SystemCfgManager.cs" />
     <Compile Include="Config\UserManager\UserModel.cs" />

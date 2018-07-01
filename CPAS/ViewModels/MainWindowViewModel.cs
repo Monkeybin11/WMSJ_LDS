@@ -46,6 +46,7 @@ namespace CPAS.ViewModels
         private bool _showPlcErrorListEdit;
         private string _strPowerMeterValue1 = "NA", _strPowerMeterValue2 = "NA";
         public PrescriptionGridModel _prescriptionUsed = new PrescriptionGridModel();
+        private SystemParaModel _systemPataModelUsed = new SystemParaModel();
         private EnumCamSnapState _amSnapState;
         public Dictionary<string, WorkFlowBase> _workeFlowDic;
         private ObservableCollection<MessageItem> _plcMessageCollection = new ObservableCollection<MessageItem>();
@@ -218,13 +219,20 @@ namespace CPAS.ViewModels
                 if (_prescriptionUsed != value)
                 {
                     _prescriptionUsed = value;
-                    ConfigMgr.SystemParaCfgMgr.SystemParaModels[0].SetCurSelectedPrescription(value.Name);
+                    SystemPataModelUsed = new SystemParaModel() { BadBarcodeExpiration = SystemPataModelUsed.BadBarcodeExpiration, CurPrescriptionName = value == null ? "" : value.Name};
                     RaisePropertyChanged();
                 }
             }
             get { return _prescriptionUsed; }
         }
-        public SystemParaModel SystemPataModelUsed { get { return ConfigMgr.SystemParaCfgMgr.SystemParaModels[0]; }}
+        public SystemParaModel SystemPataModelUsed
+        {
+            get { return _systemPataModelUsed; }
+            set {
+                _systemPataModelUsed = value;
+                RaisePropertyChanged();
+                }
+        }
         public ObservableCollection<MessageItem> PLCMessageCollection
         {
             get { return _plcMessageCollection; }
@@ -544,7 +552,8 @@ namespace CPAS.ViewModels
                     try
                     {
                         ConfigMgr.Instance.SaveConfig(EnumConfigType.PrescriptionCfg, PrescriptionCollection.ToArray());
-                        UC_MessageBox.ShowMsgBox("保存成功", "提示");
+                        SaveSystemCfgCommand.Execute(null); //也要一起保存,这个有对话框，所以这个省掉不加
+                        //UC_MessageBox.ShowMsgBox("保存成功", "提示");
                         LogHelper.WriteLine($"保存配方文件成功", LogHelper.LogType.NORMAL);
                     }
                     catch (Exception ex)
@@ -571,6 +580,10 @@ namespace CPAS.ViewModels
                                 {
                                     bExist = true;
                                     PrescriptionCollection.Remove(model);
+                                    if (SystemPataModelUsed != null && SystemPataModelUsed.CurPrescriptionName == model.Name)
+                                    {
+                                        SystemPataModelUsed.CurPrescriptionName = "未选择配方";
+                                    }
                                     LogHelper.WriteLine($"删除配方{model.Name}:{model.Remark}", LogHelper.LogType.NORMAL);
                                     break;
                                 }
@@ -625,7 +638,7 @@ namespace CPAS.ViewModels
                 {
                     try
                     {
-                        ConfigMgr.Instance.SaveConfig(EnumConfigType.SystemParaCfg, ConfigMgr.SystemParaCfgMgr.SystemParaModels);
+                        ConfigMgr.Instance.SaveConfig(EnumConfigType.SystemParaCfg,new SystemParaModel[] { SystemPataModelUsed });
                         UC_MessageBox.ShowMsgBox("保存成功", "提示");
                         LogHelper.WriteLine($"保存配方文件成功", LogHelper.LogType.NORMAL);
                     }
@@ -772,6 +785,9 @@ namespace CPAS.ViewModels
             {
                 UserModelCollection.Add(it);
             }
+
+            //当前选择的配方
+            SystemPataModelUsed = ConfigMgr.SystemParaCfgMgr.SystemParaModels[0];
         }
 
         ~MainWindowViewModel()

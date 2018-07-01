@@ -18,6 +18,12 @@ namespace CPAS.Vision
         BUSY,
         DISCONNECTED
     }
+    public enum EnumCamType
+    {
+        GigEVision,
+        DirectShow,
+        uEye,
+    }
     public class Vision
     {
         #region constructor
@@ -31,6 +37,9 @@ namespace CPAS.Vision
             }
             HOperatorSet.GenEmptyObj(out Region);
             HOperatorSet.GenEmptyObj(out ImageTemp);
+
+            //需要将相机的配置与实际的做个映射  //ddddd
+            CamCfgDic = FindCamera(EnumCamType.GigEVision);
         }
         private static readonly Lazy<Vision> _instance = new Lazy<Vision>(() => new Vision());
         public static Vision Instance
@@ -52,6 +61,7 @@ namespace CPAS.Vision
         private List<HTuple> AcqHandleList = new List<HTuple>(10);    //Aqu
         private Dictionary<int, Dictionary<string, HTuple>> HwindowDic = new Dictionary<int, Dictionary<string, HTuple>>();    //Hwindow
         private Dictionary<int, Tuple<HTuple, HTuple>> ActiveCamDic = new Dictionary<int, Tuple<HTuple, HTuple>>();
+        private Dictionary<string, Tuple<string, string>> CamCfgDic = new Dictionary<string, Tuple<string, string>>();
         private HObject Region = null;
         public Enum_REGION_OPERATOR RegionOperator = Enum_REGION_OPERATOR.ADD;
         public Enum_REGION_TYPE RegionType = Enum_REGION_TYPE.CIRCLE;
@@ -61,6 +71,8 @@ namespace CPAS.Vision
         #region public method 
         public bool AttachCamWIndow(int nCamID, string Name, HTuple hWindow)
         {
+            if (nCamID < 0)
+                return false;
             lock (_lockList[nCamID])
             {
 
@@ -99,6 +111,8 @@ namespace CPAS.Vision
         }
         public bool DetachCamWindow(int nCamID, string Name)
         {
+            if (nCamID < 0)
+                return false;
             lock (_lockList[nCamID])
             {
                 if (HwindowDic.Keys.Contains(nCamID))
@@ -111,6 +125,8 @@ namespace CPAS.Vision
         }
         public bool OpenCam(int nCamID)
         {
+            if (nCamID < 0)
+                return false;
             HObject image = null;
             HTuple hv_AcqHandle = null;
             HTuple width = 0, height = 0;
@@ -120,8 +136,10 @@ namespace CPAS.Vision
                 {
                     if (!IsCamOpen(nCamID))
                     {
-                        HOperatorSet.OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
-                                                    -1, "false", "default", "Integrated Camera", 0, -1, out hv_AcqHandle);
+                        //HOperatorSet.OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
+                        //                            -1, "false", "default", "Integrated Camera", 0, -1, out hv_AcqHandle);
+                        HOperatorSet.OpenFramegrabber(CamCfgDic.ElementAt(nCamID).Value.Item2, 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
+                                                   -1, "false", "default", CamCfgDic.ElementAt(nCamID).Value.Item1, 0, -1, out hv_AcqHandle);
                         HOperatorSet.GrabImage(out image, hv_AcqHandle);
                         HOperatorSet.GetImageSize(image, out width, out height);
                         ActiveCamDic.Add(nCamID, new Tuple<HTuple, HTuple>(width, height));
@@ -154,6 +172,8 @@ namespace CPAS.Vision
         }
         public bool CloseCam(int nCamID)
         {
+            if (nCamID < 0)
+                return false;
             try
             {
                 lock (_lockList[nCamID])
@@ -174,6 +194,8 @@ namespace CPAS.Vision
         }
         public bool IsCamOpen(int nCamID)
         {
+            if (nCamID < 0)
+                return false;
             lock (_lockList[nCamID])
             {
                 return ActiveCamDic.Keys.Contains(nCamID);
@@ -181,6 +203,8 @@ namespace CPAS.Vision
         }
         public void GrabImage(int nCamID, bool bDispose = true)
         {
+            if (nCamID < 0)
+                return;
             HObject image = null;
             try
             {
@@ -227,6 +251,9 @@ namespace CPAS.Vision
         }
         public bool ProcessImage(IMAGEPROCESS_STEP nStep, int nCamID, object para, out object result)
         {
+            result = null;
+            if (nCamID < 0)
+                return false;
             HObject image = null;
             try
             {
@@ -259,6 +286,8 @@ namespace CPAS.Vision
         }
         public bool DrawRoi(int nCamID)
         {
+            if (nCamID < 0)
+                return false;
             try
             {
                 lock (_lockList[nCamID])
@@ -306,6 +335,26 @@ namespace CPAS.Vision
             {
                 Messenger.Default.Send<String>(string.Format("DrawRectangle出错:{0}", ex.Message), "ShowError");
                 return false;
+            }
+        }
+        public Dictionary<string, Tuple<string, string>> FindCamera(EnumCamType camType)
+        {
+            try
+            {
+                HOperatorSet.InfoFramegrabber(camType.ToString(), "info_boards", out HTuple hv_Information, out HTuple hv_ValueList);
+                Dictionary<string, Tuple<string, string>> dic = new Dictionary<string, Tuple<string, string>>();
+                if (0 == hv_ValueList.Length)
+                    return dic;
+                foreach (var dev in hv_ValueList.SArr)
+                {
+                    string[] str = dev.Split('|');
+                    dic.Add(str[1].Replace("user_name:", "").Trim() + str[2].Replace("ip_address", "").Trim(), new Tuple<string, string>(str[0].Replace("unique_name:", "").Trim(), camType.ToString()));
+                }
+                return dic;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(string.Format("FIndCamera error:{0}", ex.Message));
             }
         }
         #endregion

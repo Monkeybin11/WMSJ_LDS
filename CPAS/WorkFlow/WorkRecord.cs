@@ -76,6 +76,7 @@ namespace CPAS.WorkFlow
             bool bRet = false;
 
             #region >>>>读取模块配置信息，初始化工序Enable信息
+
             Prescription = ConfigMgr.PrescriptionCfgMgr.Prescriptions[0];
             //sysPara=ConfigMg
             #endregion

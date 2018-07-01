@@ -12,7 +12,7 @@ namespace CPAS.Config.HardwareManager
         public LDSConfig[] LDSs { get; set; }
         public PLCConfig[] QSerisePlcs { get; set; }
         public KeyenceReaderConfig[] Keyence_SR1000s { get; set; }
-
+        public CameraCfg[] CameraCfgs { get; set; }
 
         public ComportCfg[] Comports { get; set; }
         public EtherNetCfg[] EtherNets { get; set; }

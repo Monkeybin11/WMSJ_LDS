@@ -17,10 +17,13 @@ namespace CPAS.Models
     {
         private string _curSelectedPrescription = "";
         private EnumBadBarcodeExpiration _badBarcodeExpiration;
-        public string CurSelectedPrescription {
+
+        [Browsable(false)]
+        public string CurPrescriptionName {
             get { return _curSelectedPrescription; }
             set {
-                SetCurSelectedPrescription(value);
+                _curSelectedPrescription=value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurPrescriptionName"));
             }
         }
         public EnumBadBarcodeExpiration BadBarcodeExpiration
@@ -35,14 +38,7 @@ namespace CPAS.Models
                 }
             }
         }
-        public void SetCurSelectedPrescription(string strName)
-        {
-            if (strName != _curSelectedPrescription)
-            {
-                _curSelectedPrescription = strName;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurSelectedPrescription"));
-            }
-        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         
     }
