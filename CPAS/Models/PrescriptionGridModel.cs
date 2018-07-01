@@ -29,7 +29,7 @@ namespace CPAS.Models
         private Int32 _cMosPointNumber = 1536;
 
 
-        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("工序名称")]
         public string Name
         {
             get { return _name; }
@@ -42,7 +42,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("备注")]
         public string Remark
         {
             get { return _remark; }
@@ -55,7 +55,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用解锁")]
         public bool UnLock
         {
             get { return _unLock; }
@@ -68,7 +68,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用扫码")]
         public bool ReadBarcode
         {
             get { return _readBarcode; }
@@ -81,7 +81,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用调整激光功率")]
         public bool AdjustLaser
         {
             get { return _adjustLaser; }
@@ -94,7 +94,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用调整水平")]
         public bool AdjustHoriz
         {
             get { return _adjustHoriz; }
@@ -107,7 +107,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用调焦距")]
         public bool AdjustFocus
         {
             get { return _adjustFocus; }
@@ -120,7 +120,7 @@ namespace CPAS.Models
                 }
             }
         }
-        [CategoryAttribute("工序配方"), DescriptionAttribute("Set the file path of log")]
+        [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用距离标定")]
         public bool Calibration
         {
             get { return _calibration; }

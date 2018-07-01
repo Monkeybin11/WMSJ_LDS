@@ -43,7 +43,7 @@ namespace CPAS.WorkFlow
             Finish_Calib_4m,
             Calclate_From_2m_4m,
             Write_To_LDS,
-            Finis_Calib,
+            Finish_Calib,
 
             #endregion
 
@@ -81,14 +81,37 @@ namespace CPAS.WorkFlow
                 {
                     case STEP.INIT:
                         PopAndPushStep(STEP.DO_NOTHING);
-                        ShowInfo("12422435");
+                        ShowInfo("Init");
                         Thread.Sleep(200);
                         break;
 
 
 
 
-
+                    case STEP.Check_Enable_Calib:
+                        break;
+                    case STEP.Wait_Calib_2m_Cmd:
+                        break;
+                    case STEP.Read_Center_Value_2m:
+                        break;
+                    case STEP.Write_Calib_2m_Boolean_Result:
+                        break;
+                    case STEP.Finish_Calib_2m:
+                        break;
+                    case STEP.Wait_Calib_4m_Cmd:
+                        break;
+                    case STEP.Read_Center_Value_4m:
+                        break;
+                    case STEP.Write_Calib_4m_Boolean_Result:
+                        break;
+                    case STEP.Finish_Calib_4m:
+                        break;
+                    case STEP.Calclate_From_2m_4m:
+                        break;
+                    case STEP.Write_To_LDS:
+                        break;
+                    case STEP.Finish_Calib:
+                        break;
 
 
 
@@ -97,7 +120,7 @@ namespace CPAS.WorkFlow
 
                     case STEP.DO_NOTHING:
                         PopAndPushStep(STEP.INIT);
-                        ShowInfo("jksjfkjfiwf");
+                        ShowInfo("距离标定工序没有启用");
                         Thread.Sleep(200);
                         break;
                     case STEP.EMG:

@@ -218,11 +218,13 @@ namespace CPAS.ViewModels
                 if (_prescriptionUsed != value)
                 {
                     _prescriptionUsed = value;
+                    ConfigMgr.SystemParaCfgMgr.SystemParaModels[0].SetCurSelectedPrescription(value.Name);
                     RaisePropertyChanged();
                 }
             }
             get { return _prescriptionUsed; }
         }
+        public SystemParaModel SystemPataModelUsed { get { return ConfigMgr.SystemParaCfgMgr.SystemParaModels[0]; }}
         public ObservableCollection<MessageItem> PLCMessageCollection
         {
             get { return _plcMessageCollection; }

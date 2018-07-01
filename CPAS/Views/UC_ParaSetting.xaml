@@ -15,7 +15,7 @@
                             <MenuItem Header="保存" Command="{Binding SaveSystemCfgCommand}"/>
                         </ContextMenu>
                     </Grid.ContextMenu>
-                    <dxprg:PropertyGridControl  Name="SystemGridProperty" FontSize="20" ExpandCategoriesWhenSelectedObjectChanged="True" SelectedObject="{Binding }"/>
+                    <dxprg:PropertyGridControl  Name="SystemGridProperty" FontSize="20" ExpandCategoriesWhenSelectedObjectChanged="True" SelectedObject="{Binding SystemPataModelUsed}"/>
                 </Grid>
             </dx:DXTabItem>
             <dx:DXTabItem Header="配方" AllowHide="Default" ToolTip="Set system para" Height="40" Width="100" HorizontalContentAlignment="Center">

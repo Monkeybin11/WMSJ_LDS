@@ -25,7 +25,6 @@ namespace CPAS.Views
         public UC_ParaSetting()
         {
             InitializeComponent();
-            SystemGridProperty.SelectedObject = new SystemParaModel();
         }
 
        

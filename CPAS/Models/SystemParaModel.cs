@@ -15,8 +15,14 @@ namespace CPAS.Models
     }
     public class SystemParaModel : INotifyPropertyChanged
     {
-        
+        private string _curSelectedPrescription = "";
         private EnumBadBarcodeExpiration _badBarcodeExpiration;
+        public string CurSelectedPrescription {
+            get { return _curSelectedPrescription; }
+            set {
+                SetCurSelectedPrescription(value);
+            }
+        }
         public EnumBadBarcodeExpiration BadBarcodeExpiration
         {
             get { return _badBarcodeExpiration; }
@@ -29,9 +35,15 @@ namespace CPAS.Models
                 }
             }
         }
-
-
+        public void SetCurSelectedPrescription(string strName)
+        {
+            if (strName != _curSelectedPrescription)
+            {
+                _curSelectedPrescription = strName;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurSelectedPrescription"));
+            }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
-       
+        
     }
 }

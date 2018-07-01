@@ -27,6 +27,9 @@ namespace CPAS.WorkFlow
         private int nCmdAdjust_Horiz1 = -1;
         private int nCmdAdjust_Horiz2 = -1;
 
+        private bool? bAdjustHoriz1Ok = null;
+        private bool? bAdjustHoriz2Ok = null;
+
 
         public WorkTune1(WorkFlowConfig cfg) : base(cfg)
         {
@@ -94,12 +97,20 @@ namespace CPAS.WorkFlow
                 {
                     case STEP.INIT:
                         PopAndPushStep(STEP.DO_NOTHING);
-                        ShowInfo("12422435");
+                        ShowInfo("Init");
                         Thread.Sleep(200);
                         break;
+
+
+
+
+
+
+
+
                     case STEP.DO_NOTHING:
                         PopAndPushStep(STEP.INIT);
-                        ShowInfo("jksjfkjfiwf");
+                        ShowInfo("就绪");
                         Thread.Sleep(200);
                         break;
                     case STEP.EMG:
@@ -110,6 +121,27 @@ namespace CPAS.WorkFlow
                 }
             }
             return 0;
+        }
+
+        private async void AdjustHorizProcess(int nIndex)
+        {
+            if (nIndex != 1 && nIndex != 2)
+                throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
+            LDS lds = nIndex == 1 ? lds1 : lds2;
+            int nStep = 1;
+            await Task.Run(()=> {
+                switch (nStep)
+                {
+                    case 1:
+                        break;
+                    case 5:
+                        break;
+                    case 10:
+                        break;
+                    case 15:
+                        break;
+                }
+            });
         }
     }
 }

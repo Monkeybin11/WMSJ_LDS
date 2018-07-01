@@ -285,12 +285,12 @@ namespace CPAS.WorkFlow
                             if (1 == nCmdAdjustLaser1)
                             {
                                 PLC.WriteInt("", 0);    //关闭调试激光命令
-                               AdjustPower(1);
+                                AdjustPowerProcess(1);
                             }
                             if (1 == nCmdAdjustLaser2)
                             {
                                 PLC.WriteInt("", 0);
-                                AdjustPower(2);
+                                AdjustPowerProcess(2);
                             }
 
                             PopAndPushStep(STEP.Write_Adjust_Laser_Power_Result);
@@ -313,6 +313,7 @@ namespace CPAS.WorkFlow
                     #endregion
 
                     case STEP.DO_NOTHING:   //调试使用
+                        ShowInfo("就绪");
                         Thread.Sleep(100);
                         break;
 
@@ -387,12 +388,12 @@ namespace CPAS.WorkFlow
             }
             return null;
         } 
-        private async void  AdjustPower(int nIndex)
+        private async void  AdjustPowerProcess(int nIndex)
         {
             await Task<bool?>.Run(() => {
                 bool? bRet = null;
                 if (nIndex < 1 || nIndex > 2)
-                    throw new Exception($"nIndex now is {nIndex},must be range in [1,3]");
+                    throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
                 LDS lds = nIndex == 1 ? lds1 : lds2;
                 double powerValue = lds.GetCurLaserPowerValue();
                 bool bIncrease = false;
