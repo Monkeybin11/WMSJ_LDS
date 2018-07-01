@@ -34,6 +34,7 @@ namespace CPAS.Classes
             if (File.Exists(strFileFullPathName))
                 File.Delete(strFileFullPathName);
         }
+  
         #endregion
 
         #region Work Directory

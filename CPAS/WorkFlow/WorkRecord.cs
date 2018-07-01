@@ -7,6 +7,7 @@ using GalaSoft.MvvmLight.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -34,7 +35,7 @@ namespace CPAS.WorkFlow
         private int nCmdUnLock2 = -1;
 
         //scan barcode cmd
-        private int nCmdScanbarcode1=-1;
+        private int nCmdScanbarcode1 = -1;
         private int nCmdScanbarcode2 = -1;
         private string strBarcode1 = "";
         private string strBarcode2 = "";
@@ -42,6 +43,8 @@ namespace CPAS.WorkFlow
         //Adjust laser cmd
         private int nCmdAdjustLaser1 = -1;
         private int nCmdAdjustLaser2 = -1;
+        bool? bAdjustLaser1Ok = null;
+        bool? bAdjustLaser2Ok = null;
 
         private enum STEP : int
         {
@@ -59,6 +62,7 @@ namespace CPAS.WorkFlow
 
             Check_Enable_Adjust_Laser_Power,
             Wait_Adjust_Laser_Power_Cmd,
+            Adjust_Power,
             Write_Adjust_Laser_Power_Result,
             #endregion
 
@@ -67,7 +71,7 @@ namespace CPAS.WorkFlow
             DO_NOTHING,
         }
 
-        protected override bool UserInit()
+        protected override  bool UserInit()
         {
             bool bRet = false;
 
@@ -91,7 +95,7 @@ namespace CPAS.WorkFlow
             string str = PLC.ReadString("R100", strTest.Length);
 #endif
 
-#endregion
+            #endregion
 
             LogExcel Fake_Barcode_Excel = new LogExcel(FILE_FAKE_BARCODE_FILE);
             Fake_Barcode_Excel.ExcelToDataTable(ref Fake_Barcode_Dt, "Sheet1");
@@ -102,17 +106,14 @@ namespace CPAS.WorkFlow
                     lds2 != null &&
                     BarcodeScanner1 != null &&
                     BarcodeScanner2 != null &&
-                    PLC !=null;
+                    PLC != null;
             if (!bRet)
                 ShowInfo("初始化失败");
-
             return bRet;
 
         }
         public WorkRecord(WorkFlowConfig cfg) : base(cfg)
         {
-            
-        
             #region >>>>
 
             #endregion
@@ -152,28 +153,42 @@ namespace CPAS.WorkFlow
                         if (1 == nCmdUnLock1 || 1 == nCmdUnLock2)
                         {
                             Thread.Sleep(200);
-                            nCmdUnLock1 = PLC.ReadInt("");
+                            nCmdUnLock1 = PLC.ReadInt("");  //清空命令
                             nCmdUnLock2 = PLC.ReadInt("");
                             if (1 == nCmdUnLock1 || 1 == nCmdUnLock2)
                             {
                                 if (1 == nCmdUnLock1)
                                 {
                                     //解锁1
+                                    SendUnlockReq(nCmdUnLock1);
                                 }
                                 if (1 == nCmdUnLock2)
                                 {
                                     //解锁2
+                                    SendUnlockReq(nCmdUnLock2);
                                 }
                                 PopAndPushStep(STEP.Write_Unlock_Result);
                             }
                         }
                         break;
-                    case STEP.Write_Unlock_Result:
-                        if (1 == nCmdUnLock1)
-                            PLC.WriteInt("", 1);
-                        if (1 == nCmdUnLock2)
-                            PLC.WriteInt("", 1);
-                        PopAndPushStep(STEP.Check_Enable_ScanBarcode);
+                    case STEP.Write_Unlock_Result:     
+                        if ((1 == nCmdUnLock1 || 1 == nCmdUnLock2))
+                        {
+                            string[] strRet = GetUnlockResult();
+                            if (strRet != null)
+                            {
+                                if (1 == nCmdUnLock1)
+                                    PLC.WriteInt("", strRet[0].ToLower()=="ok" ? 1 : 0);        //将解锁结果写入寄存器
+                                if (1 == nCmdUnLock2)
+                                    PLC.WriteInt("", strRet[1].ToLower() == "ok" ? 1 : 0);
+                                if (strRet!=null)  //等待结果过来
+                                    PopAndPushStep(STEP.Check_Enable_ScanBarcode);
+                            }
+                        }
+                        else
+                        {
+                            PopAndPushStep(STEP.Check_Enable_ScanBarcode);
+                        }
                         break;
                     #endregion
 
@@ -194,9 +209,15 @@ namespace CPAS.WorkFlow
                         nCmdScanbarcode2 = PLC.ReadInt("");
                         if (1 == nCmdScanbarcode1 || 1 == nCmdScanbarcode2)
                         {
-                            PLC.WriteInt("", 2);
-                            PLC.WriteInt("", 2);
-                            PopAndPushStep(STEP.Write_Barcode_To_Register);
+                            Thread.Sleep(200);
+                            nCmdScanbarcode1 = PLC.ReadInt("");
+                            nCmdScanbarcode2 = PLC.ReadInt("");
+                            if (1 == nCmdScanbarcode1 || 1 == nCmdScanbarcode2)
+                            {
+                                PLC.WriteInt("", 2);
+                                PLC.WriteInt("", 2);
+                                PopAndPushStep(STEP.Write_Barcode_To_Register);
+                            }
                         }
                         break;
                     case STEP.Write_Barcode_To_Register:
@@ -215,7 +236,7 @@ namespace CPAS.WorkFlow
                     case STEP.Write_Scan_Result:
                         if (nCmdScanbarcode1 == 1)
                         {
-                            if(Prescription.BarcodeLength== strBarcode1.Length)
+                            if (Prescription.BarcodeLength == strBarcode1.Length)
                                 PLC.WriteInt("", 1);    //条码1结果码1结果
                             else
                                 PLC.WriteInt("", 0);    //条码1结果码1结果
@@ -239,7 +260,7 @@ namespace CPAS.WorkFlow
                         }
                         else
                         {
-                            PopAndPushStep(STEP.INIT);//测试完毕，直接跳到开始
+                            PopAndPushStep(STEP.INIT);//如果此工序不测试，直接跳到开始
                         }
                         break;
                     case STEP.Wait_Adjust_Laser_Power_Cmd:
@@ -247,19 +268,46 @@ namespace CPAS.WorkFlow
                         nCmdAdjustLaser2 = PLC.ReadInt("");
                         if (nCmdAdjustLaser1 == 1 || nCmdAdjustLaser1 == 1)
                         {
-                            Thread.Sleep(200);
+                            Thread.Sleep(200);  //消抖
                             nCmdAdjustLaser1 = PLC.ReadInt("");
                             nCmdAdjustLaser2 = PLC.ReadInt("");
                             if (nCmdAdjustLaser1 == 1 || nCmdAdjustLaser1 == 1)
                             {
-
-                                PopAndPushStep(STEP.Write_Adjust_Laser_Power_Result);
+                                PopAndPushStep(STEP.Adjust_Power);
                             }
                         }
                         break;
+                    case STEP.Adjust_Power:     //调整激光
+                        bAdjustLaser1Ok = null;
+                        bAdjustLaser2Ok = null;
+                        if (1 == nCmdAdjustLaser1 || 1 == nCmdAdjustLaser2)
+                        {
+                            if (1 == nCmdAdjustLaser1)
+                            {
+                                PLC.WriteInt("", 0);    //关闭调试激光命令
+                               AdjustPower(1);
+                            }
+                            if (1 == nCmdAdjustLaser2)
+                            {
+                                PLC.WriteInt("", 0);
+                                AdjustPower(2);
+                            }
 
-                    //中间缺少调功率过程
+                            PopAndPushStep(STEP.Write_Adjust_Laser_Power_Result);
+                        }
+                        break;
+  
                     case STEP.Write_Adjust_Laser_Power_Result:
+                        if ((1 == nCmdAdjustLaser1 && bAdjustLaser1Ok.HasValue) || (1 == nCmdAdjustLaser2 && bAdjustLaser2Ok.HasValue))
+                        {
+                            if (1 == nCmdAdjustLaser1 && bAdjustLaser1Ok.HasValue)
+                                PLC.WriteInt("", (bool)bAdjustLaser1Ok ? 1 : 0);
+                            if (1 == nCmdAdjustLaser2 && bAdjustLaser2Ok.HasValue)
+                                PLC.WriteInt("", (bool)bAdjustLaser2Ok ? 1 : 0);
+                            PopAndPushStep(STEP.INIT);
+                        }
+                        else
+                            PopAndPushStep(STEP.INIT);  
                         ShowPower(EnumUnit.μW, false);  //关闭激光调整
                         break;
                     #endregion
@@ -284,22 +332,25 @@ namespace CPAS.WorkFlow
         {
             if (bMonitor)
             {
-                ctsMonitorPower = new CancellationTokenSource();
-                await Task.Run(() =>
+                if (ctsMonitorPower == null)
                 {
-                    StringBuilder sb = new StringBuilder();
-                    while (!ctsMonitorPower.IsCancellationRequested)
+                    ctsMonitorPower = new CancellationTokenSource();
+                    await Task.Run(() =>
                     {
-                        sb.Clear();
-                        sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
-                        sb.Append(" ");
-                        sb.Append(unit.ToString());
-                        sb.Append(",");
-                        sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
-                        sb.Append(unit.ToString());
-                        Messenger.Default.Send<Tuple<string, string, string>>(new Tuple<string, string, string>(cfg.Name, "ShowPower", sb.ToString()), "WorkFlowMessage");
-                    }
-                }, ctsMonitorPower.Token);
+                        StringBuilder sb = new StringBuilder();
+                        while (!ctsMonitorPower.IsCancellationRequested)
+                        {
+                            sb.Clear();
+                            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
+                            sb.Append(" ");
+                            sb.Append(unit.ToString());
+                            sb.Append(",");
+                            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
+                            sb.Append(unit.ToString());
+                            Messenger.Default.Send<Tuple<string, string, string>>(new Tuple<string, string, string>(cfg.Name, "ShowPower", sb.ToString()), "WorkFlowMessage");
+                        }
+                    }, ctsMonitorPower.Token);
+                }
             }
             else
             {
@@ -309,6 +360,57 @@ namespace CPAS.WorkFlow
                     ctsMonitorPower = null;
                 }
             }
+        }
+        /// <summary>
+        /// 1-解锁lds1,   2-解锁lds2，   3-解锁lds1和lds2
+        /// </summary>
+        /// <param name="nIndex"></param>
+        private void SendUnlockReq(int nIndex)
+        {
+            if (nIndex < 1 || nIndex > 3)
+                throw new Exception($"nIndex now is {nIndex},must be range in [1,3]");
+            if (!Directory.Exists(@"c:\ldsDropbox"))
+                Directory.CreateDirectory(@"c:\ldsDropbox");
+            if (!Directory.Exists(@"c:\ldsTemp"))
+                Directory.CreateDirectory(@"c:\ldsTemp");
+
+            File.WriteAllText(@"c:\ldsTemp\UnlockReq.txt", $"Unlock,{nIndex}");
+            File.Copy(@"c:\ldsTemp\UnlockReq.txt", @"c:\ldsDropbox\UnlockReq.txt");
+        }
+        private string[] GetUnlockResult()
+        {
+            if (File.Exists(@"c:\ldsDropbox\UnlockResult.txt"))
+            {
+                string[] strResult = File.ReadAllText(@"c:\ldsDropbox\UnlockResult.txt").Split(',');
+                File.Delete(@"c:\ldsDropbox\UnlockResult.txt");
+                return strResult;   //对方将返回OK,NG的随机组合，中间以逗号隔开
+            }
+            return null;
+        } 
+        private async void  AdjustPower(int nIndex)
+        {
+            await Task<bool?>.Run(() => {
+                bool? bRet = null;
+                if (nIndex < 1 || nIndex > 2)
+                    throw new Exception($"nIndex now is {nIndex},must be range in [1,3]");
+                LDS lds = nIndex == 1 ? lds1 : lds2;
+                double powerValue = lds.GetCurLaserPowerValue();
+                bool bIncrease = false;
+                if (powerValue < Prescription.LDSPower[0])
+                    bIncrease = true;
+                if (powerValue > Prescription.LDSPower[1])
+                    bIncrease = false;
+                while (powerValue < Prescription.LDSPower[0] || powerValue > Prescription.LDSPower[1])  //直到功率满足要求
+                {
+                    Thread.Sleep(100);
+                    lds.InCreasePower(bIncrease);
+                }
+                bRet = true;
+                if (nIndex == 1)
+                    bAdjustLaser1Ok = bRet;
+                if (nIndex == 2)
+                    bAdjustLaser2Ok = bRet;
+            });
         }
     }
 }

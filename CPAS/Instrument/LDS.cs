@@ -68,7 +68,7 @@ namespace CPAS.Instrument
         }
 
         #region 设置功率
-        public bool CreasePower(bool bCrease)
+        public bool InCreasePower(bool bCrease)
         { 
             string strCmd=string.Format("laserpower{0}$",bCrease?"add" : "sub");
             lock (comPort)
