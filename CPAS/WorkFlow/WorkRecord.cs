@@ -330,7 +330,7 @@ namespace CPAS.WorkFlow
             return 0;
         }
 
-        private async void ShowPower(EnumUnit unit, bool bMonitor = true)
+        private async void ShowPower(EnumUnit unit, bool bMonitor = true)   //这个监控是两个一起监控
         {
             if (bMonitor)
             {

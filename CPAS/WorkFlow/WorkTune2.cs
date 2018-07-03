@@ -28,30 +28,39 @@ namespace CPAS.WorkFlow
         private bool? bAdjustFocus1Ok = null;
         private bool? bAdjustFocus2Ok = null;
 
+        private CancellationTokenSource ctsMonitorValue1 = null;
+        private CancellationTokenSource ctsMonitorValue2 = null;
+
         private enum STEP : int
         {
             INIT,
 
             //调焦距
-            #region Station3
+    
             Check_Enable_Adjust_Focus,
+
+            //分支
             Wait_Focus_Grab_Cmd,
             Grab_Focus_Image,
             Cacul_Focus_Servo_Angle,
-            Send_Focus_Calcu_Angle_Finish_Signal,
 
             Wait_Adjust_Foucs_Cmd,
             Read_Focus_Value,
             Check_Foucs_Is_Ok,
-            Adjust_A_Small_Step,
-            Read_Focus_Value_For_GetDir,    //先判断方向
-            Write_Angle_To_Register_i,
-            Wait_Servo_Finish_i,
-            Read_Focus_Value_i,
-            Check_Focus_Is_Ok_i,
 
+            Turn_A_Circle_Outside_For_Safe,
+            Turn_Slowly_inside,
+            GetMaxValue,
+            Write_MaxValuePos_To_Register,
+            TurnBack_MaxValue_Position, //退回最大点处
             Finis_Adjust_Focus,
-            #endregion
+            //分支
+
+
+            Wait_Finish_Both,
+
+
+
 
             EMG,
             EXIT,
@@ -94,123 +103,21 @@ namespace CPAS.WorkFlow
                     case STEP.Check_Enable_Adjust_Focus:
                         if (Prescription.AdjustFocus)
                         {
-                            PopAndPushStep(STEP.Wait_Focus_Grab_Cmd);
+                            //PopAndPushStep(STEP.Wait_Focus_Grab_Cmd);
+                            AdjustFocusProcess(1);
+                            AdjustFocusProcess(2);
+                            PopAndPushStep(STEP.Wait_Finish_Both);
                         }
                         else
                         {
                             PopAndPushStep(STEP.DO_NOTHING);
                         }
                         break;
-                    case STEP.Wait_Focus_Grab_Cmd:
-                        nCmdFocus_Grab1 = PLC.ReadInt("");
-                        nCmdFocus_Grab2 = PLC.ReadInt("");
-                        if ((1 == nCmdFocus_Grab1 || 1 == nCmdFocus_Grab2))
-                        {
-                            nCmdFocus_Grab1 = PLC.ReadInt("");
-                            nCmdFocus_Grab2 = PLC.ReadInt("");
-                            if (1 == nCmdFocus_Grab1 && 1 == nCmdFocus_Grab2)
-                            {
-                                PopAndPushStep(STEP.Grab_Focus_Image);
-                            }
-                        }
-                        else if (10 == nCmdFocus_Grab1 && 10 == nCmdFocus_Grab2)
-                        {
-                            Thread.Sleep(200);
-                            nCmdFocus_Grab1 = PLC.ReadInt("");
-                            nCmdFocus_Grab2 = PLC.ReadInt("");
-                            if (10 == nCmdFocus_Grab1 && 10 == nCmdFocus_Grab2)
-                            {
-                                PopAndPushStep(STEP.INIT);
-                            }
-                        }
-                        break;
-                    case STEP.Grab_Focus_Image:
-                        if (1 == nCmdFocus_Grab1)
-                        {
-                            Vision.Vision.Instance.GrabImage(Cam5);
-                        }
-                        if (1 == nCmdFocus_Grab2)
-                        {
-                            Vision.Vision.Instance.GrabImage(Cam6);
-                        }
-                        PopAndPushStep(STEP.Cacul_Focus_Servo_Angle);
-                        break;
-                    case STEP.Cacul_Focus_Servo_Angle:
-                        if (1 == nCmdFocus_Grab1)
-                        {
-                            if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.T1, Cam5, null, out object oResult1))
-                            {
-                                PLC.WriteDint("", Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000)); //角度
-                                PLC.WriteInt("", 1);    //拍摄1的最终结果
-                            }
-                            else
-                                PLC.WriteInt("", 0);    //拍摄1的最终结果
 
-                        }
-                        if (1 == nCmdFocus_Grab2)
-                        {
-                            if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.T1, Cam6, null, out object oResult2))
-                            {
-                                PLC.WriteDint("", Convert.ToInt32(Math.Round(double.Parse(oResult2.ToString()), 3) * 1000)); //角度
-                                PLC.WriteInt("", 1);    //拍摄1的最终结果
-                            }
-                            else
-                                PLC.WriteInt("", 0);    //拍摄2的最终结果
-                        }
-                        PopAndPushStep(STEP.Send_Focus_Calcu_Angle_Finish_Signal);
-                        break;
-      
-                    case STEP.Send_Focus_Calcu_Angle_Finish_Signal:
-                        PLC.WriteInt("", 2);    //完成角度拍摄
+                    case STEP.Wait_Finish_Both:
                         break;
 
-
-
-                    case STEP.Wait_Adjust_Foucs_Cmd:       //有可能拍照全部NG
-                        nCmdAdjust_Foucs1 = PLC.ReadInt("");
-                        nCmdAdjust_Foucs2= PLC.ReadInt("");
-                        if (1 == nCmdAdjust_Foucs1 || 1 == nCmdAdjust_Foucs2)
-                        {
-                            Thread.Sleep(200);
-                            if (1 == nCmdAdjust_Foucs1 || 1 == nCmdAdjust_Foucs2)
-                            {
-                                PopAndPushStep(STEP.Read_Focus_Value);
-                            }
-                        }
-                        else if (10== nCmdAdjust_Foucs1 && 10== nCmdAdjust_Foucs2)
-                        {
-                            PopAndPushStep(STEP.INIT);
-                        }
-                        break;
-
-
-                    case STEP.Read_Focus_Value:         //开始调整焦距，需要先判断旋转方向
-                        break;
-                    case STEP.Check_Foucs_Is_Ok:
-                        break;
-                    case STEP.Adjust_A_Small_Step:
-                        break;
-                    case STEP.Read_Focus_Value_For_GetDir:
-                        break;    //先判断方向
-                    case STEP.Write_Angle_To_Register_i:
-                        break;
-                    case STEP.Wait_Servo_Finish_i:
-                        break;
-                    case STEP.Read_Focus_Value_i:
-                        break;
-                    case STEP.Check_Focus_Is_Ok_i:
-                        break;
-
-                    case STEP.Finis_Adjust_Focus:
-                        break;
-
-
-
-
-
-
-
-
+  
 
                     case STEP.DO_NOTHING:
                         PopAndPushStep(STEP.INIT);
@@ -232,20 +139,103 @@ namespace CPAS.WorkFlow
             if (nIndex != 1 && nIndex != 2)
                 throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
             LDS lds = nIndex == 1 ? lds1 : lds2;
-            int nStep = 1;
+            string strCmdFocusGrabRegister = 1 == nIndex ? "" : "";
+            string strCmdFocusStartRegister= 1 == nIndex ? "" : "";
+
+
+            string strCalAngleJointRegister= 1 == nIndex ? "" : "";
+            string strJointBoolResultRegister = 1 == nIndex ? "" : "";
+            int nCamID= 1 == nIndex ? Cam5 : Cam6;
+            
+            int nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
+            int nCmdAdjustStart= PLC.ReadInt(strCmdFocusGrabRegister);
+
+            STEP nStep=STEP.Wait_Focus_Grab_Cmd;
             await Task.Run(() => {
                 switch (nStep)
                 {
-                    case 1:
+                    case STEP.Wait_Focus_Grab_Cmd:
+                        nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
+                        if ((1 == nCmdFocus_Grab))
+                                PopAndPushStep(STEP.Grab_Focus_Image);
+                        else if (10 == nCmdFocus_Grab)      //如果不需要拍照
+                                PopAndPushStep(STEP.INIT);
                         break;
-                    case 5:
+                    case STEP.Grab_Focus_Image:
+                        Vision.Vision.Instance.GrabImage(nCamID);
+                        PopAndPushStep(STEP.Cacul_Focus_Servo_Angle);
                         break;
-                    case 10:
+                    case STEP.Cacul_Focus_Servo_Angle:
+                        if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.T1, nCamID, null, out object oResult1))
+                        {
+                            PLC.WriteDint(strCalAngleJointRegister, Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000)); //角度
+                            PLC.WriteInt(strJointBoolResultRegister, 1);    //拍摄1的最终结果
+                        }
+                        else
+                            PLC.WriteInt(strJointBoolResultRegister, 0);    //拍摄1的最终结果
+                        PopAndPushStep(STEP.Wait_Adjust_Foucs_Cmd);
                         break;
-                    case 15:
+
+
+
+                    case STEP.Wait_Adjust_Foucs_Cmd:       //有可能拍照全部NG
+                        nCmdAdjustStart = PLC.ReadInt(strCmdFocusStartRegister);
+                        if (1 == nCmdAdjustStart) 
+                             PopAndPushStep(STEP.Read_Focus_Value); 
+                        else if (10 == nCmdAdjustStart)
+                            PopAndPushStep(STEP.INIT);
+                        break;
+
+                    case STEP.Read_Focus_Value:
+
+                        break;
+                    case STEP.Check_Foucs_Is_Ok:
+
+                        break;
+                    case STEP.Turn_A_Circle_Outside_For_Safe:
+                        break;
+                    case STEP.Turn_Slowly_inside:
+                        break;
+                    case STEP.GetMaxValue:
+                        break;
+                    case STEP.Write_MaxValuePos_To_Register:
+                        break;
+                    case STEP.TurnBack_MaxValue_Position: //退回最大点处
+                        break;
+                    case STEP.Finis_Adjust_Focus:
                         break;
                 }
             });
+        }
+
+        private async void StartMonitor(int nIndex, bool bMonitor = true)
+        {
+            if(nIndex!=1 && nIndex!=2)
+                throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
+            CancellationTokenSource cts = nIndex == 1 ? ctsMonitorValue1 : ctsMonitorValue2;
+            if (bMonitor)
+            {
+                if (cts == null)
+                {
+                    cts = new CancellationTokenSource();
+                    await Task.Run(() =>
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        while (!ctsMonitorPower.IsCancellationRequested)
+                        {
+                           
+                        }
+                    }, ctsMonitorPower.Token);
+                }
+            }
+            else
+            {
+                if (ctsMonitorPower != null)
+                {
+                    ctsMonitorPower.Cancel();
+                    ctsMonitorPower = null;
+                }
+            }
         }
     }
 }

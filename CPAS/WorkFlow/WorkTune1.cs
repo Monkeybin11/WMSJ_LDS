@@ -42,6 +42,8 @@ namespace CPAS.WorkFlow
             #region Station 2
             //调水平
             Check_Enable_Adjust_Horiz,  //计算对接角度
+
+
             Wait_Horiz_Grab_Cmd,
             Horiz_Grab_Image,
             Cacul_Horiz_Servo_Angle,
@@ -57,11 +59,14 @@ namespace CPAS.WorkFlow
             Cacul_Blob_Angle,
             Write_Blob_Angle_To_Register,
             Write_Blob_Boolean_Result,
-            Wait_Servo_Finish_Step,        //——》GrabImage
-
+            Wait_Servo_Finish_Step,        //——》GrabImage   //先旋转到X轴附近，再旋转90度，找Max，然后通知伺服回头
+            Check_Blob_Is_OnX,
+            Turn_Off_Light,
+            Turn90Degree,
+            FindMaxValue,
+            CheckValueIsOk,
+            TurnBackToMaxPos,
             Finish_Adjust_Horiz,
-
-           
             #endregion
 
 
