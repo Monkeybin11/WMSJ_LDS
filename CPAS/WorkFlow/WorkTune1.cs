@@ -31,6 +31,14 @@ namespace CPAS.WorkFlow
         private bool? bAdjustHoriz2Ok = null;
 
 
+        //Monitor
+        private CancellationTokenSource ctsMonitorValue1 = null;
+        private CancellationTokenSource ctsMonitorValue2 = null;
+        private Task taskMonitorValue1 = null;
+        private Task taskMonitorValue2 = null;
+        private Dictionary<Int32, int> PosValueDic1 = new Dictionary<Int32, int>();
+        private Dictionary<Int32, int> PosValueDic2 = new Dictionary<Int32, int>();
+
         public WorkTune1(WorkFlowConfig cfg) : base(cfg)
         {
 
@@ -147,6 +155,66 @@ namespace CPAS.WorkFlow
                         break;
                 }
             });
+        }
+        private void StartMonitor1(bool bMonitor = true)
+        {
+            if (bMonitor)
+            {
+                if (taskMonitorValue1 == null || taskMonitorValue1.IsCanceled || taskMonitorValue1.IsCompleted)
+                {
+                    PosValueDic1.Clear();
+                    ctsMonitorValue1 = new CancellationTokenSource();
+                    taskMonitorValue1 = new Task(() => {
+                        while (!ctsMonitorValue1.Token.IsCancellationRequested)
+                        {
+                            Thread.Sleep(50);
+                            int value = lds1.GetFocusValue();
+                            Int32 pos = PLC.ReadDint(""); //读取实时位置
+                            PosValueDic1.Add(pos, value);
+                        }
+
+                    }, ctsMonitorValue1.Token);
+                }
+            }
+            else
+            {
+                if (ctsMonitorValue1 != null)
+                {
+                    ctsMonitorValue1.Cancel();
+                    ctsMonitorValue1.Dispose();
+                    ctsMonitorValue1 = null;
+                }
+            }
+        }
+        private void StartMonitor2(bool bMonitor = true)
+        {
+            if (bMonitor)
+            {
+                if (taskMonitorValue2 == null || taskMonitorValue2.IsCanceled || taskMonitorValue2.IsCompleted)
+                {
+                    PosValueDic2.Clear();
+                    ctsMonitorValue2 = new CancellationTokenSource();
+                    taskMonitorValue2 = new Task(() => {
+                        while (!ctsMonitorValue2.Token.IsCancellationRequested)
+                        {
+                            Thread.Sleep(50);
+                            int value = lds2.GetFocusValue();
+                            Int32 pos = PLC.ReadDint(""); //读取实时位置
+                            PosValueDic2.Add(pos, value);
+                        }
+
+                    }, ctsMonitorValue2.Token);
+                }
+            }
+            else
+            {
+                if (ctsMonitorValue2 != null)
+                {
+                    ctsMonitorValue2.Cancel();
+                    ctsMonitorValue2.Dispose();
+                    ctsMonitorValue2 = null;
+                }
+            }
         }
     }
 }

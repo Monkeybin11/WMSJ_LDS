@@ -85,9 +85,6 @@ namespace CPAS.WorkFlow
                         Thread.Sleep(200);
                         break;
 
-
-
-
                     case STEP.Check_Enable_Calib:
                         break;
                     case STEP.Wait_Calib_2m_Cmd:

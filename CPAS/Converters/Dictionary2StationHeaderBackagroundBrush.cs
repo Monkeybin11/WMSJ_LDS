@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace CPAS.Converters
 {
@@ -15,9 +15,9 @@ namespace CPAS.Converters
         {
             Dictionary<string, WorkFlow.WorkFlowBase> dic = value as Dictionary<string, WorkFlow.WorkFlowBase>;
             if (dic.Keys.Contains(parameter.ToString()))
-                return new SolidBrush(Color.Green);
+                return new SolidColorBrush(Color.FromRgb(0,255,0));
             else
-                return new SolidBrush(Color.Gray);
+                return new SolidColorBrush(Color.FromRgb(128,128,128));
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

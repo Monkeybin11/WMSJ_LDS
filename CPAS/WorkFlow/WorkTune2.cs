@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace CPAS.WorkFlow
 {
+    public delegate void MonitorValueDelegate(bool bMonitor);
     public class WorkTune2 : WorkFlowBase
     {
         private PrescriptionGridModel Prescription = null;   //配方信息
@@ -30,6 +31,10 @@ namespace CPAS.WorkFlow
 
         private CancellationTokenSource ctsMonitorValue1 = null;
         private CancellationTokenSource ctsMonitorValue2 = null;
+        private Task taskMonitorValue1 = null;
+        private Task taskMonitorValue2 = null;
+        private Dictionary<Int32, int> PosValueDic1 = new Dictionary<Int32, int>();
+        private Dictionary<Int32, int> PosValueDic2 = new Dictionary<Int32, int>();
 
         private enum STEP : int
         {
@@ -46,14 +51,17 @@ namespace CPAS.WorkFlow
 
             Wait_Adjust_Foucs_Cmd,
             Read_Focus_Value,
-            Check_Foucs_Is_Ok,
 
             Turn_A_Circle_Outside_For_Safe,
+            Wait_CircleOutside_Ok,
             Turn_Slowly_inside,
+            Wait_SlowLy_Inside_Ok,
             GetMaxValue,
             Write_MaxValuePos_To_Register,
-            TurnBack_MaxValue_Position, //退回最大点处
-            Finis_Adjust_Focus,
+            Wait_TurnBack_MaxValue_Position, //退回最大点处
+
+            Finish_With_Error,
+            Finish_Adjust_Focus,
             //分支
 
 
@@ -114,7 +122,15 @@ namespace CPAS.WorkFlow
                         }
                         break;
 
+
+
                     case STEP.Wait_Finish_Both:
+
+                        if (2 == PLC.ReadInt("R267") && 2 == PLC.ReadInt("R288"))
+                        {
+                            //保存结果
+                            PopAndPushStep(STEP.INIT);
+                        }
                         break;
 
   
@@ -139,17 +155,26 @@ namespace CPAS.WorkFlow
             if (nIndex != 1 && nIndex != 2)
                 throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
             LDS lds = nIndex == 1 ? lds1 : lds2;
-            string strCmdFocusGrabRegister = 1 == nIndex ? "" : "";
-            string strCmdFocusStartRegister= 1 == nIndex ? "" : "";
+            
+           
+            string strCmdFocusGrabRegister = 1 == nIndex ? "R211" : "R237";
+            string strCalAngleJointAngleRegister= 1 == nIndex ? "R213" : "R239"; //Dint
+            string strJointBoolResultRegister = 1 == nIndex ? "R212" : "R238";  //Int
 
-
-            string strCalAngleJointRegister= 1 == nIndex ? "" : "";
-            string strJointBoolResultRegister = 1 == nIndex ? "" : "";
+            string strCmdFocusStartRegister = 1 == nIndex ? "R267" : "R288";
+            string strAdjustFocusAngleRegister= 1 == nIndex ? "R269" : "R290";   //Dint
+            string strAdjustFocusGrabRegister = 1 == nIndex ? "R268" : "R289";   //Int
+            string strCmdSingleStepRegister = 1 == nIndex ? "R271" : "R292";   //Int
+            
+            
+            MonitorValueDelegate monitorValueDel = 1 == nIndex? new MonitorValueDelegate(StartMonitor1): new MonitorValueDelegate(StartMonitor2);
             int nCamID= 1 == nIndex ? Cam5 : Cam6;
             
             int nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
             int nCmdAdjustStart= PLC.ReadInt(strCmdFocusGrabRegister);
 
+            Int32 maxPos = 0;
+            
             STEP nStep=STEP.Wait_Focus_Grab_Cmd;
             await Task.Run(() => {
                 switch (nStep)
@@ -157,9 +182,11 @@ namespace CPAS.WorkFlow
                     case STEP.Wait_Focus_Grab_Cmd:
                         nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
                         if ((1 == nCmdFocus_Grab))
-                                PopAndPushStep(STEP.Grab_Focus_Image);
+                            PopAndPushStep(STEP.Grab_Focus_Image);
                         else if (10 == nCmdFocus_Grab)      //如果不需要拍照
-                                PopAndPushStep(STEP.INIT);
+                        {
+                            PopAndPushStep(STEP.Finish_Adjust_Focus);
+                        }
                         break;
                     case STEP.Grab_Focus_Image:
                         Vision.Vision.Instance.GrabImage(nCamID);
@@ -168,11 +195,11 @@ namespace CPAS.WorkFlow
                     case STEP.Cacul_Focus_Servo_Angle:
                         if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.T1, nCamID, null, out object oResult1))
                         {
-                            PLC.WriteDint(strCalAngleJointRegister, Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000)); //角度
-                            PLC.WriteInt(strJointBoolResultRegister, 1);    //拍摄1的最终结果
+                            PLC.WriteDint(strCalAngleJointAngleRegister, Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000)); //角度
+                            PLC.WriteInt(strJointBoolResultRegister, 2);    //拍摄的最终结果
                         }
                         else
-                            PLC.WriteInt(strJointBoolResultRegister, 0);    //拍摄1的最终结果
+                            PLC.WriteInt(strJointBoolResultRegister, 1);    //拍摄的最终结果
                         PopAndPushStep(STEP.Wait_Adjust_Foucs_Cmd);
                         break;
 
@@ -183,57 +210,123 @@ namespace CPAS.WorkFlow
                         if (1 == nCmdAdjustStart) 
                              PopAndPushStep(STEP.Read_Focus_Value); 
                         else if (10 == nCmdAdjustStart)
-                            PopAndPushStep(STEP.INIT);
+                            PopAndPushStep(STEP.Finish_With_Error); 
                         break;
 
                     case STEP.Read_Focus_Value:
-
-                        break;
-                    case STEP.Check_Foucs_Is_Ok:
-
+                         if(lds.GetFocusValue()>Prescription.LDSHoriValue6m)    //如果大于直接通过
+                            PopAndPushStep(STEP.Finish_Adjust_Focus);
+                        else
+                            PopAndPushStep(STEP.Turn_A_Circle_Outside_For_Safe);
                         break;
                     case STEP.Turn_A_Circle_Outside_For_Safe:
+                        PLC.WriteDint(strAdjustFocusAngleRegister, 360 * 1000);//
+                        PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
+                        PopAndPushStep(STEP.Wait_CircleOutside_Ok);
                         break;
-                    case STEP.Turn_Slowly_inside:
+                    case STEP.Wait_CircleOutside_Ok:
+                        if (2 == PLC.ReadInt(strCmdSingleStepRegister))
+                            PopAndPushStep(STEP.Turn_Slowly_inside);
                         break;
-                    case STEP.GetMaxValue:
+                    case STEP.Turn_Slowly_inside:       //往里面走多少合适？
+                        PLC.WriteDint(strAdjustFocusAngleRegister, -2*360 * 1000);//
+                        PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
+                        monitorValueDel(true);  //开始监控
+                        PopAndPushStep(STEP.Wait_SlowLy_Inside_Ok);
+                        break;
+                    case STEP.Wait_SlowLy_Inside_Ok:
+                        if (2 == PLC.ReadInt(strCmdSingleStepRegister))
+                            PopAndPushStep(STEP.GetMaxValue);
+                        break;
+                    case STEP.GetMaxValue:  //寻找最大值
+                        var PosValueDic = 1 == nIndex ? PosValueDic1 : PosValueDic2;
+                        var max=PosValueDic.Max(p => p.Value);  //value
+                        maxPos = (from dic in PosValueDic where dic.Value == max select dic).ElementAt(0).Key;  //key
+                        if(max<Prescription.LDSHoriValue6m)
+                            PopAndPushStep(STEP.Finish_With_Error);
+                        else
+                            PopAndPushStep(STEP.Write_MaxValuePos_To_Register);
                         break;
                     case STEP.Write_MaxValuePos_To_Register:
+                        //用最大位置减去当前位置
+                        PLC.WriteDint(strAdjustFocusAngleRegister, maxPos - 10000);    //ddddd
+                        PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
+                        PopAndPushStep(STEP.Wait_TurnBack_MaxValue_Position);
                         break;
-                    case STEP.TurnBack_MaxValue_Position: //退回最大点处
+                    case STEP.Wait_TurnBack_MaxValue_Position: //退回最大点处
+                        if (2 == PLC.ReadInt(strCmdSingleStepRegister))
+                            PopAndPushStep(STEP.Finish_Adjust_Focus);
                         break;
-                    case STEP.Finis_Adjust_Focus:
+
+                    case STEP.Finish_With_Error:
+                        //错误处理
+                        PopAndPushStep(STEP.Finish_Adjust_Focus);  //完成
+                        break;
+                    case STEP.Finish_Adjust_Focus:
+                        //证确结果保存
+                        PLC.WriteInt(strCmdFocusStartRegister, 2);  //完成
                         break;
                 }
             });
         }
 
-        private async void StartMonitor(int nIndex, bool bMonitor = true)
+        private void StartMonitor1(bool bMonitor = true)
         {
-            if(nIndex!=1 && nIndex!=2)
-                throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
-            CancellationTokenSource cts = nIndex == 1 ? ctsMonitorValue1 : ctsMonitorValue2;
             if (bMonitor)
             {
-                if (cts == null)
+                if (taskMonitorValue1 == null || taskMonitorValue1.IsCanceled || taskMonitorValue1.IsCompleted)
                 {
-                    cts = new CancellationTokenSource();
-                    await Task.Run(() =>
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        while (!ctsMonitorPower.IsCancellationRequested)
+                    PosValueDic1.Clear();
+                    ctsMonitorValue1 = new CancellationTokenSource();
+                    taskMonitorValue1 = new Task(()=> {
+                        while (!ctsMonitorValue1.Token.IsCancellationRequested)
                         {
-                           
+                            Thread.Sleep(50);
+                            int value=lds1.GetFocusValue();
+                            Int32 pos = PLC.ReadDint(""); //读取实时位置
+                            PosValueDic1.Add(pos, value);
                         }
-                    }, ctsMonitorPower.Token);
+
+                    }, ctsMonitorValue1.Token);
                 }
             }
             else
             {
-                if (ctsMonitorPower != null)
+                if (ctsMonitorValue1 != null)
                 {
-                    ctsMonitorPower.Cancel();
-                    ctsMonitorPower = null;
+                    ctsMonitorValue1.Cancel();
+                    ctsMonitorValue1.Dispose();
+                    ctsMonitorValue1 = null;
+                }
+            }
+        }
+        private void StartMonitor2(bool bMonitor = true)
+        {
+            if (bMonitor)
+            {
+                if (taskMonitorValue2 == null || taskMonitorValue2.IsCanceled || taskMonitorValue2.IsCompleted)
+                {
+                    PosValueDic2.Clear();
+                    ctsMonitorValue2 = new CancellationTokenSource();
+                    taskMonitorValue2 = new Task(() => {
+                        while (!ctsMonitorValue2.Token.IsCancellationRequested)
+                        {
+                            Thread.Sleep(50);
+                            int value = lds2.GetFocusValue();
+                            Int32 pos = PLC.ReadDint(""); //读取实时位置
+                            PosValueDic2.Add(pos, value);
+                        }
+
+                    }, ctsMonitorValue2.Token);
+                }
+            }
+            else
+            {
+                if (ctsMonitorValue2 != null)
+                {
+                    ctsMonitorValue2.Cancel();
+                    ctsMonitorValue2.Dispose();
+                    ctsMonitorValue2 = null;
                 }
             }
         }

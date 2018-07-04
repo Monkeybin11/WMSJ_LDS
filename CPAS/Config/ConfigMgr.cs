@@ -29,7 +29,10 @@ namespace CPAS.Config
     }
     public class ConfigMgr
     {
-        private ConfigMgr() { }
+        private ConfigMgr()
+        {
+
+        }
         private static readonly Lazy<ConfigMgr> _instance = new Lazy<ConfigMgr>(() => new ConfigMgr());
         public static ConfigMgr Instance
         {
