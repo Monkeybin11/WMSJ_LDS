@@ -765,8 +765,8 @@ namespace CPAS.ViewModels
             int i = 0;
             foreach(var it in CamList)
             {
-                bool bOpen = Vision.Vision.Instance.OpenCam(i++);
-                CameraCollection.Add(new CameraItem() { CameraName = it, StrCameraState = bOpen? "Connected" : "DisConnected" });
+                //bool bOpen = Vision.Vision.Instance.OpenCam(i++);
+                //CameraCollection.Add(new CameraItem() { CameraName = it, StrCameraState = bOpen? "Connected" : "DisConnected" });
             }
             
             //Load Config

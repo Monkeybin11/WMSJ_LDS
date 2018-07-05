@@ -24,8 +24,8 @@ namespace CPAS.Models
         private BARCODESOURCE _barcodeSource;
         private int _barcodeLength;
         private double[] _ldsPower = new double[] { 105, 107 };
-        private double[] _ldsHoriValue2m = new double[] { 400, 730 };
-        private double _ldsHoriValue6m = 170;
+        private UInt16[] _ldsHoriValue2m = new UInt16[] { 400, 730 };
+        private UInt16 _ldsHoriValue6m = 170;
         private Int32 _cMosPointNumber = 1536;
 
 
@@ -179,7 +179,7 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("LDS设置"), DescriptionAttribute("设置LDS在2米处的激光强度值")]
-        public double[] LDSHoriValue2m
+        public UInt16[] LDSHoriValue2m
         {
             get { return _ldsHoriValue2m; }
             set
@@ -192,7 +192,7 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("LDS设置"), DescriptionAttribute("设置LDS在6米处的激光强度值")]
-        public double LDSHoriValue6m
+        public UInt16 LDSHoriValue6m
         {
             get { return _ldsHoriValue6m; }
             set

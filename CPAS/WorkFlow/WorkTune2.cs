@@ -18,8 +18,8 @@ namespace CPAS.WorkFlow
         private QSerisePlc PLC = null;
         private LDS lds1 = null;
         private LDS lds2 = null;
-        private readonly int Cam5=4;
-        private readonly int Cam6 = 5;
+        public enum EnumCamID { Cam5=4,Cam6}
+
         //cmd
         private int nCmdFocus_Grab1=-1;
         private int nCmdFocus_Grab2=-1;
@@ -168,7 +168,7 @@ namespace CPAS.WorkFlow
             
             
             MonitorValueDelegate monitorValueDel = 1 == nIndex? new MonitorValueDelegate(StartMonitor1): new MonitorValueDelegate(StartMonitor2);
-            int nCamID= 1 == nIndex ? Cam5 : Cam6;
+            int nCamID= 1 == nIndex ? (int)EnumCamID.Cam5 : (int)EnumCamID.Cam6;
             
             int nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
             int nCmdAdjustStart= PLC.ReadInt(strCmdFocusGrabRegister);
@@ -295,8 +295,6 @@ namespace CPAS.WorkFlow
                 if (ctsMonitorValue1 != null)
                 {
                     ctsMonitorValue1.Cancel();
-                    ctsMonitorValue1.Dispose();
-                    ctsMonitorValue1 = null;
                 }
             }
         }
@@ -325,8 +323,6 @@ namespace CPAS.WorkFlow
                 if (ctsMonitorValue2 != null)
                 {
                     ctsMonitorValue2.Cancel();
-                    ctsMonitorValue2.Dispose();
-                    ctsMonitorValue2 = null;
                 }
             }
         }

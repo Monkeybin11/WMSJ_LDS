@@ -15,7 +15,7 @@ namespace CPAS.Converters
         {
             Dictionary<string, WorkFlow.WorkFlowBase> dic = value as Dictionary<string, WorkFlow.WorkFlowBase>;
             if (dic.Keys.Contains(parameter.ToString()))
-                return new SolidColorBrush(Color.FromRgb(0,255,0));
+                return new SolidColorBrush(Color.FromRgb(0,180,0));
             else
                 return new SolidColorBrush(Color.FromRgb(128,128,128));
         }
