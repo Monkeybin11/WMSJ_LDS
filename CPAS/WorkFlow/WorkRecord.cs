@@ -122,6 +122,7 @@ namespace CPAS.WorkFlow
 
         protected override int WorkFlow()
         {
+
             ClearAllStep();
             PushStep(STEP.INIT);
             while (!cts.IsCancellationRequested)
@@ -151,13 +152,14 @@ namespace CPAS.WorkFlow
 
 
                     case STEP.Wait_UnLock_Cmd:
-                        nCmdUnLock1 = PLC.ReadInt("");
-                        nCmdUnLock2 = PLC.ReadInt("");
+                        Thread.Sleep(200);
+                        nCmdUnLock1 = PLC.ReadInt("R13");
+                        nCmdUnLock2 = PLC.ReadInt("R14");
                         if (1 == nCmdUnLock1 || 1 == nCmdUnLock2)
                         {
                             Thread.Sleep(200);
-                            nCmdUnLock1 = PLC.ReadInt("");  //清空命令
-                            nCmdUnLock2 = PLC.ReadInt("");
+                            nCmdUnLock1 = PLC.ReadInt("R13");  //清空命令
+                            nCmdUnLock2 = PLC.ReadInt("R14");
                             if (1 == nCmdUnLock1 || 1 == nCmdUnLock2)
                             {
                                 if (1 == nCmdUnLock1)
@@ -181,9 +183,9 @@ namespace CPAS.WorkFlow
                             if (strRet != null)
                             {
                                 if (1 == nCmdUnLock1)
-                                    PLC.WriteInt("", strRet[0].ToLower()=="ok" ? 1 : 0);        //将解锁结果写入寄存器
+                                    PLC.WriteInt("R15", strRet[0].ToLower()=="ok" ? 2 : 1);        //将解锁结果写入寄存器
                                 if (1 == nCmdUnLock2)
-                                    PLC.WriteInt("", strRet[1].ToLower() == "ok" ? 1 : 0);
+                                    PLC.WriteInt("R16", strRet[1].ToLower() == "ok" ? 2 : 1);
                                 if (strRet!=null)  //等待结果过来
                                     PopAndPushStep(STEP.Check_Enable_ScanBarcode);
                             }
@@ -208,17 +210,17 @@ namespace CPAS.WorkFlow
                         }
                         break;
                     case STEP.Wait_Scan_Barcode_Cmd:
-                        nCmdScanbarcode1 = PLC.ReadInt("");
-                        nCmdScanbarcode2 = PLC.ReadInt("");
+                        Thread.Sleep(200);
+                        nCmdScanbarcode1 = PLC.ReadInt("R18");
+                        nCmdScanbarcode2 = PLC.ReadInt("R42");
                         if (1 == nCmdScanbarcode1 || 1 == nCmdScanbarcode2)
                         {
                             Thread.Sleep(200);
-                            nCmdScanbarcode1 = PLC.ReadInt("");
-                            nCmdScanbarcode2 = PLC.ReadInt("");
+                            nCmdScanbarcode1 = PLC.ReadInt("R18");
+                            nCmdScanbarcode2 = PLC.ReadInt("R42");
                             if (1 == nCmdScanbarcode1 || 1 == nCmdScanbarcode2)
                             {
-                                PLC.WriteInt("", 2);
-                                PLC.WriteInt("", 2);
+                               
                                 PopAndPushStep(STEP.Write_Barcode_To_Register);
                             }
                         }
@@ -226,13 +228,15 @@ namespace CPAS.WorkFlow
                     case STEP.Write_Barcode_To_Register:
                         if (nCmdScanbarcode1 == 1)
                         {
+                          
                             strBarcode1 = BarcodeScanner1.Getbarcode();
-                            PLC.WriteString("", strBarcode1);
+                            PLC.WriteString("20", strBarcode1);
                         }
                         if (nCmdScanbarcode2 == 1)
                         {
+                            
                             strBarcode2 = BarcodeScanner1.Getbarcode();
-                            PLC.WriteString("", strBarcode2);
+                            PLC.WriteString("44", strBarcode2);
                         }
                         PopAndPushStep(STEP.Write_Scan_Result);
                         break;
@@ -240,16 +244,19 @@ namespace CPAS.WorkFlow
                         if (nCmdScanbarcode1 == 1)
                         {
                             if (Prescription.BarcodeLength == strBarcode1.Length)
-                                PLC.WriteInt("", 1);    //条码1结果码1结果
+                                PLC.WriteInt("19", 2);    //条码1结果码1结果
                             else
-                                PLC.WriteInt("", 0);    //条码1结果码1结果
+                                PLC.WriteInt("19", 1);    //条码1结果码1结果
+
+                            PLC.WriteInt("18", 2);                   
                         }
                         if (nCmdScanbarcode2 == 1)
                         {
                             if (Prescription.BarcodeLength == strBarcode2.Length)
-                                PLC.WriteInt("", 1);    //条码2结果
+                                PLC.WriteInt("43", 2);    //条码2结果
                             else
-                                PLC.WriteInt("", 0);    //条码2结果
+                                PLC.WriteInt("43", 1);    //条码2结果
+                            PLC.WriteInt("42", 2);
                         }
                         PopAndPushStep(STEP.Check_Enable_Adjust_Laser_Power);
                         break;
@@ -267,13 +274,13 @@ namespace CPAS.WorkFlow
                         }
                         break;
                     case STEP.Wait_Adjust_Laser_Power_Cmd:
-                        nCmdAdjustLaser1 = PLC.ReadInt("");
-                        nCmdAdjustLaser2 = PLC.ReadInt("");
+                        nCmdAdjustLaser1 = PLC.ReadInt("R66");
+                        nCmdAdjustLaser2 = PLC.ReadInt("R81");
                         if (nCmdAdjustLaser1 == 1 || nCmdAdjustLaser1 == 1)
                         {
                             Thread.Sleep(200);  //消抖
-                            nCmdAdjustLaser1 = PLC.ReadInt("");
-                            nCmdAdjustLaser2 = PLC.ReadInt("");
+                            nCmdAdjustLaser1 = PLC.ReadInt("R66");
+                            nCmdAdjustLaser2 = PLC.ReadInt("R81");
                             if (nCmdAdjustLaser1 == 1 || nCmdAdjustLaser1 == 1)
                             {
                                 PopAndPushStep(STEP.Adjust_Power);
@@ -283,30 +290,26 @@ namespace CPAS.WorkFlow
                     case STEP.Adjust_Power:     //调整激光
                         bAdjustLaser1Ok = null;
                         bAdjustLaser2Ok = null;
-                        if (1 == nCmdAdjustLaser1 || 1 == nCmdAdjustLaser2)
+                        if (1 == nCmdAdjustLaser1)
                         {
-                            if (1 == nCmdAdjustLaser1)
-                            {
-                                PLC.WriteInt("", 0);    //关闭调试激光命令
-                                AdjustPowerProcess(1);
-                            }
-                            if (1 == nCmdAdjustLaser2)
-                            {
-                                PLC.WriteInt("", 0);
-                                AdjustPowerProcess(2);
-                            }
-
-                            PopAndPushStep(STEP.Write_Adjust_Laser_Power_Result);
+                            AdjustPowerProcess(1);
                         }
+                        if (1 == nCmdAdjustLaser2)
+                        {
+                            AdjustPowerProcess(2);
+                        }
+
+                        PopAndPushStep(STEP.Write_Adjust_Laser_Power_Result);
+                        
                         break;
   
                     case STEP.Write_Adjust_Laser_Power_Result:
-                        if ((1 == nCmdAdjustLaser1 && bAdjustLaser1Ok.HasValue) || (1 == nCmdAdjustLaser2 && bAdjustLaser2Ok.HasValue))
+                        if ((1 == nCmdAdjustLaser1 && bAdjustLaser1Ok.HasValue) && (1 == nCmdAdjustLaser2 && bAdjustLaser2Ok.HasValue))
                         {
                             if (1 == nCmdAdjustLaser1 && bAdjustLaser1Ok.HasValue)
-                                PLC.WriteInt("", (bool)bAdjustLaser1Ok ? 1 : 0);
+                                PLC.WriteInt("67", (bool)bAdjustLaser1Ok ? 1 : 0);
                             if (1 == nCmdAdjustLaser2 && bAdjustLaser2Ok.HasValue)
-                                PLC.WriteInt("", (bool)bAdjustLaser2Ok ? 1 : 0);
+                                PLC.WriteInt("82", (bool)bAdjustLaser2Ok ? 1 : 0);
                             PopAndPushStep(STEP.INIT);
                         }
                         else
