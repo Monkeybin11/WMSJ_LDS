@@ -17,14 +17,13 @@ namespace CPAS.WorkFlow
 {
     public class WorkRecord : WorkFlowBase
     {
-        PrescriptionGridModel Prescription = null;   //配方信息
         private PowerMeter Pw1000USB_1 = null;
         private PowerMeter Pw1000USB_2 = null;
         private LDS lds1 = null;
         private LDS lds2 = null;
         private Keyence_SR1000 BarcodeScanner1 = null;
         private Keyence_SR1000 BarcodeScanner2 = null;
-        SystemParaModel sysPara = null;
+
         QSerisePlc PLC = null;
         CancellationTokenSource ctsMonitorPower = null;
         private string FILE_FAKE_BARCODE_FILE = FileHelper.GetCurFilePathString() + "UserData\\Barcode.xls";
@@ -76,9 +75,10 @@ namespace CPAS.WorkFlow
             bool bRet = false;
 
             #region >>>>读取模块配置信息，初始化工序Enable信息
-
-            Prescription = ConfigMgr.PrescriptionCfgMgr.Prescriptions[0];
-            //sysPara=ConfigMg
+            if (GetPresInfomation())
+                ShowInfo("加载参数成功");
+            else
+                ShowInfo("加载参数失败,请确认是否选择参数配方");
             #endregion
 
             #region >>>>初始化仪表信息

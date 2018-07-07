@@ -618,6 +618,11 @@ namespace CPAS.ViewModels
                 {
                     try
                     {
+                        if (user.Password.Trim() == "")
+                        {
+                            UC_MessageBox.ShowMsgBox("密码不能为空", "提示");
+                            return;
+                        }
                         ConfigMgr.Instance.SaveConfig(EnumConfigType.UserCfg, UserModelCollection.ToArray());
                         UC_MessageBox.ShowMsgBox("修改密码成功","成功");
                         LogHelper.WriteLine($"设置用户密码并保存成功", LogHelper.LogType.NORMAL);
@@ -630,6 +635,7 @@ namespace CPAS.ViewModels
             }
 
         }
+        
         public RelayCommand SaveSystemCfgCommand
         {
             get

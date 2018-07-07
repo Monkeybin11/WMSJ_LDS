@@ -15,20 +15,11 @@ namespace CPAS.WorkFlow
 {
     public class WorkTune1 : WorkFlowBase
     {
-        private PrescriptionGridModel Prescription = null;   //配方信息
         private QSerisePlc PLC = null;
         private LDS lds1 = null;
         private LDS lds2 = null;
         public enum EnumCamID { Cam1, Cam2, Cam3, Cam4 };
-        //cmd
-        private int nCmdHiriz_Grab1 = -1;
-        private int nCmdHiriz_Grab2 = -1;
-
-        private int nCmdAdjust_Horiz1 = -1;
-        private int nCmdAdjust_Horiz2 = -1;
-
-        private bool? bAdjustHoriz1Ok = null;
-        private bool? bAdjustHoriz2Ok = null;
+       
 
 
         //Monitor
@@ -67,16 +58,21 @@ namespace CPAS.WorkFlow
 
             Turn90Degree,
             Wait90DegreeOk,
-            FindMaxValue,
+            FindMaxValue_2m,
 
-            TurnBackToMaxPos,
-            WaitTurnMaxPos_Ok,
-            
+            TurnBackToMaxPos_2m,
+            WaitTurnMaxPos2m_Ok,
+
             Select_6m_Target,
             Wait_Prepare_6m_Ok,
             Check_6m_Value_IsOk,
-            Adjust_6m,          //如何调整6米出的强度值   ddddd 待完成
-
+            Adjust_6m,
+            Wait_Forward_30_Ok,
+            Back_60_Degree,
+            Wait_Back_60_Ok,
+            FindMaxValue_6m,
+            Turn_Back_MaxPos_6m,
+            WaitTurnMaxPos6m_Ok,
 
             Finish_Adjust_Horiz,
 
@@ -91,8 +87,10 @@ namespace CPAS.WorkFlow
         protected override bool UserInit()
         {
             #region >>>>读取模块配置信息，初始化工序Enable信息
-            Prescription = ConfigMgr.PrescriptionCfgMgr.Prescriptions[0];
-            //sysPara=ConfigMg
+            if (GetPresInfomation())
+                ShowInfo("加载参数成功");
+            else
+                ShowInfo("加载参数失败,请确认是否选择参数配方");
             #endregion
 
             #region >>>>初始化仪表信息
@@ -101,7 +99,10 @@ namespace CPAS.WorkFlow
             lds2 = InstrumentMgr.Instance.FindInstrumentByName("LDS[3]") as LDS;
             #endregion
 
-            return PLC != null && lds1 != null && lds2 != null;
+            bool bRet = PLC != null && lds1 != null && lds2 != null && Prescription != null;
+            if (!bRet)
+                ShowInfo("初始化失败");
+            return bRet;
         }
 
         protected override int WorkFlow()
@@ -175,7 +176,7 @@ namespace CPAS.WorkFlow
             string adjustBool_Result_Reg = nIndex == 1 ? "R163" : "R181";   //int
             string cmd_Single_Step_Reg = nIndex == 1 ? "R166" : "R184";   //int
             MonitorValueDelegate monitorValueDel = 1 == nIndex ? new MonitorValueDelegate(StartMonitor1) : new MonitorValueDelegate(StartMonitor2);
-            Int32 maxPos2m = 0,maxPos6m=0;
+            Int32 maxPos2m = 0, maxPos6m = 0;
 
             STEP nStep = STEP.Wait_Horiz_Grab_Cmd;
             await Task.Run(() =>
@@ -255,7 +256,7 @@ namespace CPAS.WorkFlow
                         }
 
                         break;                              //——》GrabImage   //先旋转到X轴附近，再旋转90度，找Max，然后通知伺服回头
-   
+
                     case STEP.Turn90Degree:
                         PLC.WriteDint(adjustAngle_Reg, Convert.ToInt32(90 * 1000));
                         PLC.WriteInt(cmd_Single_Step_Reg, 1);
@@ -265,26 +266,26 @@ namespace CPAS.WorkFlow
                         if (2 == PLC.ReadInt(cmd_Single_Step_Reg))
                         {
                             monitorValueDel(false); //关闭检测
-                            PopAndPushStep(STEP.FindMaxValue);
+                            PopAndPushStep(STEP.FindMaxValue_2m);
                         }
                         break;
-                    case STEP.FindMaxValue:
+                    case STEP.FindMaxValue_2m:
                         var PosValueDic = 1 == nIndex ? PosValueDic1 : PosValueDic2;
                         UInt16 max = (UInt16)PosValueDic.Max(p => p.Value);  //value
                         maxPos2m = (from dic in PosValueDic where dic.Value == max select dic).First().Key;  //key
-                        if (max > Prescription.LDSHoriValue2m[0] && max< Prescription.LDSHoriValue2m[1])    //满足条件旋转到最大值处，等待调整6.5米
-                            PopAndPushStep(STEP.TurnBackToMaxPos);
+                        if (max > Prescription.LDSHoriValue2m[0] && max < Prescription.LDSHoriValue2m[1])    //满足条件旋转到最大值处，等待调整6.5米
+                            PopAndPushStep(STEP.TurnBackToMaxPos_2m);
                         else
                             PopAndPushStep(STEP.Finish_With_Error);
                         break;
 
-                    case STEP.TurnBackToMaxPos:
+                    case STEP.TurnBackToMaxPos_2m:
                         PLC.WriteDint(adjustAngle_Reg, maxPos2m);
                         PLC.WriteInt(cmd_Single_Step_Reg, 1);
-                        PopAndPushStep(STEP.WaitTurnMaxPos_Ok);
+                        PopAndPushStep(STEP.WaitTurnMaxPos2m_Ok);
                         break;
-                    case STEP.WaitTurnMaxPos_Ok:
-                        if (2 ==PLC.ReadInt(cmd_Single_Step_Reg))
+                    case STEP.WaitTurnMaxPos2m_Ok:
+                        if (2 == PLC.ReadInt(cmd_Single_Step_Reg))
                         {
                             PLC.WriteInt(cmd_Single_Step_Reg, 0);
                             PopAndPushStep(STEP.Select_6m_Target);
@@ -299,7 +300,7 @@ namespace CPAS.WorkFlow
                         PopAndPushStep(STEP.Check_6m_Value_IsOk);
                         break;
                     case STEP.Check_6m_Value_IsOk:
-                        if (lds.GetExposeValue() > Prescription.LDSHoriValue6m) //符合要求
+                        if (lds.GetExposeValue() > Prescription.LDSHoriValue6m) //符合要求直接绿灯通过
                         {
                             PLC.WriteInt(adjustBool_Result_Reg, 2);
                             PopAndPushStep(STEP.Finish_Adjust_Horiz);
@@ -307,12 +308,56 @@ namespace CPAS.WorkFlow
                         else
                         {
                             PLC.WriteInt(adjustBool_Result_Reg, 1); //两米的结果和6米的结果需要分开？？？？？
+                            monitorValueDel(true);          //开始监视数据
+                            PopAndPushStep(STEP.Adjust_6m);
+                        }
+                        break;
+                    case STEP.Adjust_6m:        //寻找6米处的最大值就在左右30度寻找最大值  先向前走30°
+                        PLC.WriteDint(adjustAngle_Reg, 30 * 1000);
+                        PLC.WriteInt(cmd_Single_Step_Reg, 1);
+                        PopAndPushStep(STEP.Wait_Forward_30_Ok);
+                        break;
+                    case STEP.Wait_Forward_30_Ok:
+                        if (2 == PLC.ReadInt(cmd_Single_Step_Reg))
+                        {
+                            PLC.WriteInt(cmd_Single_Step_Reg, 0);
+                            PopAndPushStep(STEP.Back_60_Degree);
+                        }            
+                        break;
+                    case STEP.Back_60_Degree:
+                        PLC.WriteDint(adjustAngle_Reg, -60 * 1000);
+                        PLC.WriteInt(cmd_Single_Step_Reg, 1);
+                        PopAndPushStep(STEP.Wait_Back_60_Ok);
+                        break;
+                    case STEP.Wait_Back_60_Ok:
+                        if (2 == PLC.ReadInt(cmd_Single_Step_Reg))
+                        {
+                            PLC.WriteInt(cmd_Single_Step_Reg, 0);
+                            monitorValueDel(false);             //关闭6的监视
+                            PopAndPushStep(STEP.Back_60_Degree);
+                        }
+                        break;
+                    case STEP.FindMaxValue_6m:
+                        var PosValueDic6m = 1 == nIndex ? PosValueDic1 : PosValueDic2;
+                        UInt16 max6m = (UInt16)PosValueDic6m.Max(p => p.Value);  //value
+                        maxPos6m = (from dic in PosValueDic6m where dic.Value == max6m select dic).First().Key;  //key
+                        if (max6m > Prescription.LDSHoriValue2m[0] && max6m < Prescription.LDSHoriValue2m[1])    //满足条件旋转到最大值处，等待调整6.5米
+                            PopAndPushStep(STEP.Turn_Back_MaxPos_6m);
+                        else
+                            PopAndPushStep(STEP.Finish_With_Error);
+                        break;
+                    case STEP.Turn_Back_MaxPos_6m:
+                        PLC.WriteDint(adjustAngle_Reg, maxPos6m);
+                        PLC.WriteInt(cmd_Single_Step_Reg, 1);
+                        PopAndPushStep(STEP.WaitTurnMaxPos6m_Ok);
+                        break;
+                    case STEP.WaitTurnMaxPos6m_Ok:
+                        if (2 == PLC.ReadInt(cmd_Single_Step_Reg))
+                        {
+                            PLC.WriteInt(cmd_Single_Step_Reg, 0);
                             PopAndPushStep(STEP.Finish_Adjust_Horiz);
                         }
                         break;
-                    
-
-
 
 
                     case STEP.Finish_With_Error:
@@ -320,7 +365,7 @@ namespace CPAS.WorkFlow
 
                         break;
                     case STEP.Finish_Adjust_Horiz:
-
+                        
                         //正常结束处理数据
                         break;
                 }

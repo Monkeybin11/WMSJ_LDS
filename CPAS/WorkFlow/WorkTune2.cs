@@ -14,20 +14,12 @@ namespace CPAS.WorkFlow
     public delegate void MonitorValueDelegate(bool bMonitor);
     public class WorkTune2 : WorkFlowBase
     {
-        private PrescriptionGridModel Prescription = null;   //配方信息
         private QSerisePlc PLC = null;
         private LDS lds1 = null;
         private LDS lds2 = null;
         public enum EnumCamID { Cam5=4,Cam6}
 
-        //cmd
-        private int nCmdFocus_Grab1=-1;
-        private int nCmdFocus_Grab2=-1;
 
-        private int nCmdAdjust_Foucs1 = -1;
-        private int nCmdAdjust_Foucs2 = -1;
-        private bool? bAdjustFocus1Ok = null;
-        private bool? bAdjustFocus2Ok = null;
 
         private CancellationTokenSource ctsMonitorValue1 = null;
         private CancellationTokenSource ctsMonitorValue2 = null;
@@ -78,8 +70,10 @@ namespace CPAS.WorkFlow
         protected override bool UserInit()
         {
             #region >>>>读取模块配置信息，初始化工序Enable信息
-            Prescription = ConfigMgr.PrescriptionCfgMgr.Prescriptions[0];
-            //sysPara=ConfigMg
+            if (GetPresInfomation())
+                ShowInfo("加载参数成功");
+            else
+                ShowInfo("加载参数失败,请确认是否选择参数配方");
             #endregion
 
             #region >>>>初始化仪表信息
@@ -88,7 +82,11 @@ namespace CPAS.WorkFlow
             lds2 = InstrumentMgr.Instance.FindInstrumentByName("LDS[5]") as LDS;
             #endregion
 
-            return true;
+            bool bRet= PLC!=null && lds1!=null && lds2!=null && Prescription!=null;
+            if(!bRet)
+                ShowInfo("初始化失败");
+
+            return bRet;
         }
         public WorkTune2(WorkFlowConfig cfg) : base(cfg)
         {
@@ -104,14 +102,13 @@ namespace CPAS.WorkFlow
                 switch (nStep)
                 {
                     case STEP.INIT:
-                        PopAndPushStep(STEP.DO_NOTHING);
+                        PopAndPushStep(STEP.Check_Enable_Adjust_Focus);
                         ShowInfo("init");
                         Thread.Sleep(200);
                         break;
                     case STEP.Check_Enable_Adjust_Focus:
                         if (Prescription.AdjustFocus)
                         {
-                            //PopAndPushStep(STEP.Wait_Focus_Grab_Cmd);
                             AdjustFocusProcess(1);
                             AdjustFocusProcess(2);
                             PopAndPushStep(STEP.Wait_Finish_Both);

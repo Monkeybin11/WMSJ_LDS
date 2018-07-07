@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CPAS.Config;
 using CPAS.Config.SoftwareManager;
 using CPAS.Models;
 using CPSA.CLasses;
@@ -70,6 +71,20 @@ namespace CPAS.WorkFlow
         {
             //if (t != null)
             //    t.Wait(5000);
+        }
+
+        protected PrescriptionGridModel Prescription = null;   //配方信息
+        protected SystemParaModel SysPara = null;
+        protected bool GetPresInfomation()
+        {
+            SysPara = ConfigMgr.SystemParaCfgMgr.SystemParaModels[0];
+            if (SysPara != null)
+            {
+                var pres  = from it in ConfigMgr.PrescriptionCfgMgr.Prescriptions where it.Name == SysPara.CurPrescriptionName select it;
+                if (pres.Count() > 0)
+                    Prescription = pres.First();
+            }
+            return SysPara != null && Prescription != null;
         }
     }
 }

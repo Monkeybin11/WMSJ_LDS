@@ -1,5 +1,6 @@
 ﻿using CPAS.Interface;
 using CPAS.ViewModels;
+using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,10 +21,10 @@ namespace CPAS.Views
     /// <summary>
     /// UC_LogIn.xaml 的交互逻辑
     /// </summary>
-    public partial class UC_LogIn : UserControl 
+    public partial class UC_LogIn : UserControl
     {
         private MainWindowViewModel vm;
-       
+
 
         public UC_LogIn()
         {
@@ -31,7 +32,7 @@ namespace CPAS.Views
 
         }
 
-   
+
         private void BtnLogOut_Click(object sender, RoutedEventArgs e)
         {
             vm.LogOutCommand.Execute(null);
@@ -49,10 +50,14 @@ namespace CPAS.Views
             vm = DataContext as MainWindowViewModel;
         }
 
-      
+
 
         public Tuple<string, string> LogPara { get { return new Tuple<string, string>(UsrTextBox.Text, PsdTextBox.Password); } set { } }
 
-   
+        public RelayCommand ModifyPsdCommand { get { return new RelayCommand(() =>{
+            GridPasd.Visibility = GridPasd.Visibility == Visibility.Visible ? Visibility.Hidden : Visibility.Visible;
+        }); } }
+
+
     }
 }
