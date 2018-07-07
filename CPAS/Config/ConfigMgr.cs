@@ -191,6 +191,7 @@ namespace CPAS.Config
                     fileSaved = File_PrescriptionCfg;
                     objSaved = new PrescriptionCfgManager();
                     (objSaved as PrescriptionCfgManager).Prescriptions = listObj as PrescriptionGridModel[];
+                    PrescriptionCfgMgr = objSaved as PrescriptionCfgManager;
                     break;
                 case EnumConfigType.SoftwareCfg:
                     fileSaved = File_SoftwareCfg;
@@ -199,11 +200,13 @@ namespace CPAS.Config
                     fileSaved = File_UserCfg;
                     objSaved = new UserCfgManager();
                     (objSaved as UserCfgManager).Users = listObj as UserModel[];
+                    UserCfgMgr = objSaved as UserCfgManager;
                     break;
                 case EnumConfigType.SystemParaCfg:
                     fileSaved = File_SystemParaCfg;
                     objSaved = new SystemParaCfgManager();
                     (objSaved as SystemParaCfgManager).SystemParaModels = listObj as SystemParaModel[];
+                    SystemParaCfgMgr = objSaved as SystemParaCfgManager;
                     break; 
                 default:
                     break;

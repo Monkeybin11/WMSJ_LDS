@@ -198,7 +198,7 @@ namespace CPAS.WorkFlow
                         PopAndPushStep(STEP.Finish_Calib);
                         break;
                     case STEP.Finish_Calib:
-
+                        SetSubWorflowState(nIndex, true);
                         break;
 
                 }

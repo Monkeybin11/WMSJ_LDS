@@ -88,12 +88,12 @@ namespace CPAS.Views
         public void ButtonSearch_Click(object sender, RoutedEventArgs e)
         {
 #if TEST
-            Keyence_SR1000 sr700 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[0]") as Keyence_SR1000;
-            string strCode=sr700.Getbarcode();
-            Messenger.Default.Send<string>(strCode, "ShowInfo");
-            Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Delete", "OneWeek"), "OperateDatabase");
-            Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Add", "3456789&OK&RecordFailed"), "OperateDatabase");
-            return;
+            //Keyence_SR1000 sr700 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[0]") as Keyence_SR1000;
+            //string strCode=sr700.Getbarcode();
+            //Messenger.Default.Send<string>(strCode, "ShowInfo");
+            //Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Delete", "OneWeek"), "OperateDatabase");
+            //Messenger.Default.Send<Tuple<string, string>>(new Tuple<string, string>("Add", "3456789&OK&RecordFailed"), "OperateDatabase");
+            //return;
 #endif
             if (TextBoxBarcode.Text.Trim() == "")
                 return;

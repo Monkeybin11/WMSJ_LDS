@@ -18,7 +18,7 @@ namespace CPAS.WorkFlow
         private LDS lds1 = null;
         private LDS lds2 = null;
         public enum EnumCamID { Cam5=4,Cam6}
-
+        
 
 
         private CancellationTokenSource ctsMonitorValue1 = null;
@@ -28,6 +28,8 @@ namespace CPAS.WorkFlow
         private Dictionary<Int32, int> PosValueDic1 = new Dictionary<Int32, int>();
         private Dictionary<Int32, int> PosValueDic2 = new Dictionary<Int32, int>();
 
+
+        private int nSubWorkFlowState = 0;
         private enum STEP : int
         {
             INIT,
@@ -109,6 +111,8 @@ namespace CPAS.WorkFlow
                     case STEP.Check_Enable_Adjust_Focus:
                         if (Prescription.AdjustFocus)
                         {
+                            SetSubWorflowState(1, false);
+                            SetSubWorflowState(2, false);
                             AdjustFocusProcess(1);
                             AdjustFocusProcess(2);
                             PopAndPushStep(STEP.Wait_Finish_Both);
@@ -123,7 +127,7 @@ namespace CPAS.WorkFlow
 
                     case STEP.Wait_Finish_Both:
 
-                        if (2 == PLC.ReadInt("R267") && 2 == PLC.ReadInt("R288"))
+                        if (GetSubWorkFlowState(1) && GetSubWorkFlowState(2))
                         {
                             //保存结果
                             PopAndPushStep(STEP.INIT);
@@ -133,8 +137,7 @@ namespace CPAS.WorkFlow
   
 
                     case STEP.DO_NOTHING:
-                        PopAndPushStep(STEP.INIT);
-                        ShowInfo("就绪");
+                        ShowInfo("该工序未启用");
                         Thread.Sleep(200);
                         break;
                     case STEP.EMG:
@@ -262,6 +265,7 @@ namespace CPAS.WorkFlow
                     case STEP.Finish_Adjust_Focus:
                         //证确结果保存
                         PLC.WriteInt(strCmdFocusStartRegister, 2);  //完成
+                        SetSubWorflowState(nIndex, true);
                         break;
                 }
             });
@@ -322,6 +326,16 @@ namespace CPAS.WorkFlow
                     ctsMonitorValue2.Cancel();
                 }
             }
+        }
+        private void SetSubWorflowState(int nIndex, bool bFinish)
+        {
+            int nState1 = nIndex == 1 ? 1 : 0;
+            int nState2 = nIndex == 1 ? 1 : 0;
+            nSubWorkFlowState = nState1 + (nState2 << 1);
+        }
+        private bool GetSubWorkFlowState(int nIndex)
+        {
+            return 1 == ((nSubWorkFlowState >> (nIndex - 1)) & 0x01);
         }
     }
 }

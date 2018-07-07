@@ -219,13 +219,13 @@ namespace CPAS.ViewModels
                 if (_prescriptionUsed != value)
                 {
                     _prescriptionUsed = value;
-                    SystemPataModelUsed = new SystemParaModel() { BadBarcodeExpiration = SystemPataModelUsed.BadBarcodeExpiration, CurPrescriptionName = value == null ? "" : value.Name};
+                    SystemParaModelUsed = new SystemParaModel() { BadBarcodeExpiration = SystemParaModelUsed.BadBarcodeExpiration, CurPrescriptionName = value == null ? "" : value.Name};
                     RaisePropertyChanged();
                 }
             }
             get { return _prescriptionUsed; }
         }
-        public SystemParaModel SystemPataModelUsed
+        public SystemParaModel SystemParaModelUsed
         {
             get { return _systemPataModelUsed; }
             set {
@@ -301,14 +301,6 @@ namespace CPAS.ViewModels
 
 
         #region  Method
-        public void ShowMessage(MessageItem msgItem)
-        {
-            lock (PlcErrLock)
-            {
-               PLCMessageCollection.Add(msgItem);
-            }
-  
-        }
         private void UpdateRoiCollect(int nCamID)
         {
             RoiCollection.Clear();
@@ -580,9 +572,9 @@ namespace CPAS.ViewModels
                                 {
                                     bExist = true;
                                     PrescriptionCollection.Remove(model);
-                                    if (SystemPataModelUsed != null && SystemPataModelUsed.CurPrescriptionName == model.Name)
+                                    if (SystemParaModelUsed != null && SystemParaModelUsed.CurPrescriptionName == model.Name)
                                     {
-                                        SystemPataModelUsed.CurPrescriptionName = "未选择配方";
+                                        SystemParaModelUsed.CurPrescriptionName = "未选择配方";
                                     }
                                     LogHelper.WriteLine($"删除配方{model.Name}:{model.Remark}", LogHelper.LogType.NORMAL);
                                     break;
@@ -605,7 +597,10 @@ namespace CPAS.ViewModels
                     if (model == null)
                         UC_MessageBox.ShowMsgBox(string.Format("当前没有选中要使用的配方"));
                     else
+                    {
                         PrescriptionUsed = model;
+                        ConfigMgr.Instance.SaveConfig(EnumConfigType.SystemParaCfg, new SystemParaModel[] { SystemParaModelUsed }); //自动保存系统参数
+                    }
                     LogHelper.WriteLine($"设置使用{model.Name}:{model.Remark}为当前配方", LogHelper.LogType.NORMAL);
                 });
             }
@@ -644,7 +639,7 @@ namespace CPAS.ViewModels
                 {
                     try
                     {
-                        ConfigMgr.Instance.SaveConfig(EnumConfigType.SystemParaCfg,new SystemParaModel[] { SystemPataModelUsed });
+                        ConfigMgr.Instance.SaveConfig(EnumConfigType.SystemParaCfg,new SystemParaModel[] { SystemParaModelUsed });
                         UC_MessageBox.ShowMsgBox("保存成功", "提示");
                         LogHelper.WriteLine($"保存配方文件成功", LogHelper.LogType.NORMAL);
                     }
@@ -718,6 +713,16 @@ namespace CPAS.ViewModels
             {
                 Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = str }));
                 LogHelper.WriteLine(str, LogHelper.LogType.NORMAL);
+            });
+            Messenger.Default.Register<string>(this, "ShowPLCError", str =>
+            {
+                lock (SystemMessageCollection)
+                {
+                    Application.Current.Dispatcher.Invoke(() => {
+                        PLCMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str });
+                    });
+                }
+                LogHelper.WriteLine(str, LogHelper.LogType.ERROR);
             });
             Messenger.Default.Register<Tuple<string, string, string>>(this, "WorkFlowMessage", tuple =>
             {
@@ -793,7 +798,7 @@ namespace CPAS.ViewModels
             }
 
             //当前选择的配方
-            SystemPataModelUsed = ConfigMgr.SystemParaCfgMgr.SystemParaModels[0];
+            SystemParaModelUsed = ConfigMgr.SystemParaCfgMgr.SystemParaModels[0];
         }
 
         ~MainWindowViewModel()

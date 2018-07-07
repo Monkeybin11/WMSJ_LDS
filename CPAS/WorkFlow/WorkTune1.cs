@@ -30,6 +30,8 @@ namespace CPAS.WorkFlow
         private Dictionary<Int32, int> PosValueDic1 = new Dictionary<Int32, int>();
         private Dictionary<Int32, int> PosValueDic2 = new Dictionary<Int32, int>();
 
+
+        private int nSubWorkFlowState = 0;
         public WorkTune1(WorkFlowConfig cfg) : base(cfg)
         {
 
@@ -123,6 +125,8 @@ namespace CPAS.WorkFlow
                     case STEP.Check_Enable_Adjust_Horiz:
                         if (Prescription.AdjustFocus)
                         {
+                            SetSubWorflowState(1,false);
+                            SetSubWorflowState(2,false);
                             AdjustHorizProcess(1);
                             AdjustHorizProcess(2);
                             PopAndPushStep(STEP.Wait_Finish_Both);
@@ -141,10 +145,12 @@ namespace CPAS.WorkFlow
 
 
                     case STEP.Wait_Finish_Both:
+                        if (GetSubWorkFlowState(1) && GetSubWorkFlowState(2))
+                            PopAndPushStep(STEP.INIT);
                         break;
                     case STEP.DO_NOTHING:
-                        PopAndPushStep(STEP.INIT);
-                        ShowInfo("就绪");
+  
+                        ShowInfo("该工序未启用");
                         Thread.Sleep(200);
                         break;
                     case STEP.EMG:
@@ -362,10 +368,10 @@ namespace CPAS.WorkFlow
 
                     case STEP.Finish_With_Error:
                         //错误处理
-
+                        PopAndPushStep(STEP.Finish_Adjust_Horiz);
                         break;
                     case STEP.Finish_Adjust_Horiz:
-                        
+                        SetSubWorflowState(nIndex, true);
                         //正常结束处理数据
                         break;
                 }
@@ -428,6 +434,17 @@ namespace CPAS.WorkFlow
                     ctsMonitorValue2.Cancel();
                 }
             }
+        }
+
+        private void SetSubWorflowState(int nIndex, bool bFinish)
+        {
+            int nState1 = nIndex == 1 ? 1 : 0;
+            int nState2 = nIndex == 1 ? 1 : 0;
+            nSubWorkFlowState = nState1 + (nState2 << 1);
+        }
+        private bool GetSubWorkFlowState(int nIndex)
+        {
+            return 1 == ((nSubWorkFlowState >> (nIndex - 1)) & 0x01);
         }
     }
 }

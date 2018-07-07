@@ -91,9 +91,9 @@ namespace CPAS.WorkFlow
             PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
 
 #if TEST
-            string strTest = "ABCDEFGHIJKPRicky124567IUTVNghj";
-            PLC.WriteString("R100", strTest);
-            string str = PLC.ReadString("R100", strTest.Length);
+            //string strTest = "ABCDEFGHIJKPRicky124567IUTVNghj";
+            //PLC.WriteString("R100", strTest);
+            //string str = PLC.ReadString("R100", strTest.Length);
 #endif
 
             #endregion
@@ -148,6 +148,8 @@ namespace CPAS.WorkFlow
                             PopAndPushStep(STEP.Check_Enable_ScanBarcode);//否则直接跳到等待扫码工序
                         }
                         break;
+
+
                     case STEP.Wait_UnLock_Cmd:
                         nCmdUnLock1 = PLC.ReadInt("");
                         nCmdUnLock2 = PLC.ReadInt("");

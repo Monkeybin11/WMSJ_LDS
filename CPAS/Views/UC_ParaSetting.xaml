@@ -15,7 +15,7 @@
                             <MenuItem Header="保存" Command="{Binding SaveSystemCfgCommand}"/>
                         </ContextMenu>
                     </Grid.ContextMenu>
-                    <dxprg:PropertyGridControl  Name="SystemGridProperty" FontSize="20" ExpandCategoriesWhenSelectedObjectChanged="True" SelectedObject="{Binding SystemPataModelUsed}"/>
+                    <dxprg:PropertyGridControl  Name="SystemGridProperty" FontSize="20" ExpandCategoriesWhenSelectedObjectChanged="True" SelectedObject="{Binding SystemParaModelUsed}"/>
                 </Grid>
             </dx:DXTabItem>
             <dx:DXTabItem Header="配方" AllowHide="Default" ToolTip="Set system para" Height="40" Width="100" HorizontalContentAlignment="Center">
@@ -82,7 +82,7 @@
                             </Button>
                             
                             <TextBlock Text="当前配方:" Grid.Row="1" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <TextBlock Text="{Binding SystemPataModelUsed.CurPrescriptionName}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding SystemParaModelUsed.CurPrescriptionName}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <Rectangle Grid.Row="2" Grid.ColumnSpan="3" Fill="Orange"/>
                         </Grid>
                         <ListBox Name="PrescriptionListBox" Grid.Row="1" BorderThickness="0" ItemsSource="{Binding PrescriptionCollection}">
