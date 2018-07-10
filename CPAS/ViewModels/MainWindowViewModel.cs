@@ -19,6 +19,7 @@ using CPSA.CLasses;
 using System.Text;
 using CPAS.Config.SoftwareManager;
 using CPAS.WorkFlow;
+using CPAS.Instrument;
 
 namespace CPAS.ViewModels
 {
@@ -60,6 +61,19 @@ namespace CPAS.ViewModels
         private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
         private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
         private List<string> CamList = new List<string>() { "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Cam6" };
+        private void SetPrescriptionToPLC(PrescriptionGridModel prescription)
+        {
+            QSerisePlc PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
+            if (PLC != null)
+            {
+                PLC.WriteInt("R12", prescription.UnLock? 1:2);
+                PLC.WriteInt("R17", prescription.ReadBarcode ? 1 : 2);
+                PLC.WriteInt("R65", prescription.AdjustLaser ? 1 : 2);
+                PLC.WriteInt("R106", prescription.AdjustHoriz ? 1 : 2);
+                PLC.WriteInt("R210", prescription.AdjustFocus ? 1 : 2);
+                PLC.WriteInt("R309", prescription.Calibration ? 1 : 2);
+            }
+        }
         #endregion
 
 
@@ -221,6 +235,7 @@ namespace CPAS.ViewModels
                     _prescriptionUsed = value;
                     SystemParaModelUsed = new SystemParaModel() { BadBarcodeExpiration = SystemParaModelUsed.BadBarcodeExpiration, CurPrescriptionName = value == null ? "" : value.Name};
                     RaisePropertyChanged();
+
                 }
             }
             get { return _prescriptionUsed; }

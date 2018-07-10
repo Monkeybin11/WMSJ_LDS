@@ -33,7 +33,6 @@ namespace CPAS.Views
             {
                 DataTable dtError = ConfigMgr.PLCErrorDataTable;
                 QSerisePlc PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
-
                 cts = new CancellationTokenSource();
                 taskMonitor = new Task(() => {
                     while (!cts.IsCancellationRequested)
@@ -41,19 +40,22 @@ namespace CPAS.Views
 #if TEST
                         int[] errorCodes = new int[] {0x00FF,0xFF00,0x000F};
 #else
-                        int[] errorCodes = new int[] {
-                            PLC.ReadInt("R511"),
-                            PLC.ReadInt("R512"),
-                            PLC.ReadInt("R513"),
-                            PLC.ReadInt("R514"),
-                            PLC.ReadInt("R515"),
-                            PLC.ReadInt("R516"),
-                            PLC.ReadInt("R517"),
-                            PLC.ReadInt("R518")
-                        };
+                        if (PLC != null)
+                        {
+                            int[] errorCodes = new int[] {
+                            PLC.ReadInt("R5011"),
+                            PLC.ReadInt("R5012"),
+                            PLC.ReadInt("R5013"),
+                            PLC.ReadInt("R5014"),
+                            PLC.ReadInt("R5015"),
+                            PLC.ReadInt("R5016"),
+                            PLC.ReadInt("R5017"),
+                            PLC.ReadInt("R5018")
+                            };
 #endif
-                        ShowPLCError(errorCodes, dtError);
-                        Thread.Sleep(300);
+                            ShowPLCError(errorCodes, dtError);
+                            Thread.Sleep(300);
+                        }
                   
                     }
                 }, cts.Token);

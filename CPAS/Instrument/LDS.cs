@@ -7,19 +7,20 @@ using System.Threading;
 using CPAS.Config.HardwareManager;
 using CPAS.Config;
 using CPAS.Models;
+using System.Runtime.InteropServices;
 
 namespace CPAS.Instrument
 {
     public class LDS : InstrumentBase
     {
-        private byte[] byteRecv = new byte[1024 * 2];
+        //private byte[] byteRecv = new byte[1024 * 2];
         private ComportCfg comportCfg = null;
         public LDS(HardwareCfgLevelManager1 cfg) : base(cfg)
         {
             LDSResult = new LDSModel();
         }
         public LDSModel LDSResult{get;set;}
-
+        private byte[] ldsHeader = new byte[] { 0x5a, 0xa5, 0x5a, 0xa5 };
         public override bool Init()
         {
             try
@@ -43,6 +44,7 @@ namespace CPAS.Instrument
                         comPort.DataBits = comportData.DataBits;
                         comPort.ReadTimeout = comportData.Timeout;
                         comPort.WriteTimeout = comportData.Timeout;
+                        comPort.ReadBufferSize = 6000;  //6000个字节
                         if (comPort.IsOpen)
                             comPort.Close();
                         comPort.Open();
@@ -79,7 +81,7 @@ namespace CPAS.Instrument
                 return true;
             }
         }
-        public double GetCurLaserPowerValue()
+        public double EnsureLaserPower()
         {
             lock (comPort)
             {
@@ -89,82 +91,43 @@ namespace CPAS.Instrument
                 return 0.0f;
             }
         }
-        public bool CheckStatusOK()
+        public bool CheckSetPowerStatusOK()
         {
             lock (comPort)
             {
                 if (comPort == null)
                     return false;
                 comPort.Write("getstatuscode$");
-                return true;
+                Thread.Sleep(20);
+                byte[] recv = new byte[10];
+                comPort.Read(recv, 0, 10);
+                string strRet = System.Text.Encoding.UTF8.GetString(recv);
+                return strRet=="BR";
             }
         }
         #endregion
 
-        #region 烧录
-        /// <summary>
-        /// 准备烧录
-        /// </summary>
-        /// <returns></returns>
-        private bool PrepareRecord()
-        {
-            if (comPort == null || !comPort.IsOpen)
-                return false;
-            lock (comPort)
-            {
-                comPort.Write("flashserial$");
-                return true;
-            }
-        }
+
+        #region 烧录 SN
         private bool DoRecord(string strID)
         {
             if (comPort == null || !comPort.IsOpen)
                 return false;
             lock (comPort)
             {
+                comPort.Write("flashserial$");
+                Thread.Sleep(20);
                 comPort.Write(string.Format("Manualfacture[{0}]$", strID));
-                return true;
+                Thread.Sleep(20);
+                comPort.Write("getstatuscode$");
+                Thread.Sleep(20);
+                byte[] recv = new byte[30];
+                comPort.Read(recv, 0, 30);
+                string strRet = System.Text.Encoding.UTF8.GetString(recv);
+                return strRet==strID;
             }
         }
-        private bool CheckStatus()
-        {
-            if (comPort == null || !comPort.IsOpen)
-                return false;
-            lock (comPort)
-            {
-                comPort.Write("getstatuscode$");     //code?
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        private string GetSerial()
-        {
-            if (comPort == null || !comPort.IsOpen)
-                return "";
-            lock (comPort)
-            {
-                comPort.Write("getserial$");
-                Thread.Sleep(50);
-                comPort.Read(byteRecv, 0, 64);
-                return System.Text.Encoding.ASCII.GetString(byteRecv);
-            }
-        }
-        /// <summary>
-        /// 烧录流程
-        /// </summary>
-        /// <param name="strID"></param>
-        /// <returns></returns>
-        public bool RecodIDFlow(string strID)   
-        {
-            PrepareRecord();
-            DoRecord(strID);
-            CheckStatus();
-            return strID == GetSerial();
-        }
+ 
         #endregion
 
         #region 调水平
@@ -172,18 +135,35 @@ namespace CPAS.Instrument
         /// 读取曝光值
         /// </summary>
         /// <returns></returns>
-        public int GetExposeValue()     //读取曝光值有什么用处
+        public int GetExposeValue(int nCmosLength)
         {
             if (comPort == null || !comPort.IsOpen)
                 return 0;
             lock (comPort)
             {
                 comPort.Write("sethorizontal$");
-                Thread.Sleep(50);
-                comPort.Read(byteRecv, 0, 64);
-                if (byteRecv[0] == 0x5a && byteRecv[1] == 0xa5 && byteRecv[2] == 0x5a && byteRecv[3] == 0xa5)
-                    return byteRecv[4] + byteRecv[5] << 8;
-                return 0;
+                Thread.Sleep(100);
+                byte[] recv = new byte[6000];
+                comPort.Write("holdlds$");
+                Thread.Sleep(20);
+                comPort.Read(recv, 0, 6000);
+                int[] posArr=SearchHeader(recv, ldsHeader, nCmosLength*2);
+                if (posArr.Length > 1)      
+                {
+                    var finaList = recv.Skip(posArr[0]+ldsHeader.Length).Take(nCmosLength * 2);      //一帧数据
+                    int[] intArr=ByteArr2IntArr(finaList);
+                    int sum = 0;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        sum += intArr[i];
+                        sum += intArr[intArr.Length - i - 1];
+                    }
+                    int meanValue = sum / 20;   //底噪
+                    int value=intArr.Skip(10).Take(intArr.Length - 20).Max()-meanValue;
+                    return value;
+                }
+                else
+                    return 0;
             }
         }
         /// <summary>
@@ -208,11 +188,11 @@ namespace CPAS.Instrument
                 return 0;
             lock (comPort)
             {
-                comPort.Write("focuslds$");
-                Thread.Sleep(50);
-                comPort.Read(byteRecv, 0, 64);
-                if (byteRecv[0] == 0x5a && byteRecv[1] == 0xa5 && byteRecv[2] == 0x5a && byteRecv[3] == 0xa5)
-                    return byteRecv[4] + byteRecv[5] << 8;
+                //comPort.Write("focuslds$");
+                //Thread.Sleep(50);
+                //comPort.Read(byteRecv, 0, 64);
+                //if (byteRecv[0] == 0x5a && byteRecv[1] == 0xa5 && byteRecv[2] == 0x5a && byteRecv[3] == 0xa5)
+                //    return byteRecv[4] + byteRecv[5] << 8;
                 return 0;
             }
         }
@@ -229,11 +209,11 @@ namespace CPAS.Instrument
                 return 0;
             lock (comPort)
             {
-                comPort.Write("sendpeakpos$");
-                Thread.Sleep(1500);
-                comPort.Read(byteRecv, 0, 64);
-                if (byteRecv[0] == 0xfa)
-                    return byteRecv[1] + byteRecv[2] << 8+ byteRecv[3]<<16;
+                //comPort.Write("sendpeakpos$");
+                //Thread.Sleep(1500);
+                //comPort.Read(byteRecv, 0, 64);
+                //if (byteRecv[0] == 0xfa)
+                //    return byteRecv[1] + byteRecv[2] << 8+ byteRecv[3]<<16;
                 return 0;
             }
         }
@@ -269,8 +249,104 @@ namespace CPAS.Instrument
             }
         }
 
-     
+
         #endregion
 
+        public int[] SearchHeader(byte[] arr, byte[] header)
+        {
+            int nLenArr = arr.Length;
+            int nLenHeader = header.Length;
+
+            List<int> ls = new List<int>();
+            List<int> ll = new List<int>();
+            for (int i = 0; i < nLenArr; i++)
+            {
+                if (arr[i] == header[0])
+                {
+                    ls.Add(i);
+                }
+            }
+            foreach (var it in ls)
+            {
+                if (it < nLenArr - nLenHeader)
+                {
+                    bool b = true;
+                    for (int i = 0; i < nLenHeader; i++)
+                    {
+                        b &= arr[it + i] == header[i];
+                    }
+                    if (b)
+                        ll.Add(it);
+                }
+            }
+            return ll.ToArray();
+        }
+        public int[] SearchHeader(byte[] arr, byte[] header, int subArrLen)
+        {
+            int nLenArr = arr.Length;
+            int nLenHeader = header.Length;
+
+            List<int> ls = new List<int>();
+            List<int> ll = new List<int>();
+            List<int> y = new List<int>();
+            for (int i = 0; i < nLenArr; i++)
+            {
+                if (arr[i] == header[0])
+                {
+                    ls.Add(i);
+                }
+            }
+            foreach (var it in ls)
+            {
+                if (it < nLenArr - nLenHeader)
+                {
+                    bool b = true;
+                    for (int i = 0; i < nLenHeader; i++)
+                    {
+                        b &= arr[it + i] == header[i];
+                    }
+                    if (b)
+                        ll.Add(it);
+                }
+            }
+            for (int i = 0; i < ll.Count() - 1; i++)
+            {
+                if (ll[i + 1] - ll[i] == subArrLen + nLenHeader)
+                    y.Add(ll[i]);
+            }
+            return y.ToArray();
+        }
+        public int[] ByteArr2IntArr(byte[] sourceArr)
+        {
+            List<int> intRawData = new List<int>();
+            int nLength = sourceArr.Length;
+            if (nLength % 2 != 0)
+                throw new Exception("Wrong length when convert byteArr to intArr");
+            else
+            {
+                for (int i = 0; i < nLength/2;i++)
+                {
+                    intRawData.Add(sourceArr[2 * i] + sourceArr[2 * i + 1] << 8);
+                }
+            }
+            return intRawData.ToArray();
+        }
+        public int[] ByteArr2IntArr(IEnumerable<byte> sourceArr)
+        {
+            List<int> intRawData = new List<int>();
+            int nLength = sourceArr.Count();
+            if (nLength % 2 != 0)
+                throw new Exception("Wrong length when convert byteArr to intArr");
+            else
+            {
+                for (int i = 0; i < nLength / 2; i++)
+                {
+                    intRawData.Add(sourceArr.ElementAt(i*2) + sourceArr.ElementAt(2 * i + 1) << 8);
+                }
+            }
+            return intRawData.ToArray();
+        }
+        [DllImport("LdsUnlockLibrary.dll", EntryPoint = "LdsUnlock", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool LdsUnLock(int nPortNum, IntPtr[] Ptrs);
     }
 }

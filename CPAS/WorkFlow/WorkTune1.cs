@@ -306,7 +306,7 @@ namespace CPAS.WorkFlow
                         PopAndPushStep(STEP.Check_6m_Value_IsOk);
                         break;
                     case STEP.Check_6m_Value_IsOk:
-                        if (lds.GetExposeValue() > Prescription.LDSHoriValue6m) //符合要求直接绿灯通过
+                        if (lds.GetExposeValue(Prescription.CMosPointNumber) > Prescription.LDSHoriValue6m) //符合要求直接绿灯通过
                         {
                             PLC.WriteInt(adjustBool_Result_Reg, 2);
                             PopAndPushStep(STEP.Finish_Adjust_Horiz);

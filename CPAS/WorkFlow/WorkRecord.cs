@@ -72,8 +72,9 @@ namespace CPAS.WorkFlow
 
         protected override  bool UserInit()
         {
+          
             bool bRet = false;
-
+            
             #region >>>>读取模块配置信息，初始化工序Enable信息
             if (GetPresInfomation())
                 ShowInfo("加载参数成功");
@@ -89,7 +90,7 @@ namespace CPAS.WorkFlow
             BarcodeScanner1 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[0]") as Keyence_SR1000;
             BarcodeScanner2 = InstrumentMgr.Instance.FindInstrumentByName("SR1000[1]") as Keyence_SR1000;
             PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
-
+            
 #if TEST
             //string strTest = "ABCDEFGHIJKPRicky124567IUTVNghj";
             //PLC.WriteString("R100", strTest);
@@ -110,6 +111,9 @@ namespace CPAS.WorkFlow
                     PLC != null;
             if (!bRet)
                 ShowInfo("初始化失败");
+
+
+            return true;
             return bRet;
 
         }
@@ -131,8 +135,7 @@ namespace CPAS.WorkFlow
                 switch (nStep)
                 {
                     case STEP.INIT:
-                        PopAndPushStep(STEP.DO_NOTHING);
-                        Vision.Vision.Instance.GrabImage(0);
+                        PopAndPushStep(STEP.Check_Enable_UnLock);
                         ShowInfo();
                         Thread.Sleep(100);
                         break;
@@ -186,7 +189,7 @@ namespace CPAS.WorkFlow
                                     PLC.WriteInt("R15", strRet[0].ToLower()=="ok" ? 2 : 1);        //将解锁结果写入寄存器
                                 if (1 == nCmdUnLock2)
                                     PLC.WriteInt("R16", strRet[1].ToLower() == "ok" ? 2 : 1);
-                                if (strRet!=null)  //等待结果过来
+                                if (true || strRet!=null)  //等待结果过来                 dddd
                                     PopAndPushStep(STEP.Check_Enable_ScanBarcode);
                             }
                         }
@@ -230,7 +233,7 @@ namespace CPAS.WorkFlow
                         {
                           
                             strBarcode1 = BarcodeScanner1.Getbarcode();
-                            PLC.WriteString("20", strBarcode1);
+                            PLC.WriteString("R20", strBarcode1);
                         }
                         if (nCmdScanbarcode2 == 1)
                         {
@@ -401,7 +404,8 @@ namespace CPAS.WorkFlow
                 if (nIndex < 1 || nIndex > 2)
                     throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
                 LDS lds = nIndex == 1 ? lds1 : lds2;
-                double powerValue = lds.GetCurLaserPowerValue();
+                PowerMeter powerMeter=nIndex == 1 ? Pw1000USB_1 : Pw1000USB_2;
+                double powerValue = powerMeter.GetPowerValue(EnumUnit.μW);
                 bool bIncrease = false;
                 if (powerValue < Prescription.LDSPower[0])
                     bIncrease = true;
