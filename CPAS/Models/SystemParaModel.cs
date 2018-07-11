@@ -19,10 +19,12 @@ namespace CPAS.Models
         private EnumBadBarcodeExpiration _badBarcodeExpiration;
 
         [Browsable(false)]
-        public string CurPrescriptionName {
+        public string CurPrescriptionName
+        {
             get { return _curSelectedPrescription; }
-            set {
-                _curSelectedPrescription=value;
+            set
+            {
+                _curSelectedPrescription = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CurPrescriptionName"));
             }
         }

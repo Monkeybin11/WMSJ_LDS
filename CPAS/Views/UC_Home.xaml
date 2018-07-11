@@ -112,7 +112,6 @@
                     <TextBlock Text="Cam4:LDS2光斑图像" Foreground="Green" FontSize="20" HorizontalAlignment="Center"/>
                     <halcon:HWindowControlWPF  x:Name="Cam4" Grid.Row="1" ToolTip="Cam4"/>
                 </Grid>
-   
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="2" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">

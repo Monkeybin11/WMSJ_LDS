@@ -230,11 +230,11 @@ namespace CPAS.ViewModels
         {
             set
             {
+                SetPrescriptionToPLC(value);
                 if (_prescriptionUsed != value)
                 {
                     _prescriptionUsed = value;
-                    SystemParaModelUsed = new SystemParaModel() { BadBarcodeExpiration = SystemParaModelUsed.BadBarcodeExpiration, CurPrescriptionName = value == null ? "" : value.Name};
-                    SetPrescriptionToPLC(value);
+                    SystemParaModelUsed = new SystemParaModel() { BadBarcodeExpiration = SystemParaModelUsed.BadBarcodeExpiration, CurPrescriptionName = value == null ? "" : value.Name };
                     RaisePropertyChanged();
 
                 }
@@ -645,8 +645,7 @@ namespace CPAS.ViewModels
                 });
             }
 
-        }
-        
+        }      
         public RelayCommand SaveSystemCfgCommand
         {
             get
