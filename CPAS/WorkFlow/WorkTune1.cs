@@ -123,7 +123,7 @@ namespace CPAS.WorkFlow
                         break;
 
                     case STEP.Check_Enable_Adjust_Horiz:
-                        if (Prescription.AdjustFocus)
+                        if (Prescription.EnableAdjustFocus)
                         {
                             SetSubWorflowState(1,false);
                             SetSubWorflowState(2,false);
@@ -390,7 +390,7 @@ namespace CPAS.WorkFlow
                         while (!ctsMonitorValue1.Token.IsCancellationRequested)
                         {
                             Thread.Sleep(50);
-                            int value = lds1.GetFocusValue();
+                            int value = lds1.GetFocusValue(Prescription.CMosPointNumber);
                             Int32 pos = PLC.ReadDint(""); //读取实时位置
                             PosValueDic1.Add(pos, value);
                         }
@@ -419,7 +419,7 @@ namespace CPAS.WorkFlow
                         while (!ctsMonitorValue2.Token.IsCancellationRequested)
                         {
                             Thread.Sleep(50);
-                            int value = lds2.GetFocusValue();
+                            int value = lds2.GetFocusValue(Prescription.CMosPointNumber);
                             Int32 pos = PLC.ReadDint(""); //读取实时位置
                             PosValueDic2.Add(pos, value);
                         }

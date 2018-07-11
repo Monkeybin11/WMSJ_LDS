@@ -109,7 +109,7 @@ namespace CPAS.WorkFlow
                         Thread.Sleep(200);
                         break;
                     case STEP.Check_Enable_Adjust_Focus:
-                        if (Prescription.AdjustFocus)
+                        if (Prescription.EnableAdjustFocus)
                         {
                             SetSubWorflowState(1, false);
                             SetSubWorflowState(2, false);
@@ -214,7 +214,7 @@ namespace CPAS.WorkFlow
                         break;
 
                     case STEP.Read_Focus_Value:
-                         if(lds.GetFocusValue()>Prescription.LDSHoriValue6m)    //如果大于直接通过
+                         if(lds.GetFocusValue(Prescription.CMosPointNumber)>Prescription.LDSHoriValue6m)    //如果大于直接通过
                             PopAndPushStep(STEP.Finish_Adjust_Focus);
                         else
                             PopAndPushStep(STEP.Turn_A_Circle_Outside_For_Safe);
@@ -283,7 +283,7 @@ namespace CPAS.WorkFlow
                         while (!ctsMonitorValue1.Token.IsCancellationRequested)
                         {
                             Thread.Sleep(50);
-                            int value=lds1.GetFocusValue();
+                            int value=lds1.GetFocusValue(Prescription.CMosPointNumber);
                             Int32 pos = PLC.ReadDint(""); //读取实时位置
                             PosValueDic1.Add(pos, value);
                         }
@@ -311,7 +311,7 @@ namespace CPAS.WorkFlow
                         while (!ctsMonitorValue2.Token.IsCancellationRequested)
                         {
                             Thread.Sleep(50);
-                            int value = lds2.GetFocusValue();
+                            int value = lds2.GetFocusValue(Prescription.CMosPointNumber);
                             Int32 pos = PLC.ReadDint(""); //读取实时位置
                             PosValueDic2.Add(pos, value);
                         }

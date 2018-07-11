@@ -66,12 +66,12 @@ namespace CPAS.ViewModels
             QSerisePlc PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
             if (PLC != null)
             {
-                PLC.WriteInt("R12", prescription.UnLock? 1:2);
-                PLC.WriteInt("R17", prescription.ReadBarcode ? 1 : 2);
-                PLC.WriteInt("R65", prescription.AdjustLaser ? 1 : 2);
-                PLC.WriteInt("R106", prescription.AdjustHoriz ? 1 : 2);
-                PLC.WriteInt("R210", prescription.AdjustFocus ? 1 : 2);
-                PLC.WriteInt("R309", prescription.Calibration ? 1 : 2);
+                PLC.WriteInt("R12", prescription.EnableUnLock? 1:2);
+                PLC.WriteInt("R17", prescription.EnableReadBarcode ? 1 : 2);
+                PLC.WriteInt("R65", prescription.EnableAdjustLaser ? 1 : 2);
+                PLC.WriteInt("R106", prescription.EnableAdjustHoriz ? 1 : 2);
+                PLC.WriteInt("R210", prescription.EnableAdjustFocus ? 1 : 2);
+                PLC.WriteInt("R309", prescription.EnableCalibration ? 1 : 2);
             }
         }
         #endregion
@@ -234,6 +234,7 @@ namespace CPAS.ViewModels
                 {
                     _prescriptionUsed = value;
                     SystemParaModelUsed = new SystemParaModel() { BadBarcodeExpiration = SystemParaModelUsed.BadBarcodeExpiration, CurPrescriptionName = value == null ? "" : value.Name};
+                    SetPrescriptionToPLC(value);
                     RaisePropertyChanged();
 
                 }
@@ -533,12 +534,12 @@ namespace CPAS.ViewModels
                             {
                                 Name = strName,
                                 Remark = strRemark,
-                                UnLock = true,
-                                ReadBarcode = true,
-                                AdjustLaser = true,
-                                AdjustHoriz = true,
-                                AdjustFocus = true,
-                                Calibration = true,
+                                EnableUnLock = true,
+                                EnableReadBarcode = true,
+                                EnableAdjustLaser = true,
+                                EnableAdjustHoriz = true,
+                                EnableAdjustFocus = true,
+                                EnableCalibration = true,
                             });
                             LogHelper.WriteLine($"ÐÂÔöÅä·½{strName}:{strRemark}", LogHelper.LogType.NORMAL);
                         }

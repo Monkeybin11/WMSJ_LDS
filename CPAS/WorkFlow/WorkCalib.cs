@@ -90,7 +90,7 @@ namespace CPAS.WorkFlow
                         break;
 
                     case STEP.Check_Enable_Calib:
-                        if (Prescription.Calibration)
+                        if (Prescription.EnableCalibration)
                         {
                             SetSubWorflowState(1, false);
                             SetSubWorflowState(2, false);
@@ -157,7 +157,7 @@ namespace CPAS.WorkFlow
                         break;
 
                     case STEP.Read_Center_Value_2m:
-                        nCenterC1=lds.GetCenterValue();
+                        nCenterC1=lds.GetCenterValue(Prescription.CMosPointNumber);
                         PopAndPushStep(STEP.Write_Calib_2m_Boolean_Result);
                         break;
                     case STEP.Write_Calib_2m_Boolean_Result:
@@ -177,7 +177,7 @@ namespace CPAS.WorkFlow
                             PopAndPushStep(STEP.Read_Center_Value_4m);
                         break;
                     case STEP.Read_Center_Value_4m:
-                        nCenterC2 = lds.GetCenterValue();
+                        nCenterC2 = lds.GetCenterValue(Prescription.CMosPointNumber);
                         PopAndPushStep(STEP.Write_Calib_4m_Boolean_Result);
                         break;
                     case STEP.Write_Calib_4m_Boolean_Result:

@@ -31,7 +31,10 @@ namespace CPAS.Instrument
                     foreach (var it in hardwareCfg.Comports)
                     {
                         if (it.PortName == Config.PortName)
+                        {
                             comportCfg = it;
+                            break;
+                        }
                     }
                     comPort = new System.IO.Ports.SerialPort();
                     if (comPort != null && comportCfg != null)
@@ -135,7 +138,7 @@ namespace CPAS.Instrument
         /// 读取曝光值
         /// </summary>
         /// <returns></returns>
-        public int GetExposeValue(int nCmosLength)
+        public int GetExposeValue(int nCmosLength)  //最大值-底噪
         {
             if (comPort == null || !comPort.IsOpen)
                 return 0;
@@ -182,18 +185,35 @@ namespace CPAS.Instrument
         #endregion
 
         #region 调焦距
-        public int GetFocusValue()
+        public int GetFocusValue(int nCmosLength)
         {
             if (comPort == null || !comPort.IsOpen)
                 return 0;
             lock (comPort)
             {
-                //comPort.Write("focuslds$");
-                //Thread.Sleep(50);
-                //comPort.Read(byteRecv, 0, 64);
-                //if (byteRecv[0] == 0x5a && byteRecv[1] == 0xa5 && byteRecv[2] == 0x5a && byteRecv[3] == 0xa5)
-                //    return byteRecv[4] + byteRecv[5] << 8;
-                return 0;
+                comPort.Write("sethorizontal$");
+                Thread.Sleep(100);
+                byte[] recv = new byte[6000];
+                comPort.Write("holdlds$");
+                Thread.Sleep(20);
+                comPort.Read(recv, 0, 6000);
+                int[] posArr = SearchHeader(recv, ldsHeader, nCmosLength * 2);
+                if (posArr.Length > 1)
+                {
+                    var finaList = recv.Skip(posArr[0] + ldsHeader.Length).Take(nCmosLength * 2);      //一帧数据
+                    int[] intArr = ByteArr2IntArr(finaList);
+                    int sum = 0;
+                    for (int i = 0; i < 10; i++)
+                    {
+                        sum += intArr[i];
+                        sum += intArr[intArr.Length - i - 1];
+                    }
+                    int meanValue = sum / 20;   //底噪
+                    int value = intArr.Skip(10).Take(intArr.Length - 20).Max() - meanValue;
+                    return value;
+                }
+                else
+                    return 0;
             }
         }
         #endregion
@@ -203,27 +223,32 @@ namespace CPAS.Instrument
         /// 得到中心值，不能发送太快
         /// </summary>
         /// <returns></returns>
-        public int GetCenterValue()
+        public int GetCenterValue(int nCmosLength)      //中心值需要减去底噪吗
         {
             if (comPort == null || !comPort.IsOpen)
                 return 0;
             lock (comPort)
             {
-                //comPort.Write("sendpeakpos$");
-                //Thread.Sleep(1500);
-                //comPort.Read(byteRecv, 0, 64);
-                //if (byteRecv[0] == 0xfa)
-                //    return byteRecv[1] + byteRecv[2] << 8+ byteRecv[3]<<16;
-                return 0;
+                comPort.Write("sethorizontal$");
+                Thread.Sleep(100);
+                byte[] recv = new byte[6000];
+                comPort.Write("holdlds$");
+                Thread.Sleep(20);
+                comPort.Read(recv, 0, 6000);
+                int[] posArr = SearchHeader(recv, ldsHeader, nCmosLength * 2);
+                if (posArr.Length > 1)
+                {
+                    var finaList = recv.Skip(posArr[0] + ldsHeader.Length).Take(nCmosLength * 2);      //一帧数据
+                    int[] intArr = ByteArr2IntArr(finaList);
+                    int value = nCmosLength % 2 == 0 ? (intArr[nCmosLength / 2] + intArr[nCmosLength / 2 + 1]) / 2 : intArr[nCmosLength / 2];
+                    return value;
+                }
+                else
+                    return 0;
             }
         }
 
-        /// <summary>
-        /// 标定
-        /// </summary>
-        /// <param name="c1"></param>
-        /// <param name="c2"></param>
-        /// <returns></returns>
+ 
         public bool SetDataToLDS(int c1, int c2)
         {   
             if (comPort == null || !comPort.IsOpen)
@@ -248,7 +273,18 @@ namespace CPAS.Instrument
                 return true;
             }
         }
-
+        public bool LdsUnLock(out string strWhy)
+        {
+            strWhy = "";
+            string s1 = "aa";
+            string s2 = "bb";
+            IntPtr[] pts = new IntPtr[1];
+            pts[0] = Marshal.StringToHGlobalAnsi(s1);
+            bool bRet=LdsUnLock(Convert.ToInt16(comportCfg.Port.Substring(3)), pts);
+            String a = Marshal.PtrToStringAnsi(pts[0]);
+            strWhy = a;
+            return bRet;
+        }
 
         #endregion
 
@@ -346,7 +382,8 @@ namespace CPAS.Instrument
             }
             return intRawData.ToArray();
         }
-        [DllImport("LdsUnlockLibrary.dll", EntryPoint = "LdsUnlock", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool LdsUnLock(int nPortNum, IntPtr[] Ptrs);
+
+        [DllImport("LdsUnlockLibrary.dll", EntryPoint = "?LdsUnlock@@YA_NHPAPAD@Z", CallingConvention = CallingConvention.Cdecl)]
+        public static extern bool LdsUnLock(int nPortNum, IntPtr[] ptrs);
     }
 }

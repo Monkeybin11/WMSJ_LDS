@@ -56,7 +56,7 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用解锁")]
-        public bool UnLock
+        public bool EnableUnLock
         {
             get { return _unLock; }
             set
@@ -69,7 +69,7 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用扫码")]
-        public bool ReadBarcode
+        public bool EnableReadBarcode
         {
             get { return _readBarcode; }
             set
@@ -82,7 +82,7 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用调整激光功率")]
-        public bool AdjustLaser
+        public bool EnableAdjustLaser
         {
             get { return _adjustLaser; }
             set
@@ -95,7 +95,7 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用调整水平")]
-        public bool AdjustHoriz
+        public bool EnableAdjustHoriz
         {
             get { return _adjustHoriz; }
             set
@@ -108,7 +108,7 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用调焦距")]
-        public bool AdjustFocus
+        public bool EnableAdjustFocus
         {
             get { return _adjustFocus; }
             set
@@ -121,7 +121,7 @@ namespace CPAS.Models
             }
         }
         [CategoryAttribute("工序配方"), DescriptionAttribute("是否启用距离标定")]
-        public bool Calibration
+        public bool EnableCalibration
         {
             get { return _calibration; }
             set
