@@ -71,7 +71,6 @@ namespace CPAS.Config
             }
             InstrumentBase inst = null;
             HardwareCfgLevelManager1[] instCfgs = null;
-
             string strClassName = "";
             Type t = HardwareCfgMgr.GetType();
             PropertyInfo[] PropertyInfos = t.GetProperties();
@@ -83,7 +82,6 @@ namespace CPAS.Config
                     continue;
                 PropertyInfo pi = PropertyInfos[i];
                 instCfgs = pi.GetValue(HardwareCfgMgr) as HardwareCfgLevelManager1[];
-
                 strClassName = pi.Name.Substring(0, pi.Name.Length - 1);
                 foreach (var it in instCfgs)
                 {

@@ -170,6 +170,61 @@ namespace CPAS.Vision
                     image.Dispose();
             }
         }
+        public bool OpenCam(string strUniqName)
+        {
+            int nCamID = -1;
+            int nIndex = 0;
+            foreach (var it in CamCfgDic)
+            {
+                if (it.Key.Contains(strUniqName))
+                    nCamID = nIndex;
+                nIndex++;
+            }
+            if (nCamID < 0)
+                return false;
+            HObject image = null;
+            HTuple hv_AcqHandle = null;
+            HTuple width = 0, height = 0;
+            try
+            {
+                lock (_lockList[nCamID])
+                {
+                    if (!IsCamOpen(nCamID))
+                    {
+                        //HOperatorSet.OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
+                        //                            -1, "false", "default", "Integrated Camera", 0, -1, out hv_AcqHandle);
+                        HOperatorSet.OpenFramegrabber(CamCfgDic.ElementAt(nCamID).Value.Item2, 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
+                                                   -1, "false", "default", CamCfgDic.ElementAt(nCamID).Value.Item1, 0, -1, out hv_AcqHandle);
+                        HOperatorSet.GrabImage(out image, hv_AcqHandle);
+                        HOperatorSet.GetImageSize(image, out width, out height);
+                        ActiveCamDic.Add(nCamID, new Tuple<HTuple, HTuple>(width, height));
+                        AcqHandleList[nCamID] = hv_AcqHandle;
+                    }
+                    if (IsCamOpen(nCamID))
+                    {
+                        if (HwindowDic.Keys.Contains(nCamID))
+                        {
+                            foreach (var it in HwindowDic[nCamID])
+                            {
+                                HOperatorSet.SetPart(it.Value, 0, 0, ActiveCamDic[nCamID].Item2, ActiveCamDic[nCamID].Item1);
+                                HOperatorSet.DispObj(image, it.Value);
+                            }
+                        }
+                    }
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Messenger.Default.Send<string>(ex.Message, "ShowError");
+                return false;
+            }
+            finally
+            {
+                if (image != null)
+                    image.Dispose();
+            }
+        }
         public bool CloseCam(int nCamID)
         {
             if (nCamID < 0)

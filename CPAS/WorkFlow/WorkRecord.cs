@@ -103,8 +103,8 @@ namespace CPAS.WorkFlow
 
             bRet =  Pw1000USB_1 != null &&
                     Pw1000USB_2 != null &&
-                    lds1 != null &&
-                    lds2 != null &&
+                    //lds1 != null &&
+                    //lds2 != null &&
                     BarcodeScanner1 != null &&
                     BarcodeScanner2 != null &&
                     PLC != null;

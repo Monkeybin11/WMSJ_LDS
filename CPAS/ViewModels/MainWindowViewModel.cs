@@ -60,7 +60,7 @@ namespace CPAS.ViewModels
         private FileHelper RoiFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Roi");
         private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
         private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
-        private List<string> CamList = new List<string>() { "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Cam6" };
+        private List<string> CamList = new List<string>() { "192.168.5.11", "192.168.5.12", "192.168.5.13", "192.168.5.14", "192.168.5.15", "192.168.5.16" };
         private void SetPrescriptionToPLC(PrescriptionGridModel prescription)
         {
             QSerisePlc PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
@@ -787,14 +787,6 @@ namespace CPAS.ViewModels
             #endregion
 
 
-            //Camera
-            int i = 0;
-            foreach(var it in CamList)
-            {
-                //bool bOpen = Vision.Vision.Instance.OpenCam(i++);
-                //CameraCollection.Add(new CameraItem() { CameraName = it, StrCameraState = bOpen? "Connected" : "DisConnected" });
-            }
-            
             //Load Config
             PrescriptionCollection = new ObservableCollection<PrescriptionGridModel>();
             ConfigMgr.Instance.LoadConfig();
@@ -810,6 +802,15 @@ namespace CPAS.ViewModels
             foreach (var it in ConfigMgr.UserCfgMgr.Users)
             {
                 UserModelCollection.Add(it);
+            }
+
+
+            //Camera
+            int i = 0;
+            foreach (var it in Vision.Vision.Instance.FindCamera(EnumCamType.GigEVision))
+            {
+                bool bOpen = Vision.Vision.Instance.OpenCam(i++);
+                CameraCollection.Add(new CameraItem() { CameraName = it.Key, StrCameraState = bOpen ? "Connected" : "DisConnected" });
             }
 
             //当前选择的配方
