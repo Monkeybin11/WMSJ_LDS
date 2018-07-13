@@ -85,6 +85,18 @@
                     </Grid>
                 </Button.Content>
             </Button>
+            <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource RoundButtonStyle1}"  Background="LightGreen" ToolTip="重新连接" Margin="5" Height="50" Command="{Binding ReconnectCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}">
+                <Button.Content>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <!--<Image Source="/CPAS;component/Images/StopGrab.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>-->
+                        <TextBlock Grid.Column="1" Text="重新连接" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
+                    </Grid>
+                </Button.Content>
+            </Button>
             <ComboBox Name="Cb_Cameras" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5,12,5,12" ItemsSource="{Binding CameraCollection}" SelectedIndex="0" IsEnabled="{Binding CamSnapState,ConverterParameter=ComboBoxCameras,Converter={StaticResource EnumCamSnapState2SnapButtonEnable}}" SelectionChanged="Cb_Cameras_SelectionChanged">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">

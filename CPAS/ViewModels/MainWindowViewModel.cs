@@ -37,7 +37,7 @@ namespace CPAS.ViewModels
         private object PlcErrLock = new object();
         private object SysErrLock = new object();
 
-            
+
 
         private string _strViewID = "Home";
         private DateTime _myDateTime;
@@ -60,13 +60,12 @@ namespace CPAS.ViewModels
         private FileHelper RoiFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Roi");
         private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
         private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
-        private List<string> CamList = new List<string>() { "192.168.5.11", "192.168.5.12", "192.168.5.13", "192.168.5.14", "192.168.5.15", "192.168.5.16" };
         private void SetPrescriptionToPLC(PrescriptionGridModel prescription)
         {
             QSerisePlc PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
             if (PLC != null)
             {
-                PLC.WriteInt("R12", prescription.EnableUnLock? 1:2);
+                PLC.WriteInt("R12", prescription.EnableUnLock ? 1 : 2);
                 PLC.WriteInt("R17", prescription.EnableReadBarcode ? 1 : 2);
                 PLC.WriteInt("R65", prescription.EnableAdjustLaser ? 1 : 2);
                 PLC.WriteInt("R106", prescription.EnableAdjustHoriz ? 1 : 2);
@@ -214,7 +213,7 @@ namespace CPAS.ViewModels
             }
             get { return _strPowerMeterValue2; }
         }
-        public Dictionary<string,WorkFlowBase> WorkeFlowDic
+        public Dictionary<string, WorkFlowBase> WorkeFlowDic
         {
             get { return _workeFlowDic; }
             set
@@ -244,10 +243,11 @@ namespace CPAS.ViewModels
         public SystemParaModel SystemParaModelUsed
         {
             get { return _systemPataModelUsed; }
-            set {
+            set
+            {
                 _systemPataModelUsed = value;
                 RaisePropertyChanged();
-                }
+            }
         }
         public ObservableCollection<MessageItem> PLCMessageCollection
         {
@@ -361,11 +361,17 @@ namespace CPAS.ViewModels
 
 
         #region Commands
-        public RelayCommand<string> RibonCommand { get {
-                return new RelayCommand<string>(str => { StrCurViewID = str;
+        public RelayCommand<string> RibonCommand
+        {
+            get
+            {
+                return new RelayCommand<string>(str =>
+                {
+                    StrCurViewID = str;
                     LogHelper.WriteLine($"切换到{str}视图", LogHelper.LogType.NORMAL);
                 });
-            } }
+            }
+        }
         public RelayCommand<string> ClearMessageCommand
         {
             get
@@ -443,11 +449,18 @@ namespace CPAS.ViewModels
                 });
             }
         }
-        public RelayCommand LogOutCommand { get { return new RelayCommand(() => {
-            Level = 0;
-            StrUserName = "Operator";
-            LogHelper.WriteLine($"注销登陆", LogHelper.LogType.NORMAL);
-        }); } }
+        public RelayCommand LogOutCommand
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    Level = 0;
+                    StrUserName = "Operator";
+                    LogHelper.WriteLine($"注销登陆", LogHelper.LogType.NORMAL);
+                });
+            }
+        }
 
         public RelayCommand<int> SnapOnceCommand
         {
@@ -455,7 +468,7 @@ namespace CPAS.ViewModels
             {
                 return new RelayCommand<int>(nCamID =>
                 {
-                    Messenger.Default.Send<Tuple<string,int>>(new Tuple<string, int>("SnapOnce",nCamID), "SetCamState");
+                    Messenger.Default.Send<Tuple<string, int>>(new Tuple<string, int>("SnapOnce", nCamID), "SetCamState");
                     CamSnapState = EnumCamSnapState.IDLE;
                     LogHelper.WriteLine($"单帧采集相机{nCamID}", LogHelper.LogType.NORMAL);
                 });
@@ -482,6 +495,22 @@ namespace CPAS.ViewModels
                     Messenger.Default.Send<Tuple<string, int>>(new Tuple<string, int>("StopSnap", nCamID), "SetCamState");
                     CamSnapState = EnumCamSnapState.IDLE;
                     LogHelper.WriteLine($"停止采集相机{nCamID}", LogHelper.LogType.NORMAL);
+                });
+            }
+        }
+        public RelayCommand<int> ReconnectCommand
+        {
+            get
+            {
+                return new RelayCommand<int>(nCamID =>
+                {
+                    if (nCamID < 0)
+                        return;
+                    bool bSuccess = Vision.Vision.Instance.OpenCam(nCamID);
+                    CameraCollection.ElementAt(nCamID).StrCameraState = bSuccess ? "Connected" : "Disconnected";
+                   
+                    CamSnapState = EnumCamSnapState.IDLE;
+                    LogHelper.WriteLine($"重连相机{nCamID}", LogHelper.LogType.NORMAL);
                 });
             }
         }
@@ -517,7 +546,7 @@ namespace CPAS.ViewModels
                 });
             }
         }
-        
+
         public RelayCommand AddPrescriptionCommand
         {
             get
@@ -527,7 +556,7 @@ namespace CPAS.ViewModels
                     if (MessageBoxResult.Yes == Window_AddNewPrescription.ShowWindowNewDescription())
                     {
                         string strName = Window_AddNewPrescription.ProfileValue.Item1;
-                        string strRemark= Window_AddNewPrescription.ProfileValue.Item2;
+                        string strRemark = Window_AddNewPrescription.ProfileValue.Item2;
                         if (strName != "" && (from prescription in PrescriptionCollection where prescription.Name == strName select prescription).Count() == 0)
                         {
                             PrescriptionCollection.Add(new PrescriptionGridModel()
@@ -635,7 +664,7 @@ namespace CPAS.ViewModels
                             return;
                         }
                         ConfigMgr.Instance.SaveConfig(EnumConfigType.UserCfg, UserModelCollection.ToArray());
-                        UC_MessageBox.ShowMsgBox("修改密码成功","成功");
+                        UC_MessageBox.ShowMsgBox("修改密码成功", "成功");
                         LogHelper.WriteLine($"设置用户密码并保存成功", LogHelper.LogType.NORMAL);
                     }
                     catch (Exception ex)
@@ -645,7 +674,7 @@ namespace CPAS.ViewModels
                 });
             }
 
-        }      
+        }
         public RelayCommand SaveSystemCfgCommand
         {
             get
@@ -654,7 +683,7 @@ namespace CPAS.ViewModels
                 {
                     try
                     {
-                        ConfigMgr.Instance.SaveConfig(EnumConfigType.SystemParaCfg,new SystemParaModel[] { SystemParaModelUsed });
+                        ConfigMgr.Instance.SaveConfig(EnumConfigType.SystemParaCfg, new SystemParaModel[] { SystemParaModelUsed });
                         UC_MessageBox.ShowMsgBox("保存成功", "提示");
                         LogHelper.WriteLine($"保存配方文件成功", LogHelper.LogType.NORMAL);
                     }
@@ -714,10 +743,12 @@ namespace CPAS.ViewModels
             {
                 lock (SystemMessageCollection)
                 {
-                    Application.Current.Dispatcher.Invoke(() => {
-                        SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str });                      
-                    });}
-                    LogHelper.WriteLine(str, LogHelper.LogType.ERROR);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str });
+                    });
+                }
+                LogHelper.WriteLine(str, LogHelper.LogType.ERROR);
             });
             Messenger.Default.Register<string>(this, "ShowInfo", str =>
             {
@@ -733,7 +764,8 @@ namespace CPAS.ViewModels
             {
                 lock (SystemMessageCollection)
                 {
-                    Application.Current.Dispatcher.Invoke(() => {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
                         PLCMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str });
                     });
                 }
@@ -795,7 +827,7 @@ namespace CPAS.ViewModels
 
 
             //Init workflow state
-            WorkeFlowDic= WorkFlowMgr.Instance.stationDic;
+            WorkeFlowDic = WorkFlowMgr.Instance.stationDic;
 
             //User config
             UserModelCollection = new ObservableCollection<UserModel>();
@@ -807,7 +839,7 @@ namespace CPAS.ViewModels
 
             //Camera
             int i = 0;
-            foreach (var it in Vision.Vision.Instance.FindCamera(EnumCamType.GigEVision))
+            foreach (var it in Vision.Vision.Instance.FindCamera(EnumCamType.HuaRay))
             {
                 bool bOpen = Vision.Vision.Instance.OpenCam(i++);
                 CameraCollection.Add(new CameraItem() { CameraName = it.Key, StrCameraState = bOpen ? "Connected" : "DisConnected" });

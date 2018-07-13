@@ -45,6 +45,7 @@ namespace CPAS.Views
                         case "snaponce":
                             Vision.Vision.Instance.GrabImage(cmd.Item2);
                             break;
+                        
                         default:
                             throw new Exception("Unknow cmd for camera!");
                     }

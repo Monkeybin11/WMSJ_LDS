@@ -17,12 +17,14 @@ namespace CPAS.Vision
         IDLE,
         BUSY,
         DISCONNECTED
+        
     }
     public enum EnumCamType
     {
         GigEVision,
         DirectShow,
         uEye,
+        HuaRay
     }
     public class Vision
     {
@@ -38,8 +40,7 @@ namespace CPAS.Vision
             HOperatorSet.GenEmptyObj(out Region);
             HOperatorSet.GenEmptyObj(out ImageTemp);
 
-            //需要将相机的配置与实际的做个映射  //ddddd
-            CamCfgDic = FindCamera(EnumCamType.GigEVision);
+            CamCfgDic = FindCamera(EnumCamType.HuaRay);
         }
         private static readonly Lazy<Vision> _instance = new Lazy<Vision>(() => new Vision());
         public static Vision Instance
@@ -161,7 +162,7 @@ namespace CPAS.Vision
             }
             catch (Exception ex)
             {
-                Messenger.Default.Send<string>(ex.Message, "ShowError");
+                Messenger.Default.Send<string>($"Open Camera Error:{CamCfgDic.ElementAt(nCamID)}:{ex.Message}","ShowError");
                 return false;
             }
             finally
@@ -273,10 +274,7 @@ namespace CPAS.Vision
                     if (!IsCamOpen(nCamID))
                         OpenCam(nCamID);
                     if (!IsCamOpen(nCamID))
-                    {
-                        Messenger.Default.Send<string>(string.Format("打开相机{0}失败", nCamID), "ShowError");
                         return;
-                    }
                     if (ImageTemp != null)
                     {
                         ImageTemp.Dispose();
@@ -394,25 +392,39 @@ namespace CPAS.Vision
         }
         public Dictionary<string, Tuple<string, string>> FindCamera(EnumCamType camType)
         {
+            Dictionary<string, Tuple<string, string>> dic = new Dictionary<string, Tuple<string, string>>();
             try
             {
                 HOperatorSet.InfoFramegrabber(camType.ToString(), "info_boards", out HTuple hv_Information, out HTuple hv_ValueList);
-                Dictionary<string, Tuple<string, string>> dic = new Dictionary<string, Tuple<string, string>>();
                 if (0 == hv_ValueList.Length)
                     return dic;
-                foreach (var dev in hv_ValueList.SArr)
+                for (int i = 0; i < Config.ConfigMgr.CameraCfgs.Length; i++)
                 {
-                    string[] str = dev.Split('|');
-                    dic.Add(str[1].Replace("user_name:", "").Trim() + str[2].Replace("ip_address", "").Trim(), new Tuple<string, string>(str[0].Replace("unique_name:", "").Trim(), camType.ToString()));
+                    bool bFind = false;
+                    foreach (var dev in hv_ValueList.SArr)
+                    {
+                        
+                        string Name = dev.Substring(0, dev.IndexOf("port")).Replace("device:","").Trim();
+                        if (Name.Contains(Config.ConfigMgr.CameraCfgs[i].Name))
+                        {
+                            dic.Add(Config.ConfigMgr.CameraCfgs[i].Name, new Tuple<string, string>(Name.Trim(), camType.ToString()));
+                            bFind = true;
+                            break;
+                        }
+                    }
+                     if(!bFind)
+                         Messenger.Default.Send<String>(string.Format("相机:{0}未找到硬件，请检查硬件连接或者配置", Config.ConfigMgr.CameraCfgs[i].Name), "ShowError");
                 }
                 return dic;
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format("FIndCamera error:{0}", ex.Message));
+                Messenger.Default.Send<String>(string.Format("FIndCamera error:{0}", ex.Message));
+                return dic;
+                //throw new Exception(string.Format("FIndCamera error:{0}", ex.Message));
             }
         }
-        #endregion
+#endregion
     }
 
     public class VisionDataHelper
