@@ -193,7 +193,7 @@ namespace CPAS.WorkFlow
                         PopAndPushStep(STEP.Cacul_Focus_Servo_Angle);
                         break;
                     case STEP.Cacul_Focus_Servo_Angle:
-                        if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.T1, nCamID, null, out object oResult1))
+                        if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, nCamID, null, out object oResult1))
                         {
                             PLC.WriteDint(strCalAngleJointAngleRegister, Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000)); //角度
                             PLC.WriteInt(strJointBoolResultRegister, 2);    //拍摄的最终结果

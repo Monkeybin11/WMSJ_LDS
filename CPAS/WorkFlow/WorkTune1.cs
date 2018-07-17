@@ -204,7 +204,7 @@ namespace CPAS.WorkFlow
                         Vision.Vision.Instance.GrabImage(CamTopID);
                         break;
                     case STEP.Cacul_Horiz_Servo_Angle:
-                        if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.T1, CamTopID, null, out object oResult1))
+                        if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE1, CamTopID, null, out object oResult1))
                         {
                             PLC.WriteDint(joint_Angle_Reg, Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000));
                             PLC.WriteInt(boolResult_Grab_Reg, 2);
@@ -240,7 +240,7 @@ namespace CPAS.WorkFlow
                         Vision.Vision.Instance.GrabImage(CamBottonCam);
                         break;
                     case STEP.Cacul_Blob_Angle:
-                        if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.T1, CamBottonCam, null, out object oResult))
+                        if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_BLOB, CamBottonCam, null, out object oResult))
                         {
                             PLC.WriteDint(adjustAngle_Reg, Convert.ToInt32(Math.Round(double.Parse(oResult.ToString()), 3) * 1000));
                             PLC.WriteInt(cmd_Single_Step_Reg, 1);

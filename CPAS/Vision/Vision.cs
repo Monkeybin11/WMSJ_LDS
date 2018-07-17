@@ -53,10 +53,9 @@ namespace CPAS.Vision
         public List<object> _lockList = new List<object>();
         public enum IMAGEPROCESS_STEP
         {
-            T1,
-            T2,
-            T3,
-            T4
+            GET_ANGLE_TUNE1,
+            GET_ANGLE_BLOB,
+            GET_ANGLE_TUNE2,
         }
         private List<HObject> HoImageList = new List<HObject>(10);    //Image
         private List<HTuple> AcqHandleList = new List<HTuple>(10);    //Aqu
@@ -314,10 +313,12 @@ namespace CPAS.Vision
                 {
                     switch (nStep)
                     {
-                        case IMAGEPROCESS_STEP.T1:
+                        case IMAGEPROCESS_STEP.GET_ANGLE_TUNE1:
 
                             break;
-                        case IMAGEPROCESS_STEP.T2:
+                        case IMAGEPROCESS_STEP.GET_ANGLE_TUNE2:
+                            break;
+                        case IMAGEPROCESS_STEP.GET_ANGLE_BLOB:
                             break;
                         default:
                             break;

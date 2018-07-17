@@ -62,6 +62,35 @@ namespace CPAS.Instrument
                 return false;
             }
         }
+        public bool MyInit(ComportCfg comportCfg)
+        {
+            try
+            {
+                comPort = new System.IO.Ports.SerialPort();
+                if (comPort != null && comportCfg != null)
+                {
+                    GetPortProfileData(comportCfg);
+                    comPort.PortName = comportData.Port;
+                    comPort.BaudRate = comportData.BaudRate;
+                    comPort.Parity = comportData.parity;
+                    comPort.StopBits = comportData.stopbits;
+                    comPort.DataBits = comportData.DataBits;
+                    comPort.ReadTimeout = comportData.Timeout;
+                    comPort.WriteTimeout = comportData.Timeout;
+                    comPort.ReadBufferSize = 4000;  //4000个字节
+                    if (comPort.IsOpen)
+                        comPort.Close();
+                    comPort.Open();
+                    return comPort.IsOpen;
+                }
+                return false;
+                
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
         public override bool DeInit()
         {
             if (comPort != null)
@@ -84,14 +113,13 @@ namespace CPAS.Instrument
                 return true;
             }
         }
-        public double EnsureLaserPower()
+        public void EnsureLaserPower()
         {
             lock (comPort)
             {
                 if (comPort == null)
-                    return 0.0f;
+                    return ;
                 comPort.Write("laserpowerok$");
-                return 0.0f;
             }
         }
         public bool CheckSetPowerStatusOK()
@@ -112,21 +140,21 @@ namespace CPAS.Instrument
 
 
         #region 烧录 SN
-        private bool DoRecord(string strID)
+        public bool DoRecord(string strID)
         {
             if (comPort == null || !comPort.IsOpen)
                 return false;
             lock (comPort)
             {
                 comPort.Write("flashserial$");
-                Thread.Sleep(20);
-                comPort.Write(string.Format("Manualfacture[{0}]$", strID));
-                Thread.Sleep(20);
-                comPort.Write("getstatuscode$");
-                Thread.Sleep(20);
+                Thread.Sleep(50);
+                comPort.Write(string.Format("{0}$", strID));
+                Thread.Sleep(50);
+                comPort.Write("getserial$");
+                Thread.Sleep(50);
                 byte[] recv = new byte[30];
                 comPort.Read(recv, 0, 30);
-                string strRet = System.Text.Encoding.UTF8.GetString(recv);
+                string strRet = System.Text.Encoding.UTF8.GetString(recv).Replace("\0","");
                 return strRet==strID;
             }
         }
@@ -145,13 +173,13 @@ namespace CPAS.Instrument
             lock (comPort)
             {
                 comPort.Write("sethorizontal$");
-                Thread.Sleep(100);
-                byte[] recv = new byte[6000];
+                Thread.Sleep(400);
+                byte[] recv = new byte[4000];
                 comPort.Write("holdlds$");
                 Thread.Sleep(20);
-                comPort.Read(recv, 0, 6000);
+                comPort.Read(recv, 0, 4000);
                 int[] posArr=SearchHeader(recv, ldsHeader, nCmosLength*2);
-                if (posArr.Length > 1)      
+                if (posArr.Length >= 1)      
                 {
                     var finaList = recv.Skip(posArr[0]+ldsHeader.Length).Take(nCmosLength * 2);      //一帧数据
                     int[] intArr=ByteArr2IntArr(finaList);
@@ -163,6 +191,7 @@ namespace CPAS.Instrument
                     }
                     int meanValue = sum / 20;   //底噪
                     int value=intArr.Skip(10).Take(intArr.Length - 20).Max()-meanValue;
+                    Console.WriteLine("强度值:"+value.ToString());
                     return value;
                 }
                 else

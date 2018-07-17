@@ -7,18 +7,18 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CPAS.Instrument 
+namespace CPAS.Instrument
 {
     public class Keyence_SR1000 : InstrumentBase
     {
         private byte[] byteRecv = new byte[128];
         private ComportCfg comportCfg = null;
-        private EtherNetCfg etherNetCfg=null;  
+        private EtherNetCfg etherNetCfg = null;
         public Keyence_SR1000(HardwareCfgLevelManager1 cfg) : base(cfg)
         {
 
         }
-     
+
         public override bool Init()
         {
             try
@@ -66,6 +66,37 @@ namespace CPAS.Instrument
                 return false;
             }
         }
+        public bool MyInit()
+        {
+            comportCfg = new ComportCfg()
+            {
+                BaudRate = 115200,
+                DataBits = 8,
+                Parity = "e",
+                Port = "COM8",
+                PortName = "SR1_Comport",
+                StopBits = 1,
+                TimeOut = 1000
+
+            };
+            comPort = new System.IO.Ports.SerialPort();
+            if (comPort != null && comportCfg != null)
+            {
+                GetPortProfileData(comportCfg);
+                comPort.PortName = comportData.Port;
+                comPort.BaudRate = comportData.BaudRate;
+                comPort.Parity = comportData.parity;
+                comPort.StopBits = comportData.stopbits;
+                comPort.DataBits = comportData.DataBits;
+                comPort.ReadTimeout = comportData.Timeout;
+                comPort.WriteTimeout = comportData.Timeout;
+                if (comPort.IsOpen)
+                    comPort.Close();
+                comPort.Open();
+                return comPort.IsOpen;
+            }
+            return false;
+        }
         public override bool DeInit()
         {
             if (comPort != null)
@@ -77,7 +108,7 @@ namespace CPAS.Instrument
         }
         public string Getbarcode()
         {
-            string strCode=Query("LON\r").ToString();
+            string strCode = Query("LON\r").ToString();
             Excute("LOFF\r");
             return strCode;
         }
@@ -105,8 +136,8 @@ namespace CPAS.Instrument
                     Array.Clear(byteRecv, 0, byteRecv.Length);
                     comPort.Write(objCmd.ToString());
                     Thread.Sleep(100);
-                    comPort.Read(byteRecv,0,128);
-                    return System.Text.Encoding.ASCII.GetString(byteRecv).Replace("\0","").Replace("\r","");
+                    comPort.Read(byteRecv, 0, 128);
+                    return System.Text.Encoding.ASCII.GetString(byteRecv).Replace("\0", "").Replace("\r", "");
                 }
             }
             catch (Exception ex)

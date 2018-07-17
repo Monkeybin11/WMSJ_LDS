@@ -85,6 +85,29 @@ namespace CPAS.Instrument
                 return false;
             }
         }
+        public bool MyInit()
+        {
+            NIVasaCfg nivisaCfg = new NIVasaCfg()
+            {
+                KeyWord1 = "USB?*",
+                KeyWord2 = "P2010125",
+                PortName = ""
+            };
+            if (nivisaCfg != null)
+            {
+                string[] resources = ResourceManager.GetLocalManager().FindResources(nivisaCfg.KeyWord1);
+                foreach (var res in resources)
+                {
+                    if (res.Contains(nivisaCfg.KeyWord2))
+                    {
+                        session = ResourceManager.GetLocalManager().Open(resources[0].ToString()) as MessageBasedSession;
+                    }
+                }
+                string str = session.Query("READ?");
+                return session != null;
+            }
+            return false;
+        }
         public override bool DeInit()
         {
             if (comPort != null)
