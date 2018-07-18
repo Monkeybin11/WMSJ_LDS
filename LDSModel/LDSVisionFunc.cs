@@ -93,8 +93,11 @@ namespace LDSFuncSet
             ho_Contours1.Dispose();
             return true;
         }
-        public bool FindShapeModelXLD(HObject ImageIn, HTuple ModelName)
+        public bool FindShapeModelXLD(HObject ImageIn, HTuple ModelName, out HTuple OutRow, out HTuple OutCol,out HTuple OutAngle)
         {
+            OutRow = null;
+            OutCol = null;
+            OutAngle = null;
             HObject ho_ModelContours, ho_ImageMean;
             HObject ho_Regions, ho_RegionFillUp, ho_ConnectedRegions;
             HObject ho_SelectedRegions, ho_RegionTrans, ho_Contours;
@@ -149,9 +152,17 @@ namespace LDSFuncSet
             HOperatorSet.Difference(ho_RegionDilation, ho_RegionErosion, out ho_RegionDifference );
             ho_ImageReduced.Dispose();
             HOperatorSet.ReduceDomain(ImageIn, ho_RegionDifference, out ho_ImageReduced);
+
+
+            //输出结果
             HOperatorSet.FindShapeModel(ho_ImageReduced, hv_ModelID1, (new HTuple(0)).TupleRad()
                 , (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out hv_Row3,
                 out hv_Column3, out hv_Angle2, out hv_Score);
+
+            OutRow = hv_Row3;
+            OutCol = hv_Column3;
+            OutAngle = hv_Angle2;
+
             HOperatorSet.VectorAngleToRigid(0, 0, 0, hv_Row3, hv_Column3, hv_Angle2, out hv_HomMat2D);
             ho_ContoursAffinTrans.Dispose();
             HOperatorSet.AffineTransContourXld(ho_ModelContours, out ho_ContoursAffinTrans, hv_HomMat2D);

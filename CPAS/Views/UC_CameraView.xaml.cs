@@ -119,5 +119,10 @@ namespace CPAS.Views
             if(!bFirstLoaded)
                 Vision.Vision.Instance.AttachCamWIndow(Cb_Cameras.SelectedIndex, "CameraViewCam", Cam1.HalconWindow);
         }
+
+        private void BtnSaveImage_Click(object sender, RoutedEventArgs e)
+        {
+            (DataContext as MainWindowViewModel).SaveImagerCommand.Execute(new Tuple<int,bool,HalconDotNet.HWindow>(Cb_Cameras.SelectedIndex,(bool)RbImage.IsChecked,Cam1.HalconWindow));
+        }
     }
 }

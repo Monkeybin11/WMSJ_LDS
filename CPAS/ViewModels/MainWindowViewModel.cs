@@ -233,7 +233,11 @@ namespace CPAS.ViewModels
                 if (_prescriptionUsed != value)
                 {
                     _prescriptionUsed = value;
-                    SystemParaModelUsed = new SystemParaModel() { BadBarcodeExpiration = SystemParaModelUsed.BadBarcodeExpiration, CurPrescriptionName = value == null ? "" : value.Name };
+                    SystemParaModelUsed = new SystemParaModel() {
+                        BadBarcodeExpiration = SystemParaModelUsed.BadBarcodeExpiration,
+                        CurPrescriptionName = value == null ? "" : value.Name,
+                        ImageSaveExpiration= SystemParaModelUsed.ImageSaveExpiration
+                    };
                     RaisePropertyChanged();
 
                 }
@@ -498,19 +502,17 @@ namespace CPAS.ViewModels
                 });
             }
         }
-        public RelayCommand<int> ReconnectCommand
+        public RelayCommand<Tuple<int, bool, HalconDotNet.HWindow>> SaveImagerCommand
         {
             get
             {
-                return new RelayCommand<int>(nCamID =>
+                return new RelayCommand<Tuple<int,bool,HalconDotNet.HWindow>>(para =>
                 {
-                    if (nCamID < 0)
-                        return;
-                    bool bSuccess = Vision.Vision.Instance.OpenCam(nCamID);
-                    CameraCollection.ElementAt(nCamID).StrCameraState = bSuccess ? "Connected" : "Disconnected";
-                   
-                    CamSnapState = EnumCamSnapState.IDLE;
-                    LogHelper.WriteLine($"重连相机{nCamID}", LogHelper.LogType.NORMAL);
+                    int nCamID = para.Item1;
+                    bool bSaveImage = para.Item2;
+                    HalconDotNet.HWindow hWindow = para.Item3;
+                    DateTime now = DateTime.Now;
+                    Vision.Vision.Instance.SaveImage(nCamID, bSaveImage ? EnumImageType.Image : EnumImageType.Window, "ImageSaved\\ImageSaved", $"{now.Year}/{now.Month}/{now.Day} {now.Hour}:{now.Minute}:{now.Second} Cam{nCamID}.jpg", hWindow);
                 });
             }
         }
