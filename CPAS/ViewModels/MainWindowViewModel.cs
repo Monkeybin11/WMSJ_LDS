@@ -703,8 +703,8 @@ namespace CPAS.ViewModels
             SystemMessageCollection.CollectionChanged += SystemMessageCollection_CollectionChanged;
 
             #region Messages
-            Messenger.Default.Register<string>(this, "UpdateRoiFiles", str => UpdateRoiCollect(Convert.ToInt16(str.Substring(3, 1))));
-            Messenger.Default.Register<string>(this, "UpdateTemplateFiles", str => UpdateModelCollect(Convert.ToInt16(str.Substring(3, 1))));
+            Messenger.Default.Register<int>(this, "UpdateRoiFiles", nCamID => UpdateRoiCollect(nCamID));
+            Messenger.Default.Register<int>(this, "UpdateTemplateFiles", nCamID => UpdateModelCollect(nCamID));
             Messenger.Default.Register<Tuple<string, string>>(this, "ShowStepInfo", tuple =>
                 {
                     //不需要加锁

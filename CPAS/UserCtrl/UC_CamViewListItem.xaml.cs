@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CPAS.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,41 @@ namespace CPAS.UserCtrl
         public UC_CamViewListItem()
         {
             InitializeComponent();
+        }
+        public int CurCamID
+        {
+            get
+            {
+                return Convert.ToInt16(GetValue(CurCamIDProperty));
+            }
+            set {
+                SetValue(CurCamIDProperty,value);
+            }
+        }
+        public static DependencyProperty CurCamIDProperty = DependencyProperty.Register("CurCamID", typeof(int), typeof(UC_CamViewListItem));
+
+        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = DataContext as RoiModelBase;
+            if (CurCamID < 0)
+            {
+                UC_MessageBox.ShowMsgBox("请选择一个相机进行操作");
+                return;
+            }
+            vm.Index = 2;// CurCamID;
+            vm.OperateAdd.Execute(vm);
+        }
+
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = DataContext as RoiModelBase;
+            if (CurCamID < 0)
+            {
+                UC_MessageBox.ShowMsgBox("请选择一个相机进行操作");
+                return;
+            }
+            vm.Index = 2;// CurCamID;
+            vm.OperateDelete.Execute(vm);
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CPAS.Models;
 using GalaSoft.MvvmLight.Messaging;
 using HalconDotNet;
+using LDSFuncSet;
 
 namespace CPAS.Vision
 {
@@ -26,6 +28,17 @@ namespace CPAS.Vision
         uEye,
         HuaRay
     }
+    public enum EnumImageType
+    {
+        Window,
+        Image
+    }
+    public enum EnumShapeModelType
+    {
+        Gray,
+        Shape,
+        XLD
+    };
     public class Vision
     {
         #region constructor
@@ -65,6 +78,7 @@ namespace CPAS.Vision
         private HObject Region = null;
         public Enum_REGION_OPERATOR RegionOperator = Enum_REGION_OPERATOR.ADD;
         public Enum_REGION_TYPE RegionType = Enum_REGION_TYPE.CIRCLE;
+        private LDSVisionFunc LdsFuncSet = new LDSVisionFunc();
         private HObject ImageTemp = null;
         #endregion
 
@@ -162,61 +176,6 @@ namespace CPAS.Vision
             catch (Exception ex)
             {
                 Messenger.Default.Send<string>($"Open Camera Error:{CamCfgDic.ElementAt(nCamID)}:{ex.Message}","ShowError");
-                return false;
-            }
-            finally
-            {
-                if (image != null)
-                    image.Dispose();
-            }
-        }
-        public bool OpenCam(string strUniqName)
-        {
-            int nCamID = -1;
-            int nIndex = 0;
-            foreach (var it in CamCfgDic)
-            {
-                if (it.Key.Contains(strUniqName))
-                    nCamID = nIndex;
-                nIndex++;
-            }
-            if (nCamID < 0)
-                return false;
-            HObject image = null;
-            HTuple hv_AcqHandle = null;
-            HTuple width = 0, height = 0;
-            try
-            {
-                lock (_lockList[nCamID])
-                {
-                    if (!IsCamOpen(nCamID))
-                    {
-                        //HOperatorSet.OpenFramegrabber("DirectShow", 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
-                        //                            -1, "false", "default", "Integrated Camera", 0, -1, out hv_AcqHandle);
-                        HOperatorSet.OpenFramegrabber(CamCfgDic.ElementAt(nCamID).Value.Item2, 1, 1, 0, 0, 0, 0, "default", 8, "rgb",
-                                                   -1, "false", "default", CamCfgDic.ElementAt(nCamID).Value.Item1, 0, -1, out hv_AcqHandle);
-                        HOperatorSet.GrabImage(out image, hv_AcqHandle);
-                        HOperatorSet.GetImageSize(image, out width, out height);
-                        ActiveCamDic.Add(nCamID, new Tuple<HTuple, HTuple>(width, height));
-                        AcqHandleList[nCamID] = hv_AcqHandle;
-                    }
-                    if (IsCamOpen(nCamID))
-                    {
-                        if (HwindowDic.Keys.Contains(nCamID))
-                        {
-                            foreach (var it in HwindowDic[nCamID])
-                            {
-                                HOperatorSet.SetPart(it.Value, 0, 0, ActiveCamDic[nCamID].Item2, ActiveCamDic[nCamID].Item1);
-                                HOperatorSet.DispObj(image, it.Value);
-                            }
-                        }
-                    }
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Messenger.Default.Send<string>(ex.Message, "ShowError");
                 return false;
             }
             finally
@@ -390,6 +349,50 @@ namespace CPAS.Vision
                 Messenger.Default.Send<String>(string.Format("DrawRectangle出错:{0}", ex.Message), "ShowError");
                 return false;
             }
+        }
+        public bool SaveRoi(int nCamID)
+        {
+            if (nCamID < 0)
+                return false;
+
+            return true;
+        }
+        public bool CreateShapeModel(int nCamID,EnumShapeModelType modelType,string modelName)
+        {
+            if (nCamID < 0)
+                return false;
+            switch (modelType)
+            {
+                case EnumShapeModelType.Gray:
+                    break;
+                case EnumShapeModelType.Shape:
+                    break;
+                case EnumShapeModelType.XLD:
+                    string ModelFileName = $"VisionData\\Model\\Cam{nCamID}_{modelName}.shm";
+                    string ModelOriginPosFileName = $"VisionData\\Model\\Cam{nCamID}_{modelName}.tup";
+                    LdsFuncSet.CreateShapeModelXLD(ImageTemp, ModelFileName, ModelOriginPosFileName);
+                    break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+        public bool SaveImage(int nCamID,EnumImageType type, string filePath, string fileName,HTuple hWindow)
+        {
+            if (nCamID < 0)
+                return false;
+            if (!Directory.Exists(filePath))
+                return false;
+            switch (type)
+            {
+                case EnumImageType.Image:
+                    HOperatorSet.WriteImage(ImageTemp, "jpeg", 0, $"{filePath}\\{fileName}");
+                    break;
+                case EnumImageType.Window:
+                    HOperatorSet.DumpWindow(hWindow, "jpeg", $"{filePath}\\{fileName}");
+                    break;
+            }
+            return true;
         }
         public Dictionary<string, Tuple<string, string>> FindCamera(EnumCamType camType)
         {

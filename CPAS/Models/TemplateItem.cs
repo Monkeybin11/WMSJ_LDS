@@ -10,34 +10,25 @@ using System.Threading.Tasks;
 
 namespace CPAS.Models
 {
-    public class TemplateItem
+    public class TemplateItem : RoiModelBase
     {
-        public string StrName { get; set; }
-        public string StrFullName { get; set; }
-
-        public RelayCommand<TemplateItem> OperateAdd
+        public override  RelayCommand<RoiModelBase> OperateAdd
         {
             get
             {
-                return new RelayCommand<TemplateItem>(item => {
-                    Console.WriteLine(item.StrName);
+                return new RelayCommand<RoiModelBase>(item => {
+                    var model = item as TemplateItem;
+                    //Vision.Vision.Instance.CreateShapeModel(item.)
+                    Console.WriteLine(model.StrName);
                 });
             }
         }
-        public RelayCommand<TemplateItem> OperateEdit
+        public override RelayCommand<RoiModelBase> OperateDelete
         {
             get
             {
-                return new RelayCommand<TemplateItem>(item => {
-                    Console.WriteLine(item.StrName);
-                });
-            }
-        }
-        public RelayCommand<TemplateItem> OperateDelete
-        {
-            get
-            {
-                return new RelayCommand<TemplateItem>(item => {
+                return new RelayCommand<RoiModelBase>(item => {
+                    var model= item as TemplateItem;
                     StringBuilder sb = new StringBuilder();
                     sb.Append(FileHelper.GetCurFilePathString());
                     sb.Append("VisionData\\Model\\");
@@ -46,7 +37,7 @@ namespace CPAS.Models
                     if (UC_MessageBox.ShowMsgBox(string.Format("确定要删除{0}吗?", item.StrName)) == System.Windows.MessageBoxResult.Yes)
                     {
                         FileHelper.DeleteFile(sb.ToString());
-                        Messenger.Default.Send<string>(item.StrFullName, "UpdateTemplateFiles");
+                        Messenger.Default.Send<int>(model.Index, "UpdateTemplateFiles");
                     }   
                 });
             }

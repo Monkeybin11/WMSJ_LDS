@@ -11,32 +11,23 @@ using System.Threading.Tasks;
 
 namespace CPAS.Models
 {
-    public class RoiItem
+    public class RoiItem : RoiModelBase
     {
-        public string StrName { get; set; }
-        public string StrFullName { get; set; }
-        public RelayCommand<RoiItem> OperateAdd
+        public override  RelayCommand<RoiModelBase> OperateAdd
         {
             get
             {
-                return new RelayCommand<RoiItem>(item =>
+                return new RelayCommand<RoiModelBase>(item =>
                 {
-                    Vision.Vision.Instance.DrawRoi(Convert.ToInt16(item.StrFullName.Substring(3, 1)));
+                    var model = item as RoiItem;
+                    Vision.Vision.Instance.DrawRoi(model.Index);                  
                 });
             }
         }
-        public RelayCommand<RoiItem> OperateEdit
+
+        public override RelayCommand<RoiModelBase> OperateDelete => new RelayCommand<RoiModelBase>(item =>
         {
-            get
-            {
-                return new RelayCommand<RoiItem>(item =>
-                {
-                    Console.WriteLine(item.StrName);
-                });
-            }
-        }
-        public RelayCommand<RoiItem> OperateDelete => new RelayCommand<RoiItem>(item =>
-        {
+            var model = item as RoiItem;
             StringBuilder sb = new StringBuilder();
             sb.Append(FileHelper.GetCurFilePathString());
             sb.Append("VisionData\\Roi\\");
@@ -45,7 +36,7 @@ namespace CPAS.Models
             if (UC_MessageBox.ShowMsgBox(string.Format("确定要删除{0}吗?", item.StrName)) == System.Windows.MessageBoxResult.Yes)
             {
                 FileHelper.DeleteFile(sb.ToString());
-                Messenger.Default.Send<string>(item.StrFullName, "UpdateRoiFiles");
+                Messenger.Default.Send<int>(model.Index, "UpdateRoiFiles");
             }
         });
 

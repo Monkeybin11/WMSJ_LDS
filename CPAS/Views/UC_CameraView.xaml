@@ -85,7 +85,7 @@
                     </Grid>
                 </Button.Content>
             </Button>
-            <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource RoundButtonStyle1}"  Background="LightGreen" ToolTip="重新连接" Margin="5" Height="50" Command="{Binding ReconnectCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}">
+            <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource RoundButtonStyle1}"  Background="LightGreen" ToolTip="保存图像" Margin="5" Height="50" Command="{Binding ReconnectCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}">
                 <Button.Content>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -93,7 +93,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <!--<Image Source="/CPAS;component/Images/StopGrab.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>-->
-                        <TextBlock Grid.Column="1" Text="重新连接" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="保存图像" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
                     </Grid>
                 </Button.Content>
             </Button>
@@ -157,7 +157,7 @@
                 </ListBox.ContextMenu>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <UserCtrl:UC_CamViewListItem/>
+                        <UserCtrl:UC_CamViewListItem CurCamID="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

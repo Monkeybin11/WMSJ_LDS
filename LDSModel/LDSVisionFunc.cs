@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HalconDotNet;
-namespace LDSModel
+namespace LDSFuncSet
 {
     public class LDSVisionFunc
     {
-        public void CreateShapeModelXLD(HObject ImageIn,HTuple ModelName)
+        public bool CreateShapeModelXLD(HObject ImageIn,HTuple ModelName,HTuple ModelOriginPos)
         {
             // Local iconic variables 
 
@@ -68,6 +68,14 @@ namespace LDSModel
             ho_Contours1.Dispose();
             HOperatorSet.GenContourRegionXld(ho_RegionFillUp1, out ho_Contours1, "border");
             HOperatorSet.CreateShapeModelXld(ho_Contours1, "auto", (new HTuple(0)).TupleRad()  , (new HTuple(360)).TupleRad(), "auto", "auto", "ignore_local_polarity",  5, out hv_ModelID);
+            HOperatorSet.FindShapeModel(ImageIn, hv_ModelID, (new HTuple(0)).TupleRad() , (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out HTuple hv_Row3, out HTuple hv_Column3, out HTuple hv_Angle2, out HTuple hv_Score);
+            
+            //保存建立模板的时候Model的原始位置信息
+            ModelOriginPos[0] = hv_Row3;
+            ModelOriginPos[1] = hv_Column3;
+            ModelOriginPos[2] = hv_Angle2;
+
+
             HOperatorSet.WriteShapeModel(hv_ModelID, ModelName);
             ImageIn.Dispose();
             ho_ImageMean.Dispose();
@@ -83,6 +91,7 @@ namespace LDSModel
             ho_Regions2.Dispose();
             ho_RegionFillUp1.Dispose();
             ho_Contours1.Dispose();
+            return true;
         }
         public bool FindShapeModelXLD(HObject ImageIn, HTuple ModelName)
         {
@@ -163,6 +172,9 @@ namespace LDSModel
             ho_ContoursAffinTrans.Dispose();
             return true;
         }
-
+        public bool SaveRoi()
+        {
+            return true;
+        }
     }
 }
