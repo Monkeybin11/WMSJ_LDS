@@ -209,6 +209,7 @@
     <Compile Include="Classes\ListBoxBehavior.cs" />
     <Compile Include="Classes\LogExcel.cs" />
     <Compile Include="Classes\LogHelper.cs" />
+    <Compile Include="Classes\TempleteSelecter.cs" />
     <Compile Include="Communication\EtherNet.cs" />
     <Compile Include="Config\HardwareManager\CameraCfg.cs" />
     <Compile Include="Config\PresciptionManager\PresciptionCfgManager.cs" />
@@ -287,6 +288,10 @@
     <Compile Include="WorkFlow\WorkRecord.cs" />
     <Compile Include="WorkFlow\WorkTune1.cs" />
     <Compile Include="WorkFlow\WorkTune2.cs" />
+    <Page Include="Resources\DictionaryPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Resources\IconsResourceDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -26,11 +26,10 @@ namespace CPAS.Views.Tests
             BaudRate = 115200,
             Parity = "none",
             DataBits = 8,
-            Port = "COM9",
+            Port = "COM15",
             PortName = "LDSPort",
             StopBits = 1,
             TimeOut = 1000
-
         };
         private LDS lds = null;
         public LDsTest()
