@@ -21,9 +21,6 @@
             <Storyboard x:Key="RoiSb" Completed="Storyboard2RoiCompleted">
                 <DoubleAnimation Storyboard.TargetName="SelectTrans"  Storyboard.TargetProperty="X" From="0" To="88" BeginTime="00:00:00" Duration="00:00:0.2"/>
             </Storyboard>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Resources/DictionaryPanel.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -78,7 +75,7 @@
                     </Grid>
                 </Button.Content>
             </Button>
-            <Button Grid.Row="1" Style="{StaticResource RoundButtonStyle1}"  Background="LightGreen" ToolTip="停止采集" Margin="5" Height="50" Command="{Binding StopSnapCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"
+            <Button Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource RoundButtonStyle1}"  Background="LightGreen" ToolTip="停止采集" Margin="5" Height="50" Command="{Binding StopSnapCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"
                     IsEnabled="{Binding CamSnapState,ConverterParameter=StopSnap,Converter={StaticResource EnumCamSnapState2SnapButtonEnable}}">
                 <Button.Content>
                     <Grid>
@@ -87,7 +84,8 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Image Source="/CPAS;component/Images/StopGrab.png" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="1" Text="停止采集" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="13,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="停止采集" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="30,0,0,0"/>
+                       
                     </Grid>
                 </Button.Content>
             </Button>
@@ -141,7 +139,7 @@
                     <TranslateTransform x:Name="SelectTrans" />
                 </Rectangle.RenderTransform>
             </Rectangle>
-            <Grid Grid.Row="4" Grid.Column="1" Margin="10,0,0,0" Visibility="{Binding CurrentSelectRoiTemplate, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource RoiTemplate2Visibility}}">
+            <Grid Grid.Row="4" Grid.Column="1" Margin="10,0,0,0" Visibility="{Binding CurrentSelectRoiTemplate, Converter={StaticResource RoiTemplate2Visibility}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50"/>
                     <ColumnDefinition Width="*"/>
@@ -178,8 +176,8 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             <!--模板参数-->
-            <Grid Grid.Row="8" Grid.ColumnSpan="2"  IsEnabled="{Binding IsEnabled,ElementName=Cb_Cameras}" DataContext="{Binding CurrentSelectRoiTemplate, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}">
-                <ContentControl Content="{Binding}" ContentTemplateSelector="{StaticResource ContentSelecter}"/>
+            <Grid Grid.Row="8" Grid.ColumnSpan="2"  IsEnabled="{Binding IsEnabled,ElementName=Cb_Cameras}">
+                <ContentControl Content="{Binding CurrentSelectRoiTemplate}" ContentTemplateSelector="{StaticResource ContentSelecter}" DataContext="{Binding}"/>
             </Grid>
         </Grid>
     </Grid>

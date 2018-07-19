@@ -41,8 +41,8 @@ namespace CPAS.Views
         {
             throw new NotImplementedException();
         }
-        public int CurrentSelectRoiTemplate { get { return Convert.ToInt16(GetValue(CurrentSelectRoiTemplateProperty)); } set { SetValue(CurrentSelectRoiTemplateProperty, value); } }
-        public DependencyProperty CurrentSelectRoiTemplateProperty = DependencyProperty.Register("CurrentSelectRoiTemplate", typeof(int), typeof(UC_CameraView));
+        //public int CurrentSelectRoiTemplate { get { return Convert.ToInt16(GetValue(CurrentSelectRoiTemplateProperty)); } set { SetValue(CurrentSelectRoiTemplateProperty, value); } }
+        //public DependencyProperty CurrentSelectRoiTemplateProperty = DependencyProperty.Register("CurrentSelectRoiTemplate", typeof(int), typeof(UC_CameraView));
 
         public void SetLever(int nLever)
         {
@@ -94,8 +94,8 @@ namespace CPAS.Views
         {
             Storyboard RoiSb = FindResource("RoiSb") as Storyboard;
             Storyboard TemplateSb = FindResource("TemplateSb") as Storyboard;
-            CurrentSelectRoiTemplate = CurrentSelectRoiTemplate == 0 ? 1 : 0;
-            if (CurrentSelectRoiTemplate == 0)
+            (DataContext as MainWindowViewModel).CurrentSelectRoiTemplate = (DataContext as MainWindowViewModel).CurrentSelectRoiTemplate == 0 ? 1 : 0;
+            if ((DataContext as MainWindowViewModel).CurrentSelectRoiTemplate == 0)
                 TemplateSb.Begin();
             else
                 RoiSb.Begin();
@@ -113,7 +113,6 @@ namespace CPAS.Views
 
 
         #endregion
-
         private void Cb_Cameras_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if(!bFirstLoaded)

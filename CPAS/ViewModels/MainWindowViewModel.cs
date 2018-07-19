@@ -49,6 +49,7 @@ namespace CPAS.ViewModels
         public PrescriptionGridModel _prescriptionUsed = new PrescriptionGridModel();
         private SystemParaModel _systemPataModelUsed = new SystemParaModel();
         private EnumCamSnapState _amSnapState;
+        private int _currentSelectRoiTemplate=0;
         public Dictionary<string, WorkFlowBase> _workeFlowDic;
         private ObservableCollection<MessageItem> _plcMessageCollection = new ObservableCollection<MessageItem>();
         private ObservableCollection<MessageItem> _systemMessageCollection = new ObservableCollection<MessageItem>();
@@ -60,6 +61,7 @@ namespace CPAS.ViewModels
         private FileHelper RoiFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Roi");
         private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
         private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
+
         private void SetPrescriptionToPLC(PrescriptionGridModel prescription)
         {
             QSerisePlc PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
@@ -212,6 +214,18 @@ namespace CPAS.ViewModels
                 }
             }
             get { return _strPowerMeterValue2; }
+        }
+        public int CurrentSelectRoiTemplate
+        {
+            set
+            {
+                if (_currentSelectRoiTemplate != value)
+                {
+                    _currentSelectRoiTemplate = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _currentSelectRoiTemplate; }
         }
         public Dictionary<string, WorkFlowBase> WorkeFlowDic
         {
@@ -696,10 +710,20 @@ namespace CPAS.ViewModels
                 });
             }
         }
-        #endregion
+        public RelayCommand<string> SaveRoiModelParaCommand
+        {
+            get
+            {
+                return new RelayCommand<string>(str =>
+                {
+                    
+                });
+            }
+        }
+    #endregion
 
-        #region Ctor and DeCtor
-        public MainWindowViewModel()
+    #region Ctor and DeCtor
+    public MainWindowViewModel()
         {
             PLCMessageCollection.CollectionChanged += PLCMessageCollection_CollectionChanged;
             SystemMessageCollection.CollectionChanged += SystemMessageCollection_CollectionChanged;
@@ -862,6 +886,7 @@ namespace CPAS.ViewModels
             Messenger.Default.Unregister<Tuple<string, string>>("ShowStepInfo");
             Messenger.Default.Unregister<Tuple<string, string, string>>("WorkFlowMessage");
         }
+
         #endregion
     }
 }

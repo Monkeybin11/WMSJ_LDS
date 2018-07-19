@@ -41,7 +41,7 @@
                 <TextBlock Text="边缘对比度:" VerticalAlignment="Center" Margin="2"/>
                 <TextBox Grid.Column="1" Margin="3" FontSize="15" VerticalContentAlignment="Center"/>
             </Grid>
-            <Button Margin="2" Content="保存参数" FontSize="15" Grid.Row="2" Grid.Column="0"/>
+            <Button Margin="2" Content="保存参数" FontSize="15" Grid.Row="2" Grid.Column="0" Command="{Binding SaveRoiModelParaCommand}" CommandParameter="Roi"/>
             <Button Margin="2" Content="测试结果" FontSize="15" Grid.Row="2" Grid.Column="1"/>
         </Grid>
     </DataTemplate>
@@ -73,7 +73,7 @@
                 <TextBox Grid.Column="1" Margin="3" FontSize="15" VerticalContentAlignment="Center"/>
             </Grid>
 
-            <Button Margin="2" Content="保存参数" FontSize="15" Grid.Row="2" Grid.Column="0"/>
+            <Button Margin="2" Content="保存参数" FontSize="15" Grid.Row="2" Grid.Column="0" Command="{Binding SaveRoiModelParaCommand}" CommandParameter="Model"/>
             <Button Margin="2" Content="查找模板" FontSize="15" Grid.Row="2" Grid.Column="1"/>
         </Grid>
     </DataTemplate>
