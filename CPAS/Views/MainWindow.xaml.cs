@@ -52,11 +52,11 @@ namespace CPAS.Views
                             PLC.ReadInt("R5017"),
                             PLC.ReadInt("R5018")
                             };
-#endif
+
                             ShowPLCError(errorCodes, dtError);
                             Thread.Sleep(300);
                         }
-                  
+#endif
                     }
                 }, cts.Token);
             }

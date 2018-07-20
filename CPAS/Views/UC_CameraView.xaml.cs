@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -28,7 +29,7 @@ namespace CPAS.Views
         MODEL,
         ROI
     }
-    public partial class UC_CameraView : UserControl , Iauthor
+    public partial class UC_CameraView : System.Windows.Controls.UserControl , Iauthor
     {
         public UC_CameraView()
         {
@@ -62,7 +63,7 @@ namespace CPAS.Views
                     Task.Delay(1500).Wait();
                     bFirstLoaded = false;
                 }
-                Application.Current.Dispatcher.Invoke(()=> SetAttachCamWindow(Cb_Cameras.SelectedIndex, true));
+                System.Windows.Application.Current.Dispatcher.Invoke(()=> SetAttachCamWindow(Cb_Cameras.SelectedIndex, true));
             });
         }
 
@@ -123,5 +124,24 @@ namespace CPAS.Views
         {
             (DataContext as MainWindowViewModel).SaveImagerCommand.Execute(new Tuple<int,bool,HalconDotNet.HWindow>(Cb_Cameras.SelectedIndex,(bool)RbImage.IsChecked,Cam1.HalconWindow));
         }
+
+        private void BtnOpenImage_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.Title = "请选择要打开的文件";
+                ofd.Multiselect = false;
+                ofd.InitialDirectory = @"C:\";
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    Vision.Vision.Instance.ReadImageInWindow(ofd.FileName, Cam1.HalconWindow);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message);
+            }
+        } 
     }
 }

@@ -9,22 +9,21 @@ using System.Windows.Data;
 
 namespace CPAS.Converters
 {
-    public class Int2ContentControl : IValueConverter
+    public class Int2Visibility : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            DataTemplate t = null;
-            if (value == null)
-                return null;
-            else
+            Visibility bRet=Visibility.Hidden;
+            switch (parameter.ToString())
             {
-                if((int)value==1)
-                    t= (DataTemplate)Application.Current.TryFindResource("RoiPanel");
-                else
-                    t= (DataTemplate)Application.Current.TryFindResource("ModelPanel");
-                return t;
+                case "Roi":
+                    bRet=(int)value == 1? Visibility.Visible : Visibility.Hidden;
+                    break;
+                case "Model":
+                    bRet=(int)value == 0 ? Visibility.Visible : Visibility.Hidden;
+                    break;
             }
-            
+            return bRet;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

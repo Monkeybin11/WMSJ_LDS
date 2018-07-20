@@ -104,7 +104,7 @@
                     </Grid>
                 </Button.Content>
             </Button>
-            <Button Grid.Row="2" Style="{StaticResource RoundButtonStyle1}"  Background="LightGreen" ToolTip="打开图片" Margin="5" Height="50" Command="{Binding StopSnapCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"
+            <Button Name="BtnOpenImage" Grid.Row="2" Style="{StaticResource RoundButtonStyle1}"  Background="LightGreen" ToolTip="打开图片" Margin="5" Height="50" Click="BtnOpenImage_Click"
                     IsEnabled="{Binding CamSnapState,ConverterParameter=SnapOnce,Converter={StaticResource EnumCamSnapState2SnapButtonEnable}}">
                 <Button.Content>
                     <Grid>
@@ -177,7 +177,8 @@
             </ListBox>
             <!--模板参数-->
             <Grid Grid.Row="8" Grid.ColumnSpan="2"  IsEnabled="{Binding IsEnabled,ElementName=Cb_Cameras}">
-                <ContentControl Content="{Binding CurrentSelectRoiTemplate}" ContentTemplateSelector="{StaticResource ContentSelecter}" DataContext="{Binding}"/>
+                <UserCtrl:UC_RoiParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Roi}"/>
+                <UserCtrl:UC_ModelParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Model}"/>
             </Grid>
         </Grid>
     </Grid>

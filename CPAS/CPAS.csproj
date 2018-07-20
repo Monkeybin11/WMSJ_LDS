@@ -220,8 +220,8 @@
     <Compile Include="Converters\Boolean2ErrorListEditVisibility.cs" />
     <Compile Include="Converters\Dictionary2StationHeaderBackagroundBrush.cs" />
     <Compile Include="Converters\EnumCamSnapState2SnapButtonEnable.cs" />
-    <Compile Include="Converters\Int2ContentControl.cs" />
     <Compile Include="Converters\Int2PrescriptionModel.cs" />
+    <Compile Include="Converters\Int2Visibility.cs" />
     <Compile Include="Converters\IsChecked2RegionOperator.cs" />
     <Compile Include="Converters\IsChecked2RegionType.cs" />
     <Compile Include="Converters\UserName2Visibility.cs" />
@@ -260,6 +260,12 @@
     <Compile Include="UserCtrl\UC_MessageBox.xaml.cs">
       <DependentUpon>UC_MessageBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserCtrl\UC_ModelParaPanel.xaml.cs">
+      <DependentUpon>UC_ModelParaPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserCtrl\UC_RoiParaPanel.xaml.cs">
+      <DependentUpon>UC_RoiParaPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserCtrl\UC_StationHeader.xaml.cs">
       <DependentUpon>UC_StationHeader.xaml</DependentUpon>
     </Compile>
@@ -289,10 +295,6 @@
     <Compile Include="WorkFlow\WorkRecord.cs" />
     <Compile Include="WorkFlow\WorkTune1.cs" />
     <Compile Include="WorkFlow\WorkTune2.cs" />
-    <Page Include="Resources\DictionaryPanel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Resources\IconsResourceDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -310,6 +312,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserCtrl\UC_MessageBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserCtrl\UC_ModelParaPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserCtrl\UC_RoiParaPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

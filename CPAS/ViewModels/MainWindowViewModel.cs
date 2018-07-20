@@ -720,9 +720,19 @@ namespace CPAS.ViewModels
                 });
             }
         }
-    #endregion
+        public RelayCommand<string> TestRoiModelCommand
+        {
+            get
+            {
+                return new RelayCommand<string>(str =>
+                {
 
-    #region Ctor and DeCtor
+                });
+            }
+        }
+        #endregion
+
+        #region Ctor and DeCtor
     public MainWindowViewModel()
         {
             PLCMessageCollection.CollectionChanged += PLCMessageCollection_CollectionChanged;

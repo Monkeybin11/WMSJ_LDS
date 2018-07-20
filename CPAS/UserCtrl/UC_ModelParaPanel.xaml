@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="CPAS.UserCtrl.UC_ModelParaPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CPAS.UserCtrl"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="查找数量:" VerticalAlignment="Center" Margin="2"/>
+                <TextBox Grid.Column="1" Margin="3" FontSize="15" VerticalContentAlignment="Center"/>
+            </Grid>
+            <Grid Grid.Row="0" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="最低分数:" VerticalAlignment="Center" Margin="2"/>
+                <TextBox Grid.Column="1" Margin="3" FontSize="15" VerticalContentAlignment="Center"/>
+            </Grid>
+
+            <Button Margin="2" Content="保存参数" FontSize="15" Grid.Row="2" Grid.Column="0" Command="{Binding SaveRoiModelParaCommand}" CommandParameter="Model"/>
+            <Button Margin="2" Content="测试模板" FontSize="15" Grid.Row="2" Grid.Column="1" Command="{Binding TestRoiModelCommand}" CommandParameter="Model"/>
+        </Grid>
+    </Grid>
+</UserControl>

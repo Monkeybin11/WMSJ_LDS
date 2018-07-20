@@ -4,14 +4,12 @@
              StartupUri="Views\MainWindow.xaml"
              xmlns:Convert="clr-namespace:CPAS.Converters"
              xmlns:VM="clr-namespace:CPAS.ViewModels">
-      
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/ImplicitStylesResourceDictionary.xaml" />
                 <ResourceDictionary Source="Resources/IconsResourceDictionary.xaml" />
                 <ResourceDictionary Source="Resources/StylesResourceDictionary.xaml" />
-                <ResourceDictionary Source="Resources/DictionaryPanel.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <VM:ViewModelLocator x:Key="Locator"/>
             <Convert:Text2Visibility x:Key="Text2Visibility"/>
@@ -29,7 +27,7 @@
             <Convert:Int2PrescriptionModel x:Key="Int2PrescriptionModel"/>
             <Convert:UserName2Visibility x:Key="UserName2Visibility"/>
             <Convert:Dictionary2StationHeaderBackagroundBrush x:Key="Dictionary2StationHeaderBackagroundBrush"/>
-            <Convert:Int2ContentControl x:Key="Int2ContentControl"/>
+            <Convert:Int2Visibility x:Key="Int2Visibility"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
