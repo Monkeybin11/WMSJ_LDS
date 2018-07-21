@@ -338,7 +338,7 @@ namespace CPAS.ViewModels
         private void UpdateRoiCollect(int nCamID)
         {
             RoiCollection.Clear();
-            foreach (var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, RoiFileHelper.GetWorkDictoryProfileList()))
+            foreach (var it in Vision.VisionDataHelper.GetRoiListForSpecCamera(nCamID, RoiFileHelper.GetWorkDictoryProfileList()))
                 RoiCollection.Add(new RoiItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""), StrFullName = it });
             LogHelper.WriteLine($"更新相机{nCamID}的ROI文件", LogHelper.LogType.NORMAL);
         }
@@ -526,7 +526,7 @@ namespace CPAS.ViewModels
                     bool bSaveImage = para.Item2;
                     HalconDotNet.HWindow hWindow = para.Item3;
                     DateTime now = DateTime.Now;
-                    Vision.Vision.Instance.SaveImage(nCamID, bSaveImage ? EnumImageType.Image : EnumImageType.Window, "ImageSaved\\ImageSaved", $"{now.Year}/{now.Month}/{now.Day} {now.Hour}:{now.Minute}:{now.Second} Cam{nCamID}.jpg", hWindow);
+                    Vision.Vision.Instance.SaveImage(nCamID, bSaveImage ? EnumImageType.Image : EnumImageType.Window, FileHelper.GetCurFilePathString() + "ImageSaved\\ImageSaved", $"{now.Month}月{now.Day}日 {now.Hour}时{now.Minute}分{now.Second}秒_Cam{nCamID}.jpg", hWindow);
                 });
             }
         }
@@ -710,6 +710,63 @@ namespace CPAS.ViewModels
                 });
             }
         }
+
+
+        //Roi Model
+ 
+        public RelayCommand<int> NewRoiCommand
+        {
+            get
+            {
+                return new RelayCommand<int>(nCamID =>
+                {
+                    if (nCamID >= 0)
+                    {
+                        if (MessageBoxResult.Yes == Window_AddRoiModel.ShowWindowNewRoiModel(EnumWindowType.ROI))
+                        {
+                            foreach (var it in RoiCollection)
+                            {
+                                if (it.StrName == Window_AddRoiModel.ProfileValue)
+                                {
+                                    UC_MessageBox.ShowMsgBox("该文件已经存在，请重新命名");
+                                    return;
+                                }
+                            }
+                            Vision.Vision.Instance.NewRoi(nCamID, $"VisionData\\Roi\\Cam{nCamID}_{Window_AddRoiModel.ProfileValue}");
+                            //Vision.Vision.Instance.ShowRoi($"Cam{nCamID}_{Window_AddRoiModel.ProfileValue}");
+                            UpdateRoiCollect(nCamID);   //只更新这一个相机的Roi文件
+                        }
+                    }
+                });
+            }
+        }
+        public RelayCommand<int> NewModelCommand
+        {
+            get
+            {
+                return new RelayCommand<int>(nCamID =>
+                {
+                    if (nCamID >= 0)
+                    {
+                        Window_AddRoiModel.ShowWindowNewRoiModel(EnumWindowType.MODEL);
+                    }
+                });
+            }
+        }
+        public RelayCommand<RoiItem> ShowRoiCommand
+        {
+            get
+            {
+                return new RelayCommand<RoiItem>(item =>
+                {
+                    if (item != null)
+                    {
+                        Vision.Vision.Instance.ShowRoi(item.StrFullName);
+                    }
+                });
+            }
+        }
+
         public RelayCommand<string> SaveRoiModelParaCommand
         {
             get
@@ -726,10 +783,24 @@ namespace CPAS.ViewModels
             {
                 return new RelayCommand<string>(str =>
                 {
+                    string para = str.Split('&')[0];
+                    int nCamID= Convert.ToInt16(str.Split('&')[1]);
+                    if (nCamID < 0)
+                        return;
+                    switch (str)
+                    {
+                        case "Roi":
+                            Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE1, nCamID, null, out object result);
+                            break;
+                        case "Model":
 
+                            break;
+                    }
                 });
             }
         }
+
+
         #endregion
 
         #region Ctor and DeCtor

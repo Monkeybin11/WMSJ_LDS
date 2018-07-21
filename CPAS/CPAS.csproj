@@ -26,7 +26,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;_TEST</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;TEST</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -288,6 +288,9 @@
     <Compile Include="Views\Window_AddNewPrescription.xaml.cs">
       <DependentUpon>Window_AddNewPrescription.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Window_AddRoiModel.xaml.cs">
+      <DependentUpon>Window_AddRoiModel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Vision\Vision.cs" />
     <Compile Include="WorkFlow\WorkCalib.cs" />
     <Compile Include="WorkFlow\WorkFlowBase.cs" />
@@ -361,6 +364,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Window_AddNewPrescription.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Window_AddRoiModel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

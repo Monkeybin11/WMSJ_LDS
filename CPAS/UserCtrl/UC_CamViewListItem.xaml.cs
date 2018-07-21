@@ -45,7 +45,7 @@ namespace CPAS.UserCtrl
                 UC_MessageBox.ShowMsgBox("请选择一个相机进行操作");
                 return;
             }
-            vm.Index = 2;// CurCamID;
+            vm.Index = CurCamID;
             vm.OperateAdd.Execute(vm);
         }
 

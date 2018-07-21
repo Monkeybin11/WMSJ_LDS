@@ -70,7 +70,10 @@ namespace CPAS.Classes
                 List<string> list = new List<string>();
                 DirectoryInfo info = new DirectoryInfo(_workDirectory);
                 foreach (var file in info.GetFiles())
-                    list.Add(System.IO.Path.GetFileNameWithoutExtension(file.FullName));
+                {
+                    if (!file.Extension.Contains("tup"))
+                        list.Add(System.IO.Path.GetFileNameWithoutExtension(file.FullName));
+                }
                 return list;
             }
             else

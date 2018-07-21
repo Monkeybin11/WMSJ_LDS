@@ -13,17 +13,17 @@ namespace CPAS.Models
 {
     public class RoiItem : RoiModelBase
     {
-        public override  RelayCommand<RoiModelBase> OperateAdd
-        {
-            get
-            {
-                return new RelayCommand<RoiModelBase>(item =>
-                {
-                    var model = item as RoiItem;
-                    Vision.Vision.Instance.DrawRoi(model.Index);                  
-                });
-            }
-        }
+        //public override  RelayCommand<RoiModelBase> OperateAdd
+        //{
+        //    get
+        //    {
+        //        return new RelayCommand<RoiModelBase>(item =>
+        //        {
+        //            var model = item as RoiItem;
+        //            Vision.Vision.Instance.DrawRoi(model.Index);                  
+        //        });
+        //    }
+        //}
 
         public override RelayCommand<RoiModelBase> OperateDelete => new RelayCommand<RoiModelBase>(item =>
         {
@@ -32,11 +32,12 @@ namespace CPAS.Models
             sb.Append(FileHelper.GetCurFilePathString());
             sb.Append("VisionData\\Roi\\");
             sb.Append(item.StrFullName);
-            sb.Append(".reg");
+            int nCamID =Convert.ToInt16( item.StrFullName.Substring(3, 1));
             if (UC_MessageBox.ShowMsgBox(string.Format("确定要删除{0}吗?", item.StrName)) == System.Windows.MessageBoxResult.Yes)
             {
-                FileHelper.DeleteFile(sb.ToString());
-                Messenger.Default.Send<int>(model.Index, "UpdateRoiFiles");
+                FileHelper.DeleteFile(sb.ToString()+".reg");
+                FileHelper.DeleteFile(sb.ToString() + ".tup");
+                Messenger.Default.Send<int>(nCamID, "UpdateRoiFiles");
             }
         });
 

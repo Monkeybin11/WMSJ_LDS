@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CPAS.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,20 @@ namespace CPAS.UserCtrl
         public UC_RoiParaPanel()
         {
             InitializeComponent();
+        }
+        public int CurCamID{get;set;}
+        public DependencyProperty CurCamIDProperty = DependencyProperty.Register("CurCamID", typeof(int), typeof(UC_RoiParaPanel));
+
+        private void BtnSaveRoiPara_Click(object sender, RoutedEventArgs e)
+        {
+            var VM = DataContext as MainWindowViewModel;
+            VM.SaveRoiModelParaCommand.Execute($"Roi&{CurCamID}");
+        }
+
+        private void BtnTestRoi_Click(object sender, RoutedEventArgs e)
+        {
+            var VM = DataContext as MainWindowViewModel;
+            VM.TestRoiModelCommand.Execute($"Roi&{CurCamID}");
         }
     }
 }

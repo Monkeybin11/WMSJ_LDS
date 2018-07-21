@@ -75,7 +75,7 @@
                     </Grid>
                 </Button.Content>
             </Button>
-            <Button Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource RoundButtonStyle1}"  Background="LightGreen" ToolTip="停止采集" Margin="5" Height="50" Command="{Binding StopSnapCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"
+            <Button Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource RoundButtonStyle1}"  Background="Pink" ToolTip="停止采集" Margin="5" Height="50" Command="{Binding StopSnapCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"
                     IsEnabled="{Binding CamSnapState,ConverterParameter=StopSnap,Converter={StaticResource EnumCamSnapState2SnapButtonEnable}}">
                 <Button.Content>
                     <Grid>
@@ -132,8 +132,8 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <Rectangle Grid.Row="4" RadiusX="20" RadiusY="20" Margin="0,13,0,13"  StrokeThickness="1"  Stroke="Orange"/>
-            <TextBlock Grid.Row="4" VerticalAlignment="Center" Text="ROI" FontSize="25" Margin="15,0,0,0"/>
-            <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Text="模板" FontSize="25" Margin="105,0,0,0"/>
+            <Button Grid.Row="4" VerticalAlignment="Center" Content="+ROI" FontSize="25" Margin="12,18,94,18" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" BorderThickness="0" Width="70" Command="{Binding NewRoiCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
+            <Button Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Content="+模板" FontSize="25" Margin="90,0,0,0" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" BorderThickness="0" Command="{Binding NewModelCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
             <Rectangle Grid.Row="4" RadiusX="20" RadiusY="20" Margin="0,13,88,13" Fill="Orange" MouseDown="Rectangle_MouseDown">
                 <Rectangle.RenderTransform>
                     <TranslateTransform x:Name="SelectTrans" />
@@ -166,7 +166,7 @@
             <ListBox x:Name="ListBoxRoiTemplate" Grid.Row="5" Grid.ColumnSpan="2" Grid.RowSpan="3" Margin="5" SelectedIndex="0" ItemsSource="{Binding TemplateCollection}" IsEnabled="{Binding IsEnabled,ElementName=Cb_Cameras}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="AddNew" FontSize="30"/>
+                        <MenuItem Header="显示" FontSize="20" Command="{Binding ShowRoiCommand}" CommandParameter="{Binding SelectedItem,ElementName=ListBoxRoiTemplate}"/>
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.ItemTemplate>
@@ -177,8 +177,8 @@
             </ListBox>
             <!--模板参数-->
             <Grid Grid.Row="8" Grid.ColumnSpan="2"  IsEnabled="{Binding IsEnabled,ElementName=Cb_Cameras}">
-                <UserCtrl:UC_RoiParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Roi}"/>
-                <UserCtrl:UC_ModelParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Model}"/>
+                <UserCtrl:UC_RoiParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Roi}" CurCamID="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
+                <UserCtrl:UC_ModelParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Model}" CurCamID="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
             </Grid>
         </Grid>
     </Grid>
