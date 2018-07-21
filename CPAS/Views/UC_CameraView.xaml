@@ -133,15 +133,16 @@
             </ComboBox>
             <Rectangle Grid.Row="4" RadiusX="20" RadiusY="20" Margin="0,13,0,13"  StrokeThickness="1"  Stroke="Orange"/>
             <Button Grid.Row="4" VerticalAlignment="Center" Content="+ROI" FontSize="25" Margin="12,18,94,18" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" BorderThickness="0" Width="70" Command="{Binding NewRoiCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
-            <Button Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Content="+模板" FontSize="25" Margin="90,0,0,0" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" BorderThickness="0" Command="{Binding NewModelCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
+            <Button Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Content="+模板" FontSize="25" Margin="90,0,0,0" Style="{StaticResource RoundButtonStyle1}" Background="Transparent" BorderThickness="0" Command="{Binding PreCreateModelCommand}" CommandParameter="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
             <Rectangle Grid.Row="4" RadiusX="20" RadiusY="20" Margin="0,13,88,13" Fill="Orange" MouseDown="Rectangle_MouseDown">
                 <Rectangle.RenderTransform>
                     <TranslateTransform x:Name="SelectTrans" />
                 </Rectangle.RenderTransform>
             </Rectangle>
-            <Grid Grid.Row="4" Grid.Column="1" Margin="10,0,0,0" Visibility="{Binding CurrentSelectRoiTemplate, Converter={StaticResource RoiTemplate2Visibility}}">
+            <Grid Grid.Row="4" Grid.Column="1" Margin="10,0,0,0" Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource RoiTemplate2Visibility}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="70"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -161,12 +162,12 @@
                     <RadioButton  VerticalAlignment="Center" Content="圆形" FontSize="20" VerticalContentAlignment="Center" IsChecked="{Binding RegionType, Converter={StaticResource IsChecked2RegionType}}"/>
                     <RadioButton Grid.Row="1"  VerticalAlignment="Center" Content="矩形" FontSize="20" VerticalContentAlignment="Center" />
                 </Grid>
-
+                <Button Name="BtnDrawModelRegion" Grid.Column="2" Style="{StaticResource RoundButtonStyle1}" Background="LightGreen" Content="绘制" FontSize="15" Margin="3" Click="BtnDrawModelRegion_Click"/>
             </Grid>
             <ListBox x:Name="ListBoxRoiTemplate" Grid.Row="5" Grid.ColumnSpan="2" Grid.RowSpan="3" Margin="5" SelectedIndex="0" ItemsSource="{Binding TemplateCollection}" IsEnabled="{Binding IsEnabled,ElementName=Cb_Cameras}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="显示" FontSize="20" Command="{Binding ShowRoiCommand}" CommandParameter="{Binding SelectedItem,ElementName=ListBoxRoiTemplate}"/>
+                        <MenuItem Name="MenueShow" Header="显示" FontSize="20" Click="MenueShow_Click"/>
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.ItemTemplate>

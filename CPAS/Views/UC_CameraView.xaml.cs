@@ -1,4 +1,5 @@
 ﻿using CPAS.Interface;
+using CPAS.Models;
 using CPAS.ViewModels;
 using GalaSoft.MvvmLight.Messaging;
 using System;
@@ -135,13 +136,24 @@ namespace CPAS.Views
                 ofd.InitialDirectory = @"C:\";
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    Vision.Vision.Instance.ReadImageInWindow(ofd.FileName, Cam1.HalconWindow);
+                    if (Cb_Cameras.SelectedIndex >= 0)
+                        Vision.Vision.Instance.OpenImageInWindow(Cb_Cameras.SelectedIndex,ofd.FileName, Cam1.HalconWindow);
                 }
             }
             catch (Exception ex)
             {
                 System.Windows.Forms.MessageBox.Show(ex.Message);
             }
-        } 
+        }
+
+        private void MenueShow_Click(object sender, RoutedEventArgs e)
+        {
+            (DataContext as MainWindowViewModel).ShowRoiModelCommand.Execute(ListBoxRoiTemplate.SelectedItem);
+        }
+
+        private void BtnDrawModelRegion_Click(object sender, RoutedEventArgs e)
+        {
+            (DataContext as MainWindowViewModel).PreDrawModelRoiCommand.Execute(new Tuple<RoiModelBase,int>(ListBoxRoiTemplate.SelectedItem as RoiModelBase, Cb_Cameras.SelectedIndex));
+        }
     }
 }

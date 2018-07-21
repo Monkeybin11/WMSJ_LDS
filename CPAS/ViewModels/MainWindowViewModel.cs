@@ -46,6 +46,7 @@ namespace CPAS.ViewModels
         private string _strPLCErrorNumber = "", _strSystemErrorNumber = "";
         private bool _showPlcErrorListEdit;
         private string _strPowerMeterValue1 = "NA", _strPowerMeterValue2 = "NA";
+        private int _maxThre = 0, _minThre=0;
         public PrescriptionGridModel _prescriptionUsed = new PrescriptionGridModel();
         private SystemParaModel _systemPataModelUsed = new SystemParaModel();
         private EnumCamSnapState _amSnapState;
@@ -226,6 +227,30 @@ namespace CPAS.ViewModels
                 }
             }
             get { return _currentSelectRoiTemplate; }
+        }
+        public int MaxThre
+        {
+            set
+            {
+                if (_maxThre != value)
+                {
+                    _maxThre = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _maxThre; }
+        }
+        public int MinThre
+        {
+            set
+            {
+                if (_minThre != value)
+                {
+                    _minThre = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _minThre; }
         }
         public Dictionary<string, WorkFlowBase> WorkeFlowDic
         {
@@ -740,7 +765,7 @@ namespace CPAS.ViewModels
                 });
             }
         }
-        public RelayCommand<int> NewModelCommand
+        public RelayCommand<int> PreCreateModelCommand
         {
             get
             {
@@ -748,20 +773,61 @@ namespace CPAS.ViewModels
                 {
                     if (nCamID >= 0)
                     {
-                        Window_AddRoiModel.ShowWindowNewRoiModel(EnumWindowType.MODEL);
+                        //if (MessageBoxResult.Yes == Window_AddRoiModel.ShowWindowNewRoiModel(EnumWindowType.ROI))
+                        //{
+                        //    foreach (var it in TemplateCollection)
+                        //    {
+                        //        if (it.StrName == Window_AddRoiModel.ProfileValue)
+                        //        {
+                        //            UC_MessageBox.ShowMsgBox("该文件已经存在，请重新命名");
+                        //            return;
+                        //        }
+                        //    }
+
+                            
+                        //    //UpdateModelCollect(nCamID);   //只更新这一个相机的Roi文件
+                        //}
+                        Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD);
                     }
                 });
             }
         }
-        public RelayCommand<RoiItem> ShowRoiCommand
+        public RelayCommand<Tuple<RoiModelBase,int>> PreDrawModelRoiCommand
         {
             get
             {
-                return new RelayCommand<RoiItem>(item =>
+                return new RelayCommand<Tuple<RoiModelBase, int>>(tuple =>
+                {
+                    TemplateItem item = tuple.Item1 as TemplateItem;
+                    int nCamID = tuple.Item2;
+                    if (item != null)   
+                    {
+                        if (nCamID >= 0)
+                        {
+                            Vision.Vision.Instance.DrawRoi(nCamID,  EnumRoiType.ModelRegionReduce, out object region, $"VisionData\\Model\\Cam_{nCamID}.reg");
+                            Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD);
+                        }
+                    }
+                    else
+                    {
+                        Vision.Vision.Instance.DrawRoi(nCamID, EnumRoiType.ModelRegionReduce, out object region);
+                        //Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD);
+                    }
+                });
+            }
+        }
+        public RelayCommand<RoiModelBase> ShowRoiModelCommand
+        {
+            get
+            {
+                return new RelayCommand<RoiModelBase>(item =>
                 {
                     if (item != null)
                     {
-                        Vision.Vision.Instance.ShowRoi(item.StrFullName);
+                        if(item .GetType()== typeof(RoiItem))
+                            Vision.Vision.Instance.ShowRoi($"VisionData\\Roi\\{item.StrFullName}.reg");
+                        else
+                            Vision.Vision.Instance.ShowModel($"VisionData\\Model\\{item.StrFullName}.shm");
                     }
                 });
             }
@@ -773,7 +839,18 @@ namespace CPAS.ViewModels
             {
                 return new RelayCommand<string>(str =>
                 {
-                    
+                    string[] strList = str.Split('&');
+                    if (strList.Length != 2)
+                        return;
+                    int nCamID = Convert.ToInt16(strList[1]);
+                    switch (strList[0])
+                    {
+                        case "Roi":
+
+                            break;
+                        case "Model":
+                            break;
+                    }
                 });
             }
         }

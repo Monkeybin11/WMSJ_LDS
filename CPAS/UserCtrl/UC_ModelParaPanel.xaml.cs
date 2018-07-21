@@ -39,5 +39,15 @@ namespace CPAS.UserCtrl
             var VM = DataContext as MainWindowViewModel;
             VM.SaveRoiModelParaCommand.Execute($"Model&{CurCamID}");
         }
+
+        private void MaxThreSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Vision.Vision.Instance.PreCreateShapeModel(CurCamID, Convert.ToInt16(MinThreSlider.Value), Convert.ToInt16(MaxThreSlider.Value), Vision.EnumShapeModelType.XLD);
+        }
+
+        private void MinThreSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Vision.Vision.Instance.PreCreateShapeModel(CurCamID, Convert.ToInt16(MinThreSlider.Value), Convert.ToInt16(MaxThreSlider.Value), Vision.EnumShapeModelType.XLD);
+        }
     }
 }

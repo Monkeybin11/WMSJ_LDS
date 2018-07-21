@@ -12,17 +12,7 @@ namespace CPAS.Models
 {
     public class TemplateItem : RoiModelBase
     {
-        public override  RelayCommand<RoiModelBase> OperateAdd
-        {
-            get
-            {
-                return new RelayCommand<RoiModelBase>(item => {
-                    var model = item as TemplateItem;
-                    //Vision.Vision.Instance.CreateShapeModel(item.)
-                    Console.WriteLine(model.StrName);
-                });
-            }
-        }
+
         public override RelayCommand<RoiModelBase> OperateDelete
         {
             get
@@ -33,11 +23,15 @@ namespace CPAS.Models
                     sb.Append(FileHelper.GetCurFilePathString());
                     sb.Append("VisionData\\Model\\");
                     sb.Append(item.StrFullName);
-                    sb.Append(".shm");
+                    int nCamID = Convert.ToInt16(item.StrFullName.Substring(3, 1));
                     if (UC_MessageBox.ShowMsgBox(string.Format("确定要删除{0}吗?", item.StrName)) == System.Windows.MessageBoxResult.Yes)
                     {
-                        FileHelper.DeleteFile(sb.ToString());
-                        Messenger.Default.Send<int>(model.Index, "UpdateTemplateFiles");
+
+                        //三个文件同时删除
+                        FileHelper.DeleteFile(sb.ToString()+".shm");
+                        FileHelper.DeleteFile(sb.ToString() + ".reg");
+                        FileHelper.DeleteFile(sb.ToString() + ".tup");
+                        Messenger.Default.Send<int>(nCamID, "UpdateTemplateFiles");
                     }   
                 });
             }

@@ -40,14 +40,20 @@ namespace CPAS.Vision
         Shape,
         XLD
     };
+    public enum EnumRoiType
+    {
+        ModelRegionReduce,
+    }
     public class Vision
     {
         #region constructor
         private Vision()
         {
+            HOperatorSet.GenEmptyObj(out HObject emptyImage);
             for (int i = 0; i < 10; i++)
             {
-                HoImageList.Add(new HObject());
+
+                HoImageList.Add(emptyImage);
                 AcqHandleList.Add(new HTuple());
                 _lockList.Add(new object());
             }
@@ -302,62 +308,117 @@ namespace CPAS.Vision
                 image.Dispose();
             }
         }
-        public bool DrawRoi(int nCamID)
+
+        public bool DrawRoi(int nCamID, EnumRoiType type, out object outRegion, string fileName=null)
         {
+            outRegion = null;
             if (nCamID < 0)
                 return false;
             try
             {
-                lock (_lockList[nCamID])
+                switch (type)
                 {
-                    if (HwindowDic.Keys.Contains(nCamID) && HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
-                    {
-                        HTuple window = HwindowDic[nCamID]["CameraViewCam"];
-                        HTuple row, column, phi, length1, length2, radius;
-                        HObject newRegion = null;
-                        HOperatorSet.SetColor(window, "green");
-                        switch (RegionType)
+                    case EnumRoiType.ModelRegionReduce:
+                        if (fileName != null)   //如果是现有的Model
                         {
-                            case Enum_REGION_TYPE.RECTANGLE:
-                                HOperatorSet.DrawRectangle2Mod(window, 100, 100, 100, 100, 100, out row, out column, out phi, out length1, out length2);
-                                HOperatorSet.GenRectangle2(out newRegion, row, column, phi, length1, length2);
-                                break;
-                            case Enum_REGION_TYPE.CIRCLE:
-                                HOperatorSet.DrawCircleMod(window, 100, 100, 100, out row, out column, out radius);
-                                HOperatorSet.GenCircle(out newRegion, row, column, radius);
-                                break;
-                            default:
-                                break;
-                        }
+                            string[] strList = fileName.Split('.');
+                            if (strList.Length == 2)
+                            {
+                                if (HwindowDic.Keys.Contains(nCamID) && HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
+                                {
+                                    HTuple window = HwindowDic[nCamID]["CameraViewCam"];
+                                    HTuple row, column, phi, length1, length2, radius;
+                                    HObject newRegion = null;
+                                    HOperatorSet.SetColor(window, "green");
 
-                        if (RegionOperator == Enum_REGION_OPERATOR.ADD)
-                        {
-                            HOperatorSet.Union2(Region, newRegion, out Region);
-                        }
-                        else
-                        {
-                            HOperatorSet.Difference(Region, newRegion, out Region);
-                        }
+                                    if (File.Exists($"{strList[0]}.reg"))
+                                        HOperatorSet.ReadRegion(out Region, $"{strList[0]}.reg");   //如果已经有了就先都出来
+                                    switch (RegionType)
+                                    {
+                                        case Enum_REGION_TYPE.RECTANGLE:
+                                            HOperatorSet.DrawRectangle2Mod(window, 100, 100, 100, 100, 100, out row, out column, out phi, out length1, out length2);
+                                            HOperatorSet.GenRectangle2(out newRegion, row, column, phi, length1, length2);
+                                            break;
+                                        case Enum_REGION_TYPE.CIRCLE:
+                                            HOperatorSet.DrawCircleMod(window, 100, 100, 100, out row, out column, out radius);
+                                            HOperatorSet.GenCircle(out newRegion, row, column, radius);
+                                            break;
+                                        default:
+                                            break;
+                                    }
 
-                        HOperatorSet.SetDraw(window, "margin");
-                        HOperatorSet.SetColor(window, "red");
-                        HOperatorSet.ClearWindow(window);
-                        HOperatorSet.DispObj(HoImageList[nCamID], window);
-                        HOperatorSet.DispObj(Region, window);
-                        //newRegion.Dispose();
-                        return true;
-                    }
-                    Messenger.Default.Send<String>("绘制模板窗口没有打开,或者该相机未关联绘制模板窗口", "ShowError");
-                    return false;
+                                    if (RegionOperator == Enum_REGION_OPERATOR.ADD)
+                                    {
+                                        HOperatorSet.Union2(Region, newRegion, out Region);
+                                    }
+                                    else
+                                    {
+                                        HOperatorSet.Difference(Region, newRegion, out Region);
+                                    }
+                                    HOperatorSet.SetDraw(window, "margin");
+                                    HOperatorSet.SetColor(window, "red");
+                                    HOperatorSet.ClearWindow(window);
+                                    HOperatorSet.DispObj(HoImageList[nCamID], window);
+                                    HOperatorSet.DispObj(Region, window);
+
+                                    //存储
+                                    HOperatorSet.WriteRegion(Region, $"{strList[0]}.reg");
+                                    outRegion = Region;
+                                    return true;
+                                }
+                                Messenger.Default.Send<String>("绘制模板窗口没有打开,或者该相机未关联绘制模板窗口", "ShowError");
+                            }
+                        }
+                        else  //如果是新建的Model
+                        {
+                            if (HwindowDic.Keys.Contains(nCamID) && HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
+                            {
+                                HTuple window = HwindowDic[nCamID]["CameraViewCam"];
+                                HTuple row, column, phi, length1, length2, radius;
+                                HObject newRegion = null;
+                                HOperatorSet.SetColor(window, "green");
+                                switch (RegionType)
+                                {
+                                    case Enum_REGION_TYPE.RECTANGLE:
+                                        HOperatorSet.DrawRectangle2Mod(window, 100, 100, 100, 100, 100, out row, out column, out phi, out length1, out length2);
+                                        HOperatorSet.GenRectangle2(out newRegion, row, column, phi, length1, length2);
+                                        break;
+                                    case Enum_REGION_TYPE.CIRCLE:
+                                        HOperatorSet.DrawCircleMod(window, 100, 100, 100, out row, out column, out radius);
+                                        HOperatorSet.GenCircle(out newRegion, row, column, radius);
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                if (RegionOperator == Enum_REGION_OPERATOR.ADD)
+                                {
+                                    HOperatorSet.Union2(Region, newRegion, out Region);
+                                }
+                                else
+                                {
+                                    HOperatorSet.Difference(Region, newRegion, out Region);
+                                }
+                                HOperatorSet.SetDraw(window, "margin");
+                                HOperatorSet.SetColor(window, "red");
+                                HOperatorSet.ClearWindow(window);
+                                HOperatorSet.DispObj(HoImageList[nCamID], window);
+                                HOperatorSet.DispObj(Region, window);
+                                outRegion = Region;
+                            }
+                        }
+                 
+                        break;
                 }
+                return false;
             }
             catch (Exception ex)
             {
-                Messenger.Default.Send<String>(string.Format("DrawRectangle出错:{0}", ex.Message), "ShowError");
+                Messenger.Default.Send<String>(string.Format("DrawRoi出错:{0}", ex.Message), "ShowError");
                 return false;
             }
         }
-        public bool NewRoi(int nCamID, string strRoiName)     //就在建立修改的时候有用到
+        public bool NewRoi(int nCamID, string strRoiName)     //就在建立找边ROI的时候有用到
         {
             if (nCamID < 0)
                 return false;
@@ -369,10 +430,9 @@ namespace CPAS.Vision
 
             HObject ho_Rectangle, ho_Rectangle1, ho_EmptyRegion;
 
-
             // Local control variables 
 
-            HTuple  hv_Row, hv_Column;
+            HTuple hv_Row, hv_Column;
             HTuple hv_Phi, hv_Length1, hv_Length2, hv_Row1, hv_Column1;
             HTuple hv_Phi1, hv_Length11, hv_Length21, hv_data;
 
@@ -399,7 +459,7 @@ namespace CPAS.Vision
                     disp_message(window, "请绘制第二个ROI，以右键结束绘制", "window", 12, 12, "black", "true");
                     HOperatorSet.DrawRectangle2Mod(window, 100, 100, 100, 100, 100, out hv_Row1, out hv_Column1, out hv_Phi1, out hv_Length11, out hv_Length21);
                     ho_Rectangle1.Dispose();
-                    HOperatorSet.GenRectangle2(out ho_Rectangle1, hv_Row1, hv_Column1, hv_Phi1,hv_Length11, hv_Length21);
+                    HOperatorSet.GenRectangle2(out ho_Rectangle1, hv_Row1, hv_Column1, hv_Phi1, hv_Length11, hv_Length21);
                     HOperatorSet.DispObj(ho_Rectangle1, window);
                     hv_data = new HTuple();
                     hv_data[0] = hv_Row;
@@ -446,28 +506,78 @@ namespace CPAS.Vision
                 ho_Rectangle1.Dispose();
                 ho_EmptyRegion.Dispose();
                 throw new Exception($"创建Roi时候出现错误:{HDevExpDefaultException.Message}");
-               
+
             }
-            
-           
+
+
 
         }
+
         public bool ShowRoi(string RoiFilePathName)     //就在建立修改的时候有用到,同时更新多个窗口
         {
-            int nCamID =Convert.ToInt16(RoiFilePathName.Substring(3, 1));
-            HOperatorSet.ReadRegion(out HObject region, RoiFilePathName);
-            foreach (var it in HwindowDic[nCamID])
+            string[] splitString = RoiFilePathName.Split('\\');
+            if (splitString.Length > 2)
             {
-                if (it.Value != -1)
+                int nCamID = Convert.ToInt16(splitString[splitString.Length - 1].Substring(3, 1));
+                HOperatorSet.ReadRegion(out HObject region, RoiFilePathName);
+                foreach (var it in HwindowDic[nCamID])
                 {
-                    HOperatorSet.DispObj(HoImageList[nCamID], it.Value);
-                    HOperatorSet.DispObj(region, it.Value);
-
+                    if (it.Value != -1)
+                    {
+                        HOperatorSet.ClearWindow(it.Value);
+                        if (HoImageList[nCamID] != null)
+                            HOperatorSet.DispObj(HoImageList[nCamID], it.Value);
+                        HOperatorSet.SetDraw(it.Value, "margin");
+                        HOperatorSet.SetColor(it.Value, "green");
+                        HOperatorSet.DispObj(region, it.Value);
+                    }
                 }
+                return true;
             }
-            return true;
+            return false;
         }
+        public bool ShowModel(string ModelFilePathName)     //就在建立修改的时候有用到,同时更新多个窗口
+        {
+            HObject modelContours = null;
+            HObject modelContoursMoved = null;
 
+
+            string[] splitString = ModelFilePathName.Split('\\');
+            if (splitString.Length > 2)
+            {
+                int nCamID = Convert.ToInt16(splitString[splitString.Length - 1].Substring(3, 1));
+
+                //三个文件同时读取
+                HOperatorSet.ReadShapeModel(ModelFilePathName, out HTuple ModelID);
+                HOperatorSet.ReadRegion(out HObject ModelRoiRegion, $"{splitString[0]}.reg");
+                HOperatorSet.ReadTuple($"{splitString[0]}.tup", out HTuple ModelOriginPos);
+
+                foreach (var it in HwindowDic[nCamID])
+                {
+                    if (it.Value != -1)
+                    {
+                        HOperatorSet.ClearWindow(it.Value);
+                        if (HoImageList[nCamID] != null)
+                            HOperatorSet.DispObj(HoImageList[nCamID], it.Value);
+                        HOperatorSet.SetDraw(it.Value, "margin");
+                        HOperatorSet.SetColor(it.Value, "green");
+
+                        HOperatorSet.GetShapeModelContours(out modelContours, ModelID, 1);
+                        HOperatorSet.MoveRegion(modelContours, out modelContoursMoved, ModelOriginPos[0], ModelOriginPos[1]);
+
+
+                        HOperatorSet.DispObj(modelContoursMoved, it.Value);
+                        HOperatorSet.DispObj(ModelRoiRegion, it.Value);
+
+                        modelContours.Dispose();
+                        modelContoursMoved.Dispose();
+                    }
+                }
+
+                return true;
+            }
+            return false;
+        }
         public bool SaveImage(int nCamID, EnumImageType type, string filePath, string fileName, HTuple hWindow)
         {
             if (nCamID < 0)
@@ -485,12 +595,18 @@ namespace CPAS.Vision
             }
             return true;
         }
-        public bool ReadImageInWindow(string imageFilePath, HTuple hwindow)
+        public bool OpenImageInWindow(int nCamID, string imageFilePath, HTuple hwindow)
         {
             HOperatorSet.ReadImage(out HObject image, imageFilePath);
-            HOperatorSet.GetImageSize(image, out HTuple width, out HTuple height);
+            if (HoImageList[nCamID] != null)
+            {
+                HoImageList[nCamID].Dispose();
+                HoImageList[nCamID] = null;
+            }
+            HoImageList[nCamID] = image.SelectObj(1);
+            HOperatorSet.GetImageSize(HoImageList[nCamID], out HTuple width, out HTuple height);
             HOperatorSet.SetPart(hwindow, 0, 0, height, width);
-            HOperatorSet.DispObj(image, hwindow);
+            HOperatorSet.DispObj(HoImageList[nCamID], hwindow);
             return true;
         }
         public Dictionary<string, Tuple<string, string>> FindCamera(EnumCamType camType)
@@ -634,23 +750,25 @@ namespace CPAS.Vision
         }
         #endregion
 
-        public bool CreateShapeModel(int nCamID, EnumShapeModelType modelType, string modelName)
+        public bool PreCreateShapeModel(int nCamID,int MinThre,int MaxThre, EnumShapeModelType modelType)
         {
-            if (nCamID < 0)
+            if (nCamID < 0 || MaxThre<MinThre)
                 return false;
-            switch (modelType)
+            if (HwindowDic.Keys.Contains(nCamID) && HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
             {
-                case EnumShapeModelType.Gray:
-                    break;
-                case EnumShapeModelType.Shape:
-                    break;
-                case EnumShapeModelType.XLD:
-                    string ModelFileName = $"VisionData\\Model\\Cam{nCamID}_{modelName}.shm";
-                    string ModelOriginPosFileName = $"VisionData\\Model\\Cam{nCamID}_{modelName}.tup";
-                    LdsFuncSet.CreateShapeModelXLD(HoImageList[nCamID], ModelFileName, ModelOriginPosFileName);
-                    break;
-                default:
-                    return false;
+                HTuple window = HwindowDic[nCamID]["CameraViewCam"];
+                switch (modelType)
+                {
+                    case EnumShapeModelType.Gray:
+                        break;
+                    case EnumShapeModelType.Shape:
+                        break;
+                    case EnumShapeModelType.XLD:
+                        HObject region=null;
+                        return LdsFuncSet.PreProcessShapeMode(HoImageList[nCamID], window, MinThre, MaxThre, region);
+                    default:
+                        return false;
+                }
             }
             return true;
         }
@@ -795,8 +913,8 @@ namespace CPAS.Vision
             //output parameter:
             //ImageScale: the resulting scaled image
             //
-            if ((int)(new HTuple((new HTuple(hv_Min_COPY_INP_TMP.TupleLength())).TupleEqual(
-                2))) != 0)
+
+            if ((int)(new HTuple((new HTuple(hv_Min_COPY_INP_TMP.TupleLength())).TupleEqual(2))) != 0)
             {
                 hv_LowerLimit = hv_Min_COPY_INP_TMP[1];
                 hv_Min_COPY_INP_TMP = hv_Min_COPY_INP_TMP[0];
@@ -882,8 +1000,6 @@ namespace CPAS.Vision
         }
         public void disp_message(HTuple hv_WindowHandle, HTuple hv_String, HTuple hv_CoordSystem, HTuple hv_Row, HTuple hv_Column, HTuple hv_Color, HTuple hv_Box)
         {
-
-
             // Local control variables 
 
             HTuple hv_Red, hv_Green, hv_Blue, hv_Row1Part;
