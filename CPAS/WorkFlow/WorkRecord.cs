@@ -165,15 +165,18 @@ namespace CPAS.WorkFlow
                             {
                                 if (1 == nCmdUnLock1)
                                 {
-                                    
+                                    lds1.DeInit();
                                     //解锁1
-                                    //SendUnlockReq(nCmdUnLock1);       dddd
+                                    lds1.LdsUnLock(out string error);
+                                    lds1.Init();
                                 }
                                 if (1 == nCmdUnLock2)
                                 {
-                                    
+
                                     //解锁2
-                                    // SendUnlockReq(nCmdUnLock2);       dddd
+                                    lds2.DeInit();
+                                    lds2.LdsUnLock(out string error);
+                                    lds2.Init();
                                 }
                                 PopAndPushStep(STEP.Write_Unlock_Result);
                             }

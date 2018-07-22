@@ -20,6 +20,7 @@ using System.Text;
 using CPAS.Config.SoftwareManager;
 using CPAS.WorkFlow;
 using CPAS.Instrument;
+using System.IO;
 
 namespace CPAS.ViewModels
 {
@@ -363,17 +364,19 @@ namespace CPAS.ViewModels
         private void UpdateRoiCollect(int nCamID)
         {
             RoiCollection.Clear();
-            foreach (var it in Vision.VisionDataHelper.GetRoiListForSpecCamera(nCamID, RoiFileHelper.GetWorkDictoryProfileList()))
+            foreach (var it in Vision.VisionDataHelper.GetRoiListForSpecCamera(nCamID, RoiFileHelper.GetWorkDictoryProfileList(new string[] { "reg"})))
                 RoiCollection.Add(new RoiItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""), StrFullName = it });
             LogHelper.WriteLine($"更新相机{nCamID}的ROI文件", LogHelper.LogType.NORMAL);
         }
+
         private void UpdateModelCollect(int nCamID)
         {
             TemplateCollection.Clear();
-            foreach (var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, ModelFileHelper.GetWorkDictoryProfileList()))
+            foreach (var it in Vision.VisionDataHelper.GetTemplateListForSpecCamera(nCamID, ModelFileHelper.GetWorkDictoryProfileList(new string[] { "shm" })))
                 TemplateCollection.Add(new TemplateItem() { StrName = it.Replace(string.Format("Cam{0}_", nCamID), ""), StrFullName = it });
             LogHelper.WriteLine($"更新相机{nCamID}的模板文件", LogHelper.LogType.NORMAL);
         }
+
         private void PLCMessageCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             lock (PlcErrLock)
@@ -773,49 +776,94 @@ namespace CPAS.ViewModels
                 {
                     if (nCamID >= 0)
                     {
-                        //if (MessageBoxResult.Yes == Window_AddRoiModel.ShowWindowNewRoiModel(EnumWindowType.ROI))
-                        //{
-                        //    foreach (var it in TemplateCollection)
-                        //    {
-                        //        if (it.StrName == Window_AddRoiModel.ProfileValue)
-                        //        {
-                        //            UC_MessageBox.ShowMsgBox("该文件已经存在，请重新命名");
-                        //            return;
-                        //        }
-                        //    }
-
+                        if (MessageBoxResult.Yes == Window_AddRoiModel.ShowWindowNewRoiModel(EnumWindowType.ROI))
+                        {
+                            foreach (var it in TemplateCollection)
+                            {
+                                if (it.StrName == Window_AddRoiModel.ProfileValue)
+                                {
+                                    UC_MessageBox.ShowMsgBox("该文件已经存在，请重新命名");
+                                    return;
+                                }
+                            }
+                            string strRegionTemp = $"VisionData\\ModelTemp\\Cam{nCamID}_{Window_AddRoiModel.ProfileValue}.reg";
+                            FileHelper.DeleteAllFileInDirectory($"VisionData\\ModelTemp");
+                            File.OpenWrite(strRegionTemp);
+                            Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, strRegionTemp);
                             
-                        //    //UpdateModelCollect(nCamID);   //只更新这一个相机的Roi文件
-                        //}
-                        Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD);
+                        }
+                       
                     }
                 });
             }
         }
-        public RelayCommand<Tuple<RoiModelBase,int>> PreDrawModelRoiCommand
+        public RelayCommand<Tuple<RoiModelBase,int>> PreDrawModelRoiCommand     //调整Model的ROI
         {
             get
             {
                 return new RelayCommand<Tuple<RoiModelBase, int>>(tuple =>
                 {
+                    List<string> fileList = FileHelper.GetProfileList($"VisionData\\ModelTemp");
                     TemplateItem item = tuple.Item1 as TemplateItem;
                     int nCamID = tuple.Item2;
-                    if (item != null)   
+                    if (fileList.Count == 0)
                     {
-                        if (nCamID >= 0)
+                        if (item != null)      //判断编辑现有的还是编辑新模板
                         {
-                            Vision.Vision.Instance.DrawRoi(nCamID,  EnumRoiType.ModelRegionReduce, out object region, $"VisionData\\Model\\Cam_{nCamID}.reg");
-                            Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD);
+                            if (nCamID >= 0)
+                            {
+                                string regionPath = $"VisionData\\Model\\{item.StrFullName}.reg";
+                                Vision.Vision.Instance.DrawRoi(nCamID, EnumRoiType.ModelRegionReduce, out object region, regionPath);    //有模板的时候直接以名称存储
+                                Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, regionPath, region);
+                            }
                         }
                     }
                     else
                     {
-                        Vision.Vision.Instance.DrawRoi(nCamID, EnumRoiType.ModelRegionReduce, out object region);
-                        //Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD);
+                        if (nCamID >= 0)
+                        {
+                            string regionPath = $"VisionData\\ModelTemp\\{fileList[0]}.reg";
+                            Vision.Vision.Instance.DrawRoi(nCamID, EnumRoiType.ModelRegionReduce, out object region, regionPath);       //没有模板的时候就按照相机存储
+                            Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, regionPath, region);    //传入Region
+                        }
                     }
                 });
             }
         }
+        public RelayCommand<Tuple<RoiModelBase, int>> PreViewRoiCommand     //只是动态显示，不绘图
+        {
+            get
+            {
+                return new RelayCommand<Tuple<RoiModelBase, int>>(tuple =>
+                {
+                    List<string> fileList = FileHelper.GetProfileList($"VisionData\\ModelTemp");
+                    TemplateItem item = tuple.Item1 as TemplateItem;
+                    int nCamID = tuple.Item2;
+                    if (fileList.Count == 0)
+                    {
+                        if (item != null)
+                        {
+                            if (nCamID >= 0)
+                            {
+                                string strRegionPath = $"VisionData\\Model\\{item.StrFullName}.reg";
+                                object region = Vision.Vision.Instance.ReadRegion(strRegionPath);
+                                Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, strRegionPath, region);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (nCamID >= 0)
+                        {
+                            string strRegionPath = $"VisionData\\ModelTemp\\{fileList[0]}.reg";
+                            object region = Vision.Vision.Instance.ReadRegion(strRegionPath);
+                            Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, strRegionPath, region);    //传入Region
+                        }
+                    }
+                });
+            }
+        }
+
         public RelayCommand<RoiModelBase> ShowRoiModelCommand
         {
             get
@@ -833,23 +881,67 @@ namespace CPAS.ViewModels
             }
         }
 
-        public RelayCommand<string> SaveRoiModelParaCommand
+        public RelayCommand<Tuple<RoiModelBase, int>> SaveModelParaCommand
         {
             get
             {
-                return new RelayCommand<string>(str =>
+                return new RelayCommand<Tuple<RoiModelBase, int>>(tuple =>
                 {
-                    string[] strList = str.Split('&');
-                    if (strList.Length != 2)
-                        return;
-                    int nCamID = Convert.ToInt16(strList[1]);
-                    switch (strList[0])
+                    List<string> fileList = FileHelper.GetProfileList($"VisionData\\ModelTemp");
+                    TemplateItem item = tuple.Item1 as TemplateItem;
+                    int nCamID = tuple.Item2;
+                    if (fileList.Count == 0)
                     {
-                        case "Roi":
+                        if (item != null)
+                        {
+                            if (nCamID >= 0)
+                            {
+                                string strRegionPath = $"VisionData\\Model\\{item.StrFullName}.reg";
+                                object region = Vision.Vision.Instance.ReadRegion(strRegionPath);
+                                Vision.Vision.Instance.SaveShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, strRegionPath, region);
+                                UpdateModelCollect(nCamID);   //只更新这一个相机的Roi文件
+                            }
+                        }
+                       
+                    }
+                    else
+                    {
+                        if (nCamID >= 0)
+                        {
+                            string strRegionPath = $"VisionData\\ModelTemp\\{fileList[0]}.reg";
+                            object region = Vision.Vision.Instance.ReadRegion(strRegionPath);
+                            FileHelper.DeleteAllFileInDirectory($"VisionData\\ModelTemp");  //删除Temp文件
+                            Vision.Vision.Instance.SaveShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, $"VisionData\\Model\\{fileList[0]}.reg", region);    //传入Region
+                            UpdateModelCollect(nCamID);   //只更新这一个相机的Roi文件
+                        }
+                    }
+                });
+            }
+        }
+        public RelayCommand<Tuple<RoiModelBase, int>> TestModelParaCommand
+        {
+            get
+            {
+                return new RelayCommand<Tuple<RoiModelBase, int>>(tuple =>
+                {
+                    List<string> fileList = FileHelper.GetProfileList($"VisionData\\ModelTemp");
+                    TemplateItem item = tuple.Item1 as TemplateItem;
+                    int nCamID = tuple.Item2;
+                    if (item != null && fileList.Count == 0)
+                    {
+                        if (nCamID >= 0)
+                        {
+                            string strRegionPath = $"VisionData\\Model\\{item.StrFullName}.reg";
+                            object region = Vision.Vision.Instance.ReadRegion(strRegionPath);
+                            Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, strRegionPath, region);
+                        }
+                    }
+                    else
+                    {
+                        string strRegionPath = $"VisionData\\ModelTemp\\{fileList[0]}.reg";
+                        object region = Vision.Vision.Instance.ReadRegion(strRegionPath);
+                        Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, strRegionPath, region);    //传入Region
 
-                            break;
-                        case "Model":
-                            break;
                     }
                 });
             }

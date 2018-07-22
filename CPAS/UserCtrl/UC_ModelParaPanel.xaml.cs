@@ -1,4 +1,6 @@
-﻿using CPAS.ViewModels;
+﻿using CPAS.Models;
+using CPAS.ViewModels;
+using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,29 +27,43 @@ namespace CPAS.UserCtrl
         {
             InitializeComponent();
         }
-        public int CurCamID { get; set; }
+        public int CurCamID
+        {
+            get { return Convert.ToInt16(GetValue(CurCamIDProperty).ToString()); }
+            set { SetValue(CurCamIDProperty, value); }
+        }
         public DependencyProperty CurCamIDProperty = DependencyProperty.Register("CurCamID", typeof(int), typeof(UC_ModelParaPanel));
+
+ 
+        public RoiModelBase CurSelectItemOfListBox
+        {
+            get { return  GetValue(CurSelectItemOfListBoxProperty) as RoiModelBase; }
+            set { SetValue(CurSelectItemOfListBoxProperty, value); }
+        }
+        public DependencyProperty CurSelectItemOfListBoxProperty = DependencyProperty.Register("CurSelectItemOfListBox", typeof(RoiModelBase), typeof(UC_ModelParaPanel));
+
+
 
         private void BtnSaveModelPara_Click(object sender, RoutedEventArgs e)
         {
             var VM = DataContext as MainWindowViewModel;
-            VM.SaveRoiModelParaCommand.Execute($"Model&{CurCamID}");
+            VM.SaveModelParaCommand.Execute(new Tuple<RoiModelBase, int>(CurSelectItemOfListBox, CurCamID));
         }
 
         private void BtnTestModel_Click(object sender, RoutedEventArgs e)
         {
             var VM = DataContext as MainWindowViewModel;
-            VM.SaveRoiModelParaCommand.Execute($"Model&{CurCamID}");
+            VM.TestModelParaCommand.Execute(new Tuple<RoiModelBase, int>(CurSelectItemOfListBox, CurCamID));
         }
 
         private void MaxThreSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Vision.Vision.Instance.PreCreateShapeModel(CurCamID, Convert.ToInt16(MinThreSlider.Value), Convert.ToInt16(MaxThreSlider.Value), Vision.EnumShapeModelType.XLD);
+            (DataContext as MainWindowViewModel).PreViewRoiCommand.Execute(new Tuple<RoiModelBase,int>(CurSelectItemOfListBox, CurCamID));
         }
 
         private void MinThreSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Vision.Vision.Instance.PreCreateShapeModel(CurCamID, Convert.ToInt16(MinThreSlider.Value), Convert.ToInt16(MaxThreSlider.Value), Vision.EnumShapeModelType.XLD);
+            (DataContext as MainWindowViewModel).PreViewRoiCommand.Execute(new Tuple<RoiModelBase, int>(CurSelectItemOfListBox, CurCamID));
         }
     }
 }

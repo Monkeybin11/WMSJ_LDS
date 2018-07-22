@@ -34,7 +34,16 @@ namespace CPAS.Classes
             if (File.Exists(strFileFullPathName))
                 File.Delete(strFileFullPathName);
         }
-  
+        public static void DeleteAllFileInDirectory(string filePath)
+        {
+            var dir = filePath + "\\";
+            if (Directory.Exists(dir))
+            {   
+                DirectoryInfo info = new DirectoryInfo(dir);
+                foreach (var file in info.GetFiles())
+                    File.Delete(file.FullName);
+            }
+        }
         #endregion
 
         #region Work Directory
@@ -63,7 +72,7 @@ namespace CPAS.Classes
             if (File.Exists(_workDirectory + strFileName))
                 File.Delete(_workDirectory + strFileName);
         }
-        public List<string> GetWorkDictoryProfileList()
+        public List<string> GetWorkDictoryProfileList(string[] expNameListLookingFor)
         {
             if (Directory.Exists(_workDirectory))
             {
@@ -71,8 +80,14 @@ namespace CPAS.Classes
                 DirectoryInfo info = new DirectoryInfo(_workDirectory);
                 foreach (var file in info.GetFiles())
                 {
-                    if (!file.Extension.Contains("tup"))
-                        list.Add(System.IO.Path.GetFileNameWithoutExtension(file.FullName));
+                    if (expNameListLookingFor != null)
+                    {
+                        foreach (var ext in expNameListLookingFor)
+                        {
+                            if (file.Extension.Contains(ext))
+                                list.Add(System.IO.Path.GetFileNameWithoutExtension(file.FullName));
+                        }
+                    }
                 }
                 return list;
             }

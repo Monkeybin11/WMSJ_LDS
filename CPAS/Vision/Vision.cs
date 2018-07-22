@@ -513,7 +513,7 @@ namespace CPAS.Vision
 
         }
 
-        public bool ShowRoi(string RoiFilePathName)     //就在建立修改的时候有用到,同时更新多个窗口
+        public bool ShowRoi(string RoiFilePathName)     //显示ROI
         {
             string[] splitString = RoiFilePathName.Split('\\');
             if (splitString.Length > 2)
@@ -539,15 +539,15 @@ namespace CPAS.Vision
         public bool ShowModel(string ModelFilePathName)     //就在建立修改的时候有用到,同时更新多个窗口
         {
             HObject modelContours = null;
-            HObject modelContoursMoved = null;
 
 
             string[] splitString = ModelFilePathName.Split('\\');
-            if (splitString.Length > 2)
+            if (splitString.Length > 1)
             {
                 int nCamID = Convert.ToInt16(splitString[splitString.Length - 1].Substring(3, 1));
 
                 //三个文件同时读取
+                splitString= ModelFilePathName.Split('.');
                 HOperatorSet.ReadShapeModel(ModelFilePathName, out HTuple ModelID);
                 HOperatorSet.ReadRegion(out HObject ModelRoiRegion, $"{splitString[0]}.reg");
                 HOperatorSet.ReadTuple($"{splitString[0]}.tup", out HTuple ModelOriginPos);
@@ -563,14 +563,15 @@ namespace CPAS.Vision
                         HOperatorSet.SetColor(it.Value, "green");
 
                         HOperatorSet.GetShapeModelContours(out modelContours, ModelID, 1);
-                        HOperatorSet.MoveRegion(modelContours, out modelContoursMoved, ModelOriginPos[0], ModelOriginPos[1]);
-
-
-                        HOperatorSet.DispObj(modelContoursMoved, it.Value);
-                        HOperatorSet.DispObj(ModelRoiRegion, it.Value);
-
+                        if (modelContours.CountObj() > 0)
+                        {
+                            HOperatorSet.VectorAngleToRigid(0, 0, 0, ModelOriginPos[0], ModelOriginPos[1], ModelOriginPos[2], out HTuple homMat2D);
+                            HOperatorSet.AffineTransContourXld(modelContours, out HObject contoursAffinTrans, homMat2D);
+                            HOperatorSet.DispObj(contoursAffinTrans, it.Value);
+                            contoursAffinTrans.Dispose();
+                        }
+                                   
                         modelContours.Dispose();
-                        modelContoursMoved.Dispose();
                     }
                 }
 
@@ -750,7 +751,7 @@ namespace CPAS.Vision
         }
         #endregion
 
-        public bool PreCreateShapeModel(int nCamID,int MinThre,int MaxThre, EnumShapeModelType modelType)
+        public bool PreCreateShapeModel(int nCamID,int MinThre,int MaxThre, EnumShapeModelType modelType,string regionFilePath,object regionIn=null)
         {
             if (nCamID < 0 || MaxThre<MinThre)
                 return false;
@@ -764,13 +765,51 @@ namespace CPAS.Vision
                     case EnumShapeModelType.Shape:
                         break;
                     case EnumShapeModelType.XLD:
-                        HObject region=null;
-                        return LdsFuncSet.PreProcessShapeMode(HoImageList[nCamID], window, MinThre, MaxThre, region);
+                        HObject region=regionIn as HObject;
+                        return LdsFuncSet.PreProcessShapeMode(HoImageList[nCamID], window, MinThre, MaxThre, region, regionFilePath,true);
                     default:
                         return false;
                 }
             }
             return true;
+        }
+        public bool SaveShapeModel(int nCamID, int MinThre, int MaxThre, EnumShapeModelType modelType, string regionFilePath, object regionIn = null)
+        {
+            if (nCamID < 0 || MaxThre < MinThre)
+                return false;
+            if (HwindowDic.Keys.Contains(nCamID) && HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
+            {
+                HTuple window = HwindowDic[nCamID]["CameraViewCam"];
+                switch (modelType)
+                {
+                    case EnumShapeModelType.Gray:
+                        break;
+                    case EnumShapeModelType.Shape:
+                        break;
+                    case EnumShapeModelType.XLD:
+                        HObject region = regionIn as HObject;
+                        return LdsFuncSet.PreProcessShapeMode(HoImageList[nCamID], window, MinThre, MaxThre, region, regionFilePath, false);
+                    default:
+                        return false;
+                }
+            }
+            return true;
+        }
+        public object ReadRegion(string regionPath)
+        {
+            if (File.Exists(regionPath))
+            {
+                try
+                {
+                    HOperatorSet.ReadRegion(out HObject region, regionPath);
+                    return region;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+            }
+            return null;
         }
         private void FindLine(HObject ho_Image, HTuple hv_CaliperNum, HTuple hv_EdgeGrayValue, HTuple hv_RoiRow, HTuple hv_RoiCol, HTuple hv_RoiPhi, HTuple hv_RoiL1, HTuple hv_RoiL2, out HTuple hv_OutRowStart, out HTuple hv_OutColStart, out HTuple hv_OutRowEnd, out HTuple hv_OutColEnd)
         {
@@ -1164,6 +1203,6 @@ namespace CPAS.Vision
             }
             return list;
         }
-
+   
     }
 }

@@ -30,8 +30,8 @@ namespace CPAS.UserCtrl
 
         private void BtnSaveRoiPara_Click(object sender, RoutedEventArgs e)
         {
-            var VM = DataContext as MainWindowViewModel;
-            VM.SaveRoiModelParaCommand.Execute($"Roi&{CurCamID}");
+            //var VM = DataContext as MainWindowViewModel;
+            //VM.SaveModelParaCommand.Execute($"Roi&{CurCamID}");
         }
 
         private void BtnTestRoi_Click(object sender, RoutedEventArgs e)
@@ -39,5 +39,6 @@ namespace CPAS.UserCtrl
             var VM = DataContext as MainWindowViewModel;
             VM.TestRoiModelCommand.Execute($"Roi&{CurCamID}");
         }
+
     }
 }

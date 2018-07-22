@@ -179,7 +179,7 @@
             <!--模板参数-->
             <Grid Grid.Row="8" Grid.ColumnSpan="2"  IsEnabled="{Binding IsEnabled,ElementName=Cb_Cameras}">
                 <UserCtrl:UC_RoiParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Roi}" CurCamID="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
-                <UserCtrl:UC_ModelParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Model}" CurCamID="{Binding SelectedIndex,ElementName=Cb_Cameras}"/>
+                <UserCtrl:UC_ModelParaPanel Visibility="{Binding CurrentSelectRoiTemplate,Converter={StaticResource Int2Visibility},ConverterParameter=Model}" CurCamID="{Binding SelectedIndex,ElementName=Cb_Cameras}" CurSelectItemOfListBox="{Binding SelectedItem,ElementName=ListBoxRoiTemplate}"/>
             </Grid>
         </Grid>
     </Grid>
