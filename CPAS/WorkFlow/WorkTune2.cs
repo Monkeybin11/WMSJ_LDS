@@ -28,7 +28,8 @@ namespace CPAS.WorkFlow
         private Dictionary<Int32, int> PosValueDic1 = new Dictionary<Int32, int>();
         private Dictionary<Int32, int> PosValueDic2 = new Dictionary<Int32, int>();
 
-
+        private Task task1 = null, task2 = null;
+        private STEP nStep1, nStep2;
         private int nSubWorkFlowState = 0;
         private enum STEP : int
         {
@@ -85,6 +86,7 @@ namespace CPAS.WorkFlow
             #endregion
 
             bool bRet= PLC!=null && lds1!=null && lds2!=null && Prescription!=null;
+            bRet = true;
             if(!bRet)
                 ShowInfo("初始化失败");
 
@@ -96,6 +98,7 @@ namespace CPAS.WorkFlow
         }
         protected override int WorkFlow()
         {
+             
             ClearAllStep();
             PushStep(STEP.INIT);
             while (!cts.IsCancellationRequested)
@@ -111,10 +114,20 @@ namespace CPAS.WorkFlow
                     case STEP.Check_Enable_Adjust_Focus:
                         if (Prescription.EnableAdjustFocus)
                         {
+                            nStep1 = STEP.Wait_Focus_Grab_Cmd;
+                            //nStep2 = STEP.Wait_Focus_Grab_Cmd;
                             SetSubWorflowState(1, false);
-                            SetSubWorflowState(2, false);
-                            AdjustFocusProcess(1);
-                            AdjustFocusProcess(2);
+                            //SetSubWorflowState(2, false);
+                            if (task1 == null || task1.IsCanceled || task1.IsCompleted)
+                            {
+                                task1 = new Task(()=>AdjustFocusProcess(1));
+                                task1.Start();
+                            }
+                            //if (task2 == null || task2.IsCanceled || task2.IsCompleted)
+                            //{
+                            //    task2 = new Task(() => AdjustFocusProcess(1));
+                            //    task2.Start();
+                            //}
                             PopAndPushStep(STEP.Wait_Finish_Both);
                         }
                         else
@@ -130,7 +143,8 @@ namespace CPAS.WorkFlow
                         if (GetSubWorkFlowState(1) && GetSubWorkFlowState(2))
                         {
                             //保存结果
-                            PopAndPushStep(STEP.INIT);
+                            //PopAndPushStep(STEP.INIT);
+                            Thread.Sleep(1000);
                         }
                         break;
 
@@ -150,7 +164,7 @@ namespace CPAS.WorkFlow
             return 0;
         }
 
-        private async void AdjustFocusProcess(int nIndex)
+        private void AdjustFocusProcess(int nIndex)
         {
             if (nIndex != 1 && nIndex != 2)
                 throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
@@ -173,94 +187,101 @@ namespace CPAS.WorkFlow
             int nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
             int nCmdAdjustStart= PLC.ReadInt(strCmdFocusGrabRegister);
 
-            Int32 maxPos = 0;
-            
-            STEP nStep=STEP.Wait_Focus_Grab_Cmd;
-            await Task.Run(() => {
-                switch (nStep)
+            Int32 maxPos = 0; 
+
+
+            while (!cts.IsCancellationRequested)
+            {
+                STEP Step = 1 == nIndex ? nStep1 : nStep2;
+                switch (Step)
                 {
                     case STEP.Wait_Focus_Grab_Cmd:
                         nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
                         if ((1 == nCmdFocus_Grab))
-                            PopAndPushStep(STEP.Grab_Focus_Image);
+                            SetStep(nIndex,STEP.Grab_Focus_Image);
                         else if (10 == nCmdFocus_Grab)      //如果不需要拍照
                         {
-                            PopAndPushStep(STEP.Finish_Adjust_Focus);
+                            SetStep(nIndex, STEP.Finish_Adjust_Focus);
                         }
                         break;
                     case STEP.Grab_Focus_Image:
                         Vision.Vision.Instance.GrabImage(nCamID);
-                        PopAndPushStep(STEP.Cacul_Focus_Servo_Angle);
+                        SetStep(nIndex, STEP.Cacul_Focus_Servo_Angle);
                         break;
                     case STEP.Cacul_Focus_Servo_Angle:
-                        if (Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, nCamID, null, out object oResult1))
+                        if (true || Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, nCamID, null, out object oResult1))
                         {
-                            PLC.WriteDint(strCalAngleJointAngleRegister, Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000)); //角度
+                            PLC.WriteDint(strCalAngleJointAngleRegister, 98765432); //角度 dddd
+                            //PLC.WriteDint(strCalAngleJointAngleRegister, Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000)); //角度 dddd
                             PLC.WriteInt(strJointBoolResultRegister, 2);    //拍摄的最终结果
+
                         }
                         else
                             PLC.WriteInt(strJointBoolResultRegister, 1);    //拍摄的最终结果
-                        PopAndPushStep(STEP.Wait_Adjust_Foucs_Cmd);
+                        PLC.WriteInt(strCmdFocusGrabRegister, 2);
+                        SetStep(nIndex, STEP.Wait_Adjust_Foucs_Cmd);
                         break;
 
 
 
                     case STEP.Wait_Adjust_Foucs_Cmd:       //有可能拍照全部NG
                         nCmdAdjustStart = PLC.ReadInt(strCmdFocusStartRegister);
-                        if (1 == nCmdAdjustStart) 
-                             PopAndPushStep(STEP.Read_Focus_Value); 
+                        if (1 == nCmdAdjustStart)
+                            SetStep(nIndex, STEP.Read_Focus_Value);
                         else if (10 == nCmdAdjustStart)
-                            PopAndPushStep(STEP.Finish_With_Error); 
+                            SetStep(nIndex, STEP.Finish_With_Error);
                         break;
 
                     case STEP.Read_Focus_Value:
-                         if(lds.GetFocusValue(Prescription.CMosPointNumber)>Prescription.LDSHoriValue6m)    //如果大于直接通过
-                            PopAndPushStep(STEP.Finish_Adjust_Focus);
+                        if (true || lds.GetFocusValue(Prescription.CMosPointNumber) > Prescription.LDSHoriValue6m)    //如果大于直接通过  dddd
+                        {
+                            SetStep(nIndex, STEP.Finish_Adjust_Focus);
+                        }
                         else
-                            PopAndPushStep(STEP.Turn_A_Circle_Outside_For_Safe);
+                            SetStep(nIndex, STEP.Turn_A_Circle_Outside_For_Safe);
                         break;
                     case STEP.Turn_A_Circle_Outside_For_Safe:
                         PLC.WriteDint(strAdjustFocusAngleRegister, 360 * 1000);//
                         PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
-                        PopAndPushStep(STEP.Wait_CircleOutside_Ok);
+                        SetStep(nIndex, STEP.Wait_CircleOutside_Ok);
                         break;
                     case STEP.Wait_CircleOutside_Ok:
                         if (2 == PLC.ReadInt(strCmdSingleStepRegister))
-                            PopAndPushStep(STEP.Turn_Slowly_inside);
+                            SetStep(nIndex, STEP.Turn_Slowly_inside);
                         break;
                     case STEP.Turn_Slowly_inside:       //往里面走多少合适？
-                        PLC.WriteDint(strAdjustFocusAngleRegister, -2*360 * 1000);//
+                        PLC.WriteDint(strAdjustFocusAngleRegister, -2 * 360 * 1000);//
                         PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
                         monitorValueDel(true);  //开始监控
-                        PopAndPushStep(STEP.Wait_SlowLy_Inside_Ok);
+                        SetStep(nIndex, STEP.Wait_SlowLy_Inside_Ok);
                         break;
                     case STEP.Wait_SlowLy_Inside_Ok:
                         if (2 == PLC.ReadInt(strCmdSingleStepRegister))
-                            PopAndPushStep(STEP.GetMaxValue);
+                            SetStep(nIndex, STEP.GetMaxValue);
                         break;
                     case STEP.GetMaxValue:  //寻找最大值
                         var PosValueDic = 1 == nIndex ? PosValueDic1 : PosValueDic2;
-                        var max=PosValueDic.Max(p => p.Value);  //value
+                        var max = PosValueDic.Max(p => p.Value);  //value
                         maxPos = (from dic in PosValueDic where dic.Value == max select dic).ElementAt(0).Key;  //key
-                        if(max<Prescription.LDSHoriValue6m)
-                            PopAndPushStep(STEP.Finish_With_Error);
+                        if (max < Prescription.LDSHoriValue6m)
+                            SetStep(nIndex, STEP.Finish_With_Error);
                         else
-                            PopAndPushStep(STEP.Write_MaxValuePos_To_Register);
+                            SetStep(nIndex, STEP.Write_MaxValuePos_To_Register);
                         break;
                     case STEP.Write_MaxValuePos_To_Register:
                         //用最大位置减去当前位置
                         PLC.WriteDint(strAdjustFocusAngleRegister, maxPos - 10000);    //ddddd
                         PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
-                        PopAndPushStep(STEP.Wait_TurnBack_MaxValue_Position);
+                        SetStep(nIndex, STEP.Wait_TurnBack_MaxValue_Position);
                         break;
                     case STEP.Wait_TurnBack_MaxValue_Position: //退回最大点处
                         if (2 == PLC.ReadInt(strCmdSingleStepRegister))
-                            PopAndPushStep(STEP.Finish_Adjust_Focus);
+                            SetStep(nIndex, STEP.Finish_Adjust_Focus);
                         break;
 
                     case STEP.Finish_With_Error:
                         //错误处理
-                        PopAndPushStep(STEP.Finish_Adjust_Focus);  //完成
+                        SetStep(nIndex, STEP.Finish_Adjust_Focus);  //完成
                         break;
                     case STEP.Finish_Adjust_Focus:
                         //证确结果保存
@@ -268,11 +289,19 @@ namespace CPAS.WorkFlow
                         SetSubWorflowState(nIndex, true);
                         break;
                 }
-            });
+                Thread.Sleep(50);
+            }
         }
-
+        private void SetStep(int nIndex, STEP step)
+        {
+            if (nIndex == 1)
+                nStep1 = step;
+            else
+                nStep2 = step;
+        }
         private void StartMonitor1(bool bMonitor = true)
         {
+            return;// ddd
             if (bMonitor)
             {
                 if (taskMonitorValue1 == null || taskMonitorValue1.IsCanceled || taskMonitorValue1.IsCompleted)
@@ -301,6 +330,7 @@ namespace CPAS.WorkFlow
         }
         private void StartMonitor2(bool bMonitor = true)
         {
+            return; //ddd
             if (bMonitor)
             {
                 if (taskMonitorValue2 == null || taskMonitorValue2.IsCanceled || taskMonitorValue2.IsCompleted)

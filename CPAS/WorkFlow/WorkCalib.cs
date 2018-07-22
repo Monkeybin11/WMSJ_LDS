@@ -19,17 +19,16 @@ namespace CPAS.WorkFlow
         private LDS lds1 = null;
         private LDS lds2 = null;
 
+        private Task task1 = null, task2 = null;
+        private STEP nStep1, nStep2;
 
         private int nSubWorkFlowState=0;
         private enum STEP : int
         {
             INIT,
 
-
-
             Check_Enable_Calib,     //分支
             
-
             Wait_Calib_2m_Cmd,
             Read_Center_Value_2m,
             Write_Calib_2m_Boolean_Result,
@@ -94,8 +93,16 @@ namespace CPAS.WorkFlow
                         {
                             SetSubWorflowState(1, false);
                             SetSubWorflowState(2, false);
-                            CalibProcess(1);
-                            CalibProcess(2);
+                            if (task1 == null || task1.IsCanceled || task1.IsCompleted)
+                            {
+                                task1 = new Task(()=> CalibProcess(1));
+                                task1.Start();
+                            }
+                            if (task2 == null || task2.IsCanceled || task2.IsCompleted)
+                            {
+                                task2 = new Task(() => CalibProcess(2));
+                                task2.Start();
+                            }
                             PopAndPushStep(STEP.Wait_Calib_2m_Cmd);
                         }
                         else
@@ -107,7 +114,8 @@ namespace CPAS.WorkFlow
                     case STEP.Wait_Finish_Both:
                         if (GetSubWorkFlowState(1) && GetSubWorkFlowState(2))
                         {
-                            PopAndPushStep(STEP.INIT);
+                            Thread.Sleep(1000);
+                            //PopAndPushStep(STEP.INIT);
                         }
                         break;
 
@@ -126,7 +134,7 @@ namespace CPAS.WorkFlow
             }
             return 0;
         }
-        private async void CalibProcess(int nIndex)
+        private void CalibProcess(int nIndex)
         {
             if (nIndex != 1 && nIndex != 2)
                 throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
@@ -141,7 +149,7 @@ namespace CPAS.WorkFlow
 
 
             STEP nStep = STEP.Wait_Calib_2m_Cmd;
-            await Task.Run(() =>
+            while(!cts.IsCancellationRequested)
             {
                 int nCenterC1 = 0;
                 int nCenterC2 = 0;
@@ -151,58 +159,66 @@ namespace CPAS.WorkFlow
                     case STEP.Wait_Calib_2m_Cmd:
                         Thread.Sleep(100);
                         if (PLC.ReadInt(cmdCalib2m_Reg) == 1)
-                            PopAndPushStep(STEP.Read_Center_Value_2m);
+                            SetStep(nIndex,STEP.Read_Center_Value_2m);
                         else if(PLC.ReadInt(cmdCalib2m_Reg) == 10)  //不做标定
-                            PopAndPushStep(STEP.Finish_Calib);
+                            SetStep(nIndex,STEP.Finish_Calib);
                         break;
 
                     case STEP.Read_Center_Value_2m:
                         nCenterC1=lds.GetCenterValue(Prescription.CMosPointNumber);
-                        PopAndPushStep(STEP.Write_Calib_2m_Boolean_Result);
+                        SetStep(nIndex,STEP.Write_Calib_2m_Boolean_Result);
                         break;
                     case STEP.Write_Calib_2m_Boolean_Result:
                         PLC.WriteInt(booleanResult2m_Reg, 2);   //2-ok,1-NG
-                        PopAndPushStep(STEP.Finish_Calib_2m);
+                        SetStep(nIndex,STEP.Finish_Calib_2m);
                         break;
                     case STEP.Finish_Calib_2m:
                         lds.HoldLDS();
                         PLC.WriteInt(cmdCalib2m_Reg, 2);
-                        PopAndPushStep(STEP.Wait_Calib_4m_Cmd);
+                        SetStep(nIndex,STEP.Wait_Calib_4m_Cmd);
                         break;
 
 
                     case STEP.Wait_Calib_4m_Cmd:
                         Thread.Sleep(100);
                         if (PLC.ReadInt(cmdCalib4m_Reg) == 1)
-                            PopAndPushStep(STEP.Read_Center_Value_4m);
+                            SetStep(nIndex,STEP.Read_Center_Value_4m);
                         break;
                     case STEP.Read_Center_Value_4m:
                         nCenterC2 = lds.GetCenterValue(Prescription.CMosPointNumber);
-                        PopAndPushStep(STEP.Write_Calib_4m_Boolean_Result);
+                        SetStep(nIndex,STEP.Write_Calib_4m_Boolean_Result);
                         break;
                     case STEP.Write_Calib_4m_Boolean_Result:
                         PLC.WriteInt(booleanResult4m_Reg, 2);   //2-ok,1-NG
-                        PopAndPushStep(STEP.Finish_Calib_4m);
+                        SetStep(nIndex,STEP.Finish_Calib_4m);
                         break;
                     case STEP.Finish_Calib_4m:
                         PLC.WriteInt(cmdCalib4m_Reg, 2);
-                        PopAndPushStep(STEP.Calclate_From_2m_4m);
+                        SetStep(nIndex,STEP.Calclate_From_2m_4m);
                         break;
                     case STEP.Calclate_From_2m_4m:      //计算AB
                         if(lds.SetDataToLDS(nCenterC1, nCenterC2))
-                            PopAndPushStep(STEP.Finish_Calib);
+                            SetStep(nIndex,STEP.Finish_Calib);
                         else
-                            PopAndPushStep(STEP.Finish_With_Error);
+                            SetStep(nIndex,STEP.Finish_With_Error);
                         break;
                     case STEP.Finish_With_Error:
-                        PopAndPushStep(STEP.Finish_Calib);
+                        SetStep(nIndex,STEP.Finish_Calib);
                         break;
                     case STEP.Finish_Calib:
                         SetSubWorflowState(nIndex, true);
                         break;
 
                 }
-            });
+                Thread.Sleep(50);
+            }
+        }
+        private void SetStep(int nIndex, STEP step)
+        {
+            if (nIndex == 1)
+                nStep1 = step;
+            else
+                nStep2 = step;
         }
         private void SetSubWorflowState(int nIndex,bool bFinish)
         {

@@ -305,7 +305,11 @@ namespace CPAS.Vision
             }
             finally
             {
-                image.Dispose();
+                if (image != null)
+                {
+                    image.Dispose();
+                    image = null;
+                }
             }
         }
 
@@ -616,9 +620,9 @@ namespace CPAS.Vision
 
             try
             {
-#if TEST
-                dic.Add("DirectShow", new Tuple<string, string>("Integrated Camera", "DirectShow"));
-#else
+
+                //dic.Add("DirectShow", new Tuple<string, string>("Integrated Camera", "DirectShow"));
+
                 HOperatorSet.InfoFramegrabber(camType.ToString(), "info_boards", out HTuple hv_Information, out HTuple hv_ValueList);
                 if (0 == hv_ValueList.Length)
                     return dic;
@@ -639,7 +643,7 @@ namespace CPAS.Vision
                     if (!bFind)
                         Messenger.Default.Send<String>(string.Format("相机:{0}未找到硬件，请检查硬件连接或者配置", Config.ConfigMgr.CameraCfgs[i].Name), "ShowError");
                 }
-#endif
+
                 return dic;
             }
             catch (Exception ex)

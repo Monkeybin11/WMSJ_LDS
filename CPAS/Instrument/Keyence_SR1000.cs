@@ -29,7 +29,10 @@ namespace CPAS.Instrument
                     foreach (var it in hardwareCfg.Comports)
                     {
                         if (it.PortName == Config.PortName)
+                        {
                             comportCfg = it;
+                            break;
+                        }
                     }
                     comPort = new System.IO.Ports.SerialPort();
                     if (comPort != null && comportCfg != null)
