@@ -29,46 +29,7 @@ namespace CPAS.WorkFlow
         private Dictionary<Int32, int> PosValueDic2 = new Dictionary<Int32, int>();
 
         private Task task1 = null, task2 = null;
-        private STEP nStep1, nStep2;
         private int nSubWorkFlowState = 0;
-        private enum STEP : int
-        {
-            INIT,
-
-            //调焦距
-    
-            Check_Enable_Adjust_Focus,
-
-            //分支
-            Wait_Focus_Grab_Cmd,
-            Grab_Focus_Image,
-            Cacul_Focus_Servo_Angle,
-
-            Wait_Adjust_Foucs_Cmd,
-            Read_Focus_Value,
-
-            Turn_A_Circle_Outside_For_Safe,
-            Wait_CircleOutside_Ok,
-            Turn_Slowly_inside,
-            Wait_SlowLy_Inside_Ok,
-            GetMaxValue,
-            Write_MaxValuePos_To_Register,
-            Wait_TurnBack_MaxValue_Position, //退回最大点处
-
-            Finish_With_Error,
-            Finish_Adjust_Focus,
-            //分支
-
-
-            Wait_Finish_Both,
-
-
-
-
-            EMG,
-            EXIT,
-            DO_NOTHING,
-        }
 
         protected override bool UserInit()
         {
@@ -98,274 +59,109 @@ namespace CPAS.WorkFlow
         }
         protected override int WorkFlow()
         {
-             
-            ClearAllStep();
-            PushStep(STEP.INIT);
-            while (!cts.IsCancellationRequested)
-            {
-                nStep = PeekStep();
-                switch (nStep)
-                {
-                    case STEP.INIT:
-                        PopAndPushStep(STEP.Check_Enable_Adjust_Focus);
-                        ShowInfo("init");
-                        Thread.Sleep(200);
-                        break;
-                    case STEP.Check_Enable_Adjust_Focus:
-                        if (Prescription.EnableAdjustFocus)
-                        {
-                            nStep1 = STEP.Wait_Focus_Grab_Cmd;
-                            //nStep2 = STEP.Wait_Focus_Grab_Cmd;
-                            SetSubWorflowState(1, false);
-                            //SetSubWorflowState(2, false);
-                            if (task1 == null || task1.IsCanceled || task1.IsCompleted)
-                            {
-                                task1 = new Task(()=>AdjustFocusProcess(1));
-                                task1.Start();
-                            }
-                            //if (task2 == null || task2.IsCanceled || task2.IsCompleted)
-                            //{
-                            //    task2 = new Task(() => AdjustFocusProcess(1));
-                            //    task2.Start();
-                            //}
-                            PopAndPushStep(STEP.Wait_Finish_Both);
-                        }
-                        else
-                        {
-                            PopAndPushStep(STEP.DO_NOTHING);
-                        }
-                        break;
-
-
-
-                    case STEP.Wait_Finish_Both:
-
-                        if (GetSubWorkFlowState(1) && GetSubWorkFlowState(2))
-                        {
-                            //保存结果
-                            //PopAndPushStep(STEP.INIT);
-                            Thread.Sleep(1000);
-                        }
-                        break;
-
-  
-
-                    case STEP.DO_NOTHING:
-                        ShowInfo("该工序未启用");
-                        Thread.Sleep(200);
-                        break;
-                    case STEP.EMG:
-                        ClearAllStep();
-                        break;
-                    case STEP.EXIT:
-                        return 0;
-                }
-            }
             return 0;
         }
-
-        private void AdjustFocusProcess(int nIndex)
+        private void LdsWorkFunctionSet1()
         {
-            if (nIndex != 1 && nIndex != 2)
-                throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
-            LDS lds = nIndex == 1 ? lds1 : lds2;
-            
-           
-            string strCmdFocusGrabRegister = 1 == nIndex ? "R211" : "R237";
-            string strCalAngleJointAngleRegister= 1 == nIndex ? "R213" : "R239"; //Dint
-            string strJointBoolResultRegister = 1 == nIndex ? "R212" : "R238";  //Int
+            int nIndex = 1;
+            int nCmd = 0;
+            const string cmdReg = "R107";
 
-            string strCmdFocusStartRegister = 1 == nIndex ? "R267" : "R288";
-            string strAdjustFocusAngleRegister= 1 == nIndex ? "R269" : "R290";   //Dint
-            string strAdjustFocusGrabRegister = 1 == nIndex ? "R268" : "R289";   //Int
-            string strCmdSingleStepRegister = 1 == nIndex ? "R271" : "R292";   //Int
-            
-            
-            MonitorValueDelegate monitorValueDel = 1 == nIndex? new MonitorValueDelegate(StartMonitor1): new MonitorValueDelegate(StartMonitor2);
-            int nCamID= 1 == nIndex ? (int)EnumCamID.Cam5 : (int)EnumCamID.Cam6;
-            
-            int nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
-            int nCmdAdjustStart= PLC.ReadInt(strCmdFocusGrabRegister);
+            const string Angle_Join_Reg = "R213";
+            const string bool_Join_Reg = "R212";
 
-            Int32 maxPos = 0; 
-
+            const string Intensity6m_Reg = "R272";
+            const string bool_6m_Reg = "R274";
 
             while (!cts.IsCancellationRequested)
             {
-                STEP Step = 1 == nIndex ? nStep1 : nStep2;
-                switch (Step)
+                bool bRet = false;
+                nCmd = PLC.ReadInt(cmdReg);
+                switch (nCmd)
                 {
-                    case STEP.Wait_Focus_Grab_Cmd:
-                        nCmdFocus_Grab = PLC.ReadInt(strCmdFocusGrabRegister);
-                        if ((1 == nCmdFocus_Grab))
-                            SetStep(nIndex,STEP.Grab_Focus_Image);
-                        else if (10 == nCmdFocus_Grab)      //如果不需要拍照
-                        {
-                            SetStep(nIndex, STEP.Finish_Adjust_Focus);
-                        }
-                        break;
-                    case STEP.Grab_Focus_Image:
-                        Vision.Vision.Instance.GrabImage(nCamID);
-                        SetStep(nIndex, STEP.Cacul_Focus_Servo_Angle);
-                        break;
-                    case STEP.Cacul_Focus_Servo_Angle:
-                        if (true || Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, nCamID, null, out object oResult1))
-                        {
-                            PLC.WriteDint(strCalAngleJointAngleRegister, 98765432); //角度 dddd
-                            //PLC.WriteDint(strCalAngleJointAngleRegister, Convert.ToInt32(Math.Round(double.Parse(oResult1.ToString()), 3) * 1000)); //角度 dddd
-                            PLC.WriteInt(strJointBoolResultRegister, 2);    //拍摄的最终结果
-
-                        }
-                        else
-                            PLC.WriteInt(strJointBoolResultRegister, 1);    //拍摄的最终结果
-                        PLC.WriteInt(strCmdFocusGrabRegister, 2);
-                        SetStep(nIndex, STEP.Wait_Adjust_Foucs_Cmd);
+                    case 1: //计算对接角度
+                        bRet = GetTune2JoinAngle(nIndex, out double Angle);
+                        PLC.WriteDint(Angle_Join_Reg, Convert.ToInt32(Angle * 1000));
+                        PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
-
-
-                    case STEP.Wait_Adjust_Foucs_Cmd:       //有可能拍照全部NG
-                        nCmdAdjustStart = PLC.ReadInt(strCmdFocusStartRegister);
-                        if (1 == nCmdAdjustStart)
-                            SetStep(nIndex, STEP.Read_Focus_Value);
-                        else if (10 == nCmdAdjustStart)
-                            SetStep(nIndex, STEP.Finish_With_Error);
+                    case 5: //获取强度值
+                        bRet = GetLaserIntensityValue(nIndex, out int intensityValue);
+                        PLC.WriteDint(Intensity6m_Reg, intensityValue);
+                        PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
-
-                    case STEP.Read_Focus_Value:
-                        if (true || lds.GetFocusValue(Prescription.CMosPointNumber) > Prescription.LDSHoriValue6m)    //如果大于直接通过  dddd
-                        {
-                            SetStep(nIndex, STEP.Finish_Adjust_Focus);
-                        }
-                        else
-                            SetStep(nIndex, STEP.Turn_A_Circle_Outside_For_Safe);
+                    case 100:
+                        ReadResutFromPLC(nIndex);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
-                    case STEP.Turn_A_Circle_Outside_For_Safe:
-                        PLC.WriteDint(strAdjustFocusAngleRegister, 360 * 1000);//
-                        PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
-                        SetStep(nIndex, STEP.Wait_CircleOutside_Ok);
-                        break;
-                    case STEP.Wait_CircleOutside_Ok:
-                        if (2 == PLC.ReadInt(strCmdSingleStepRegister))
-                            SetStep(nIndex, STEP.Turn_Slowly_inside);
-                        break;
-                    case STEP.Turn_Slowly_inside:       //往里面走多少合适？
-                        PLC.WriteDint(strAdjustFocusAngleRegister, -2 * 360 * 1000);//
-                        PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
-                        monitorValueDel(true);  //开始监控
-                        SetStep(nIndex, STEP.Wait_SlowLy_Inside_Ok);
-                        break;
-                    case STEP.Wait_SlowLy_Inside_Ok:
-                        if (2 == PLC.ReadInt(strCmdSingleStepRegister))
-                            SetStep(nIndex, STEP.GetMaxValue);
-                        break;
-                    case STEP.GetMaxValue:  //寻找最大值
-                        var PosValueDic = 1 == nIndex ? PosValueDic1 : PosValueDic2;
-                        var max = PosValueDic.Max(p => p.Value);  //value
-                        maxPos = (from dic in PosValueDic where dic.Value == max select dic).ElementAt(0).Key;  //key
-                        if (max < Prescription.LDSHoriValue6m)
-                            SetStep(nIndex, STEP.Finish_With_Error);
-                        else
-                            SetStep(nIndex, STEP.Write_MaxValuePos_To_Register);
-                        break;
-                    case STEP.Write_MaxValuePos_To_Register:
-                        //用最大位置减去当前位置
-                        PLC.WriteDint(strAdjustFocusAngleRegister, maxPos - 10000);    //ddddd
-                        PLC.WriteInt(strCmdSingleStepRegister, 1);    //表示让伺服开始启动
-                        SetStep(nIndex, STEP.Wait_TurnBack_MaxValue_Position);
-                        break;
-                    case STEP.Wait_TurnBack_MaxValue_Position: //退回最大点处
-                        if (2 == PLC.ReadInt(strCmdSingleStepRegister))
-                            SetStep(nIndex, STEP.Finish_Adjust_Focus);
-                        break;
-
-                    case STEP.Finish_With_Error:
-                        //错误处理
-                        SetStep(nIndex, STEP.Finish_Adjust_Focus);  //完成
-                        break;
-                    case STEP.Finish_Adjust_Focus:
-                        //证确结果保存
-                        PLC.WriteInt(strCmdFocusStartRegister, 2);  //完成
-                        SetSubWorflowState(nIndex, true);
+                    default:
                         break;
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(100);
             }
         }
-        private void SetStep(int nIndex, STEP step)
+        private void LdsWorkFunctionSet2()
         {
-            if (nIndex == 1)
-                nStep1 = step;
-            else
-                nStep2 = step;
-        }
-        private void StartMonitor1(bool bMonitor = true)
-        {
-            return;// ddd
-            if (bMonitor)
+            int nIndex = 2;
+            int nCmd = 0;
+            const string cmdReg = "R134";
+
+            const string Angle_Join_Reg = "R239";
+            const string bool_Join_Reg = "R238";
+
+            const string Intensity6m_Reg = "R293";
+            const string bool_6m_Reg = "R295";
+
+            while (!cts.IsCancellationRequested)
             {
-                if (taskMonitorValue1 == null || taskMonitorValue1.IsCanceled || taskMonitorValue1.IsCompleted)
+                bool bRet = false;
+                nCmd = PLC.ReadInt(cmdReg);
+                switch (nCmd)
                 {
-                    PosValueDic1.Clear();
-                    ctsMonitorValue1 = new CancellationTokenSource();
-                    taskMonitorValue1 = new Task(()=> {
-                        while (!ctsMonitorValue1.Token.IsCancellationRequested)
-                        {
-                            Thread.Sleep(50);
-                            int value=lds1.GetFocusValue(Prescription.CMosPointNumber);
-                            Int32 pos = PLC.ReadDint(""); //读取实时位置
-                            PosValueDic1.Add(pos, value);
-                        }
+                    case 1: //计算对接角度
+                        bRet = GetTune2JoinAngle(nIndex, out double Angle);
+                        PLC.WriteDint(Angle_Join_Reg, Convert.ToInt32(Angle * 1000));
+                        PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
+                        break;
 
-                    }, ctsMonitorValue1.Token);
+                    case 5: //获取强度值
+                        bRet = GetLaserIntensityValue(nIndex, out int intensityValue);
+                        PLC.WriteDint(Intensity6m_Reg, intensityValue);
+                        PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
+                        break;
+                    case 100:
+                        ReadResutFromPLC(nIndex);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
+                        break;
+                    default:
+                        break;
                 }
-            }
-            else
-            {
-                if (ctsMonitorValue1 != null)
-                {
-                    ctsMonitorValue1.Cancel();
-                }
+                Thread.Sleep(100);
             }
         }
-        private void StartMonitor2(bool bMonitor = true)
-        {
-            return; //ddd
-            if (bMonitor)
-            {
-                if (taskMonitorValue2 == null || taskMonitorValue2.IsCanceled || taskMonitorValue2.IsCompleted)
-                {
-                    PosValueDic2.Clear();
-                    ctsMonitorValue2 = new CancellationTokenSource();
-                    taskMonitorValue2 = new Task(() => {
-                        while (!ctsMonitorValue2.Token.IsCancellationRequested)
-                        {
-                            Thread.Sleep(50);
-                            int value = lds2.GetFocusValue(Prescription.CMosPointNumber);
-                            Int32 pos = PLC.ReadDint(""); //读取实时位置
-                            PosValueDic2.Add(pos, value);
-                        }
 
-                    }, ctsMonitorValue2.Token);
-                }
-            }
-            else
-            {
-                if (ctsMonitorValue2 != null)
-                {
-                    ctsMonitorValue2.Cancel();
-                }
-            }
-        }
-        private void SetSubWorflowState(int nIndex, bool bFinish)
+
+        private bool GetTune2JoinAngle(int nIndex,out double Angle)
         {
-            int nState1 = nIndex == 1 ? 1 : 0;
-            int nState2 = nIndex == 1 ? 1 : 0;
-            nSubWorkFlowState = nState1 + (nState2 << 1);
+            Angle = 0;
+            if (nIndex != 1 && nIndex != 2)
+                return false;
+            return false;
         }
-        private bool GetSubWorkFlowState(int nIndex)
+        private bool GetLaserIntensityValue(int nIndex, out int IntensityValue)
         {
-            return 1 == ((nSubWorkFlowState >> (nIndex - 1)) & 0x01);
+            IntensityValue = 0;
+            if (nIndex != 1 && nIndex != 2)
+                return false;
+            return false;
+        }
+        private bool ReadResutFromPLC(int nIndex)
+        {
+            return true;
         }
     }
 }

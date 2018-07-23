@@ -169,7 +169,7 @@ namespace CPAS.Instrument
         public int GetExposeValue(int nCmosLength)  //最大值-底噪
         {
             if (comPort == null || !comPort.IsOpen)
-                return 0;
+                return -1;
             lock (comPort)
             {
                 comPort.Write("sethorizontal$");
@@ -195,7 +195,7 @@ namespace CPAS.Instrument
                     return value;
                 }
                 else
-                    return 0;
+                    return -1;
             }
         }
         /// <summary>

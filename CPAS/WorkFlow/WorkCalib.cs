@@ -20,35 +20,6 @@ namespace CPAS.WorkFlow
         private LDS lds2 = null;
 
         private Task task1 = null, task2 = null;
-        private STEP nStep1, nStep2;
-
-        private int nSubWorkFlowState=0;
-        private enum STEP : int
-        {
-            INIT,
-
-            Check_Enable_Calib,     //分支
-            
-            Wait_Calib_2m_Cmd,
-            Read_Center_Value_2m,
-            Write_Calib_2m_Boolean_Result,
-            Finish_Calib_2m,
-            Wait_Calib_4m_Cmd,
-            Read_Center_Value_4m,
-            Write_Calib_4m_Boolean_Result,
-            Finish_Calib_4m,
-            Calclate_From_2m_4m,
-
-            Finish_With_Error,
-            Finish_Calib,
-
-          
-            Wait_Finish_Both,
-
-            EMG,
-            EXIT,
-            DO_NOTHING,
-        }
 
         protected override bool UserInit()
         {
@@ -68,6 +39,25 @@ namespace CPAS.WorkFlow
             bool bRet = PLC != null && lds1 != null && lds2 != null && Prescription != null;
             if (!bRet)
                 ShowInfo("初始化失败");
+            else
+            {
+                if (task1 == null || task1.IsCanceled || task1.IsCompleted)
+                {
+                    task1 = new Task(() =>
+                    {
+                        LdsWorkFunctionSet1();
+                    });
+                    task1.Start();
+                }
+                if (task2 == null || task2.IsCanceled || task2.IsCompleted)
+                {
+                    task2 = new Task(() =>
+                    {
+                        LdsWorkFunctionSet2();
+                    });
+                    task2.Start();
+                }
+            }
             return bRet;
         }
         public WorkCalib(WorkFlowConfig cfg) : base(cfg)
@@ -75,160 +65,122 @@ namespace CPAS.WorkFlow
         }
         protected override int WorkFlow()
         {
-            ClearAllStep();
-            PushStep(STEP.INIT);
-            while (!cts.IsCancellationRequested)
-            {
-                nStep = PeekStep();
-                switch (nStep)
-                {
-                    case STEP.INIT:
-                        PopAndPushStep(STEP.DO_NOTHING);
-                        ShowInfo("Init");
-                        Thread.Sleep(200);
-                        break;
-
-                    case STEP.Check_Enable_Calib:
-                        if (Prescription.EnableCalibration)
-                        {
-                            SetSubWorflowState(1, false);
-                            SetSubWorflowState(2, false);
-                            if (task1 == null || task1.IsCanceled || task1.IsCompleted)
-                            {
-                                task1 = new Task(()=> CalibProcess(1));
-                                task1.Start();
-                            }
-                            if (task2 == null || task2.IsCanceled || task2.IsCompleted)
-                            {
-                                task2 = new Task(() => CalibProcess(2));
-                                task2.Start();
-                            }
-                            PopAndPushStep(STEP.Wait_Calib_2m_Cmd);
-                        }
-                        else
-                            PopAndPushStep(STEP.DO_NOTHING);
-                        break;
-
-
-
-                    case STEP.Wait_Finish_Both:
-                        if (GetSubWorkFlowState(1) && GetSubWorkFlowState(2))
-                        {
-                            Thread.Sleep(1000);
-                            //PopAndPushStep(STEP.INIT);
-                        }
-                        break;
-
-
-
-                    case STEP.DO_NOTHING:
-                        ShowInfo("距离标定工序没有启用");
-                        Thread.Sleep(200);
-                        break;
-                    case STEP.EMG:
-                        ClearAllStep();
-                        break;
-                    case STEP.EXIT:
-                        return 0;
-                }
-            }
             return 0;
         }
-        private void CalibProcess(int nIndex)
+        private void LdsWorkFunctionSet1()
         {
-            if (nIndex != 1 && nIndex != 2)
-                throw new Exception($"nIndex now is {nIndex},must be range in [1,2]");
+            int nIndex = 1;
+            int nCmd = 0;
+            const string cmdReg = "R309";
 
+            int C1 = 0;
+            int C2 = 0;
 
-            LDS lds = nIndex == 1 ? lds1 : lds2;
-            string cmdCalib2m_Reg= nIndex == 1 ? "R310" : "R339";
-            string booleanResult2m_Reg= nIndex == 1 ? "R311" : "R340";
-            string cmdCalib4m_Reg = nIndex == 1 ? "R365" : "R384";
-            string booleanResult4m_Reg = nIndex == 1 ? "R366" : "R385";
+            const string bool_Calib2m = "R311";
+            const string bool_Calib4m = "R366";
 
-
-
-            STEP nStep = STEP.Wait_Calib_2m_Cmd;
-            while(!cts.IsCancellationRequested)
+            while (!cts.IsCancellationRequested)
             {
-                int nCenterC1 = 0;
-                int nCenterC2 = 0;
-
-                switch (nStep)
+                bool bRet = false;
+                nCmd = PLC.ReadInt(cmdReg);
+                switch (nCmd)
                 {
-                    case STEP.Wait_Calib_2m_Cmd:
-                        Thread.Sleep(100);
-                        if (PLC.ReadInt(cmdCalib2m_Reg) == 1)
-                            SetStep(nIndex,STEP.Read_Center_Value_2m);
-                        else if(PLC.ReadInt(cmdCalib2m_Reg) == 10)  //不做标定
-                            SetStep(nIndex,STEP.Finish_Calib);
+                    case 1: //读取2米强度值
+                        bRet = GetCenterFocus(nIndex, out C1);
+                        PLC.WriteInt(bool_Calib2m, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
-                    case STEP.Read_Center_Value_2m:
-                        nCenterC1=lds.GetCenterValue(Prescription.CMosPointNumber);
-                        SetStep(nIndex,STEP.Write_Calib_2m_Boolean_Result);
-                        break;
-                    case STEP.Write_Calib_2m_Boolean_Result:
-                        PLC.WriteInt(booleanResult2m_Reg, 2);   //2-ok,1-NG
-                        SetStep(nIndex,STEP.Finish_Calib_2m);
-                        break;
-                    case STEP.Finish_Calib_2m:
-                        lds.HoldLDS();
-                        PLC.WriteInt(cmdCalib2m_Reg, 2);
-                        SetStep(nIndex,STEP.Wait_Calib_4m_Cmd);
+                    case 3: //读取4米强度值
+                        bRet = GetCenterFocus(nIndex, out C1);
+                        PLC.WriteInt(bool_Calib4m, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
-
-                    case STEP.Wait_Calib_4m_Cmd:
-                        Thread.Sleep(100);
-                        if (PLC.ReadInt(cmdCalib4m_Reg) == 1)
-                            SetStep(nIndex,STEP.Read_Center_Value_4m);
+                    case 5: //计算结果给LDS
+                        bRet=SetLDSCalidData(nIndex, C1, C2);
+                        //结果写在哪
                         break;
-                    case STEP.Read_Center_Value_4m:
-                        nCenterC2 = lds.GetCenterValue(Prescription.CMosPointNumber);
-                        SetStep(nIndex,STEP.Write_Calib_4m_Boolean_Result);
+                    case 100:
+                        ReadResutFromPLC(nIndex);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
-                    case STEP.Write_Calib_4m_Boolean_Result:
-                        PLC.WriteInt(booleanResult4m_Reg, 2);   //2-ok,1-NG
-                        SetStep(nIndex,STEP.Finish_Calib_4m);
+                    default:
                         break;
-                    case STEP.Finish_Calib_4m:
-                        PLC.WriteInt(cmdCalib4m_Reg, 2);
-                        SetStep(nIndex,STEP.Calclate_From_2m_4m);
-                        break;
-                    case STEP.Calclate_From_2m_4m:      //计算AB
-                        if(lds.SetDataToLDS(nCenterC1, nCenterC2))
-                            SetStep(nIndex,STEP.Finish_Calib);
-                        else
-                            SetStep(nIndex,STEP.Finish_With_Error);
-                        break;
-                    case STEP.Finish_With_Error:
-                        SetStep(nIndex,STEP.Finish_Calib);
-                        break;
-                    case STEP.Finish_Calib:
-                        SetSubWorflowState(nIndex, true);
-                        break;
-
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(100);
             }
         }
-        private void SetStep(int nIndex, STEP step)
+        private void LdsWorkFunctionSet2()
         {
-            if (nIndex == 1)
-                nStep1 = step;
-            else
-                nStep2 = step;
+            int nIndex = 2;
+            int nCmd = 0;
+            const string cmdReg = "R339";
+
+            int C1 = 0;
+            int C2 = 0;
+
+            const string bool_Calib2m = "R340";
+            const string bool_Calib4m = "R385";
+
+            while (!cts.IsCancellationRequested)
+            {
+                bool bRet = false;
+                nCmd = PLC.ReadInt(cmdReg);
+                switch (nCmd)
+                {
+                    case 1: //读取2米强度值
+                        bRet = GetCenterFocus(nIndex, out C1);
+                        PLC.WriteInt(bool_Calib2m, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
+                        break;
+
+                    case 3: //读取4米强度值
+                        bRet = GetCenterFocus(nIndex, out C1);
+                        PLC.WriteInt(bool_Calib4m, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
+                        break;
+
+                    case 5: //计算结果给LDS
+                        bRet = SetLDSCalidData(nIndex, C1, C2);
+                        //结果写在哪
+                        break;
+
+                    case 100:
+                        ReadResutFromPLC(nIndex);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
+                        break;
+                    default:
+                        break;
+                }
+                Thread.Sleep(100);
+            }
         }
-        private void SetSubWorflowState(int nIndex,bool bFinish)
+
+
+
+
+        private bool GetCenterFocus(int nIndex, out int CenterValue)
         {
-            int nState1 = nIndex == 1 ? 1 : 0;
-            int nState2= nIndex == 1 ? 1 : 0;
-            nSubWorkFlowState = nState1 + (nState2 << 1);
+            CenterValue = 0;
+            bool bRet = false;
+            if (nIndex < 1 || nIndex > 2)
+                return false;
+            LDS lds = nIndex == 1 ? lds1 : lds2;
+            CenterValue=lds.GetFocusValue(Prescription.CMosPointNumber);
+            bRet = CenterValue >= 0;
+            return bRet;
         }
-        private bool GetSubWorkFlowState(int nIndex)
+        private bool SetLDSCalidData(int nIndex,int c1,int c2)
         {
-            return 1 == ((nSubWorkFlowState >> (nIndex - 1)) & 0x01);
+            if (nIndex < 1 || nIndex > 2)
+                return false;
+            LDS lds = nIndex == 1 ? lds1 : lds2;
+            return lds.SetDataToLDS(c1, c2);
+        }
+        private bool ReadResutFromPLC(int nIndex)
+        {
+            return true;
         }
     }
 }
