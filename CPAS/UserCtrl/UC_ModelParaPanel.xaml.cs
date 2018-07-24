@@ -53,7 +53,7 @@ namespace CPAS.UserCtrl
         private void BtnTestModel_Click(object sender, RoutedEventArgs e)
         {
             var VM = DataContext as MainWindowViewModel;
-            VM.TestModelParaCommand.Execute(new Tuple<RoiModelBase, int>(CurSelectItemOfListBox, CurCamID));
+            VM.TestModelParaCommand.Execute(CurCamID);
         }
 
         private void MaxThreSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

@@ -53,6 +53,8 @@ namespace CPAS.ViewModels
         private SystemParaModel _systemPataModelUsed = new SystemParaModel();
         private EnumCamSnapState _amSnapState;
         private int _currentSelectRoiTemplate=0;
+        private string _lastPLCError = "";
+        private string _lastSystemError = "";
         public Dictionary<string, WorkFlowBase> _workeFlowDic;
         private ObservableCollection<MessageItem> _plcMessageCollection = new ObservableCollection<MessageItem>();
         private ObservableCollection<MessageItem> _systemMessageCollection = new ObservableCollection<MessageItem>();
@@ -64,7 +66,7 @@ namespace CPAS.ViewModels
         private FileHelper RoiFileHelper = new FileHelper(FileHelper.GetCurFilePathString() + "VisionData\\Roi");
         private Dictionary<int, string> ModelNameDic = new Dictionary<int, string>();
         private Dictionary<int, string> RoiNameDic = new Dictionary<int, string>();
-
+        
         private void SetPrescriptionToPLC(PrescriptionGridModel prescription)
         {
             QSerisePlc PLC = InstrumentMgr.Instance.FindInstrumentByName("PLC") as QSerisePlc;
@@ -266,6 +268,30 @@ namespace CPAS.ViewModels
             }
             get { return _minThre; }
         }
+        public string LastPLCError
+        {
+            set
+            {
+                if (_lastPLCError != value)
+                {
+                    _lastPLCError = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _lastPLCError; }
+        }
+        public string LastSystemError
+        {
+            set
+            {
+                if (_lastSystemError != value)
+                {
+                    _lastSystemError =value ;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _lastSystemError; }
+        }
         public Dictionary<string, WorkFlowBase> WorkeFlowDic
         {
             get { return _workeFlowDic; }
@@ -412,8 +438,6 @@ namespace CPAS.ViewModels
                     StrSystemErrorNumber = string.Format("{0}", collect.Count());
                 else
                     StrSystemErrorNumber = "";
-                if (SystemMessageCollection.Count > 50)
-                    SystemMessageCollection.RemoveAt(0);
             }
         }
         private void SetPrescriptionRoiModelUsedName(PrescriptionGridModel pres,int nIndex, string strType, string strUsedName)
@@ -553,6 +577,7 @@ namespace CPAS.ViewModels
                             lock (PlcErrLock)
                             {
                                 PLCMessageCollection.Clear();
+                                LastPLCError = "";
                             }
                             LogHelper.WriteLine($"清除PLC错误信息记录", LogHelper.LogType.NORMAL);
                             break;
@@ -560,6 +585,7 @@ namespace CPAS.ViewModels
                             lock (SysErrLock)
                             {
                                 SystemMessageCollection.Clear();
+                                LastSystemError = "";
                             }
                             LogHelper.WriteLine($"清除System错误信息记录", LogHelper.LogType.NORMAL);
                             break;
@@ -1070,71 +1096,59 @@ namespace CPAS.ViewModels
                 });
             }
         }
-        public RelayCommand<Tuple<RoiModelBase, int>> TestModelParaCommand
+        public RelayCommand<int> TestModelParaCommand
         {
             get
             {
-                return new RelayCommand<Tuple<RoiModelBase, int>>(tuple =>
+                return new RelayCommand<int>(nCamID =>
                 {
-                    List<string> fileList = FileHelper.GetProfileList($"VisionData\\ModelTemp");
-                    TemplateItem item = tuple.Item1 as TemplateItem;
-                    int nCamID = tuple.Item2;
                     if (nCamID >= 0)
-                            {
-                                double angle = 0.0f;
-                                string strRecParaFileName =GetPrescriptionRoiModelUsedName(PrescriptionUsed,nCamID+1,"Roi");
-                                string strModelFileName = GetPrescriptionRoiModelUsedName(PrescriptionUsed, nCamID + 1, "Model");
-                                if (strRecParaFileName == "" || strModelFileName == "")
-                                {
-                                    UC_MessageBox.ShowMsgBox("请确认当前使用的配方选择了Roi和Model");
-                                    return;
-                                }
-                                else
-                                {
-                                    strRecParaFileName = $"VisionData\\Roi\\Cam{nCamID}_{strRecParaFileName}.tup";
-                                    strModelFileName = $"VisionData\\Model\\Cam{nCamID}_{strModelFileName}.shm";
-                                }
-                                if (PrescriptionUsed == null)
-                                {
-                                    UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}不存在");
-                                    return;
-                                }
-                                if (!File.Exists(strRecParaFileName))
-                                {
-                                    UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}的Roi:{strRecParaFileName}不存在");
-                                    return;
-                                }
-                                if (!File.Exists(strModelFileName))
-                                {
-                                    UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}的模板{strModelFileName}不存在");
-                                    return;
-                                }
-                                bool bRet=Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE1, nCamID, $"{strRecParaFileName}&{strModelFileName}", out object result);
-                                if (bRet)
-                                    angle = double.Parse(result.ToString())*180;
-                            }
+                    {
+                        double angle = 0.0f;
+                        string strRecParaFileName =GetPrescriptionRoiModelUsedName(PrescriptionUsed,nCamID+1,"Roi");
+                        string strModelFileName = GetPrescriptionRoiModelUsedName(PrescriptionUsed, nCamID + 1, "Model");
+                        if (strRecParaFileName == "" || strModelFileName == "")
+                        {
+                            UC_MessageBox.ShowMsgBox("请确认当前使用的配方选择了Roi和Model");
+                            return;
+                        }
+                        else
+                        {
+                            strRecParaFileName = $"VisionData\\Roi\\Cam{nCamID}_{strRecParaFileName}.tup";
+                            strModelFileName = $"VisionData\\Model\\Cam{nCamID}_{strModelFileName}.shm";
+                        }
+                        if (PrescriptionUsed == null)
+                        {
+                            UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}不存在");
+                            return;
+                        }
+                        if (!File.Exists(strRecParaFileName))
+                        {
+                            UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}的Roi:{strRecParaFileName}不存在");
+                            return;
+                        }
+                        if (!File.Exists(strModelFileName))
+                        {
+                            UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}的模板{strModelFileName}不存在");
+                            return;
+                        }
+                        bool bRet=Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE1, nCamID, $"{strRecParaFileName}&{strModelFileName}", out object result);
+                        if (bRet)
+                            angle = double.Parse(result.ToString())*180;
+                    }
                 });
             }
         }
-        public RelayCommand<string> TestRoiModelCommand
+        public RelayCommand<string> TestRoiCommand
         {
             get
             {
                 return new RelayCommand<string>(str =>
                 {
-                    string para = str.Split('&')[0];
-                    int nCamID= Convert.ToInt16(str.Split('&')[1]);
+                    int nCamID= Convert.ToInt16(str);
                     if (nCamID < 0)
-                        return;
-                    switch (str)
-                    {
-                        case "Roi":
-                            Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE1, nCamID, null, out object result);
-                            break;
-                        case "Model":
-
-                            break;
-                    }
+                        return;   
+                    Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, nCamID, null, out object result);
                 });
             }
         }
@@ -1160,22 +1174,22 @@ namespace CPAS.ViewModels
                         {
                             case "WorkRecord":
                                 StepCollection[0].Add(tuple.Item2);
-                                if (StepCollection[0].Count > 50)
+                                if (StepCollection[0].Count > 5)
                                     StepCollection[0].RemoveAt(0);
                                 break;
                             case "WorkTune1":
                                 StepCollection[1].Add(tuple.Item2);
-                                if (StepCollection[1].Count > 50)
+                                if (StepCollection[1].Count > 5)
                                     StepCollection[1].RemoveAt(0);
                                 break;
                             case "WorkTune2":
                                 StepCollection[2].Add(tuple.Item2);
-                                if (StepCollection[2].Count > 50)
+                                if (StepCollection[2].Count > 5)
                                     StepCollection[2].RemoveAt(0);
                                 break;
                             case "WorkCalib":
                                 StepCollection[3].Add(tuple.Item2);
-                                if (StepCollection[3].Count > 50)
+                                if (StepCollection[3].Count > 5)
                                     StepCollection[3].RemoveAt(0);
                                 break;
                             default:
@@ -1195,24 +1209,36 @@ namespace CPAS.ViewModels
                     });
                 }
                 LogHelper.WriteLine(str, LogHelper.LogType.ERROR);
+                LastSystemError = $"{DateTime.Now}(System): {str}";
+                if (SystemMessageCollection.Count > 50)
+                    SystemMessageCollection.RemoveAt(0);
             });
             Messenger.Default.Register<string>(this, "ShowInfo", str =>
             {
                 Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.INFO, StrMsg = str }));
                 LogHelper.WriteLine(str, LogHelper.LogType.NORMAL);
+                if (SystemMessageCollection.Count > 50)
+                    SystemMessageCollection.RemoveAt(0);
             });
             Messenger.Default.Register<string>(this, "ShowWarning", str =>
             {
-                Application.Current.Dispatcher.Invoke(() => SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = str }));
+                Application.Current.Dispatcher.Invoke(() => 
+                SystemMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.WARNING, StrMsg = str }));
                 LogHelper.WriteLine(str, LogHelper.LogType.NORMAL);
+                if (SystemMessageCollection.Count > 50)
+                    SystemMessageCollection.RemoveAt(0);
             });
             Messenger.Default.Register<string>(this, "ShowPLCError", str =>
             {
-                lock (SystemMessageCollection)
+                lock (PlcErrLock)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         PLCMessageCollection.Add(new MessageItem() { MsgType = MSGTYPE.ERROR, StrMsg = str });
+                        LogHelper.WriteLine(str, LogHelper.LogType.ERROR);
+                        LastPLCError = $"{DateTime.Now}(PLC): {str}";
+                        if (PLCMessageCollection.Count > 50)
+                            PLCMessageCollection.RemoveAt(0); 
                     });
                 }
                 LogHelper.WriteLine(str, LogHelper.LogType.ERROR);

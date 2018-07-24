@@ -26,7 +26,7 @@ namespace CPAS.Views.Tests
             BaudRate = 115200,
             Parity = "none",
             DataBits = 8,
-            Port = "COM15",
+            Port = "COM9",
             PortName = "LDSPort",
             StopBits = 1,
             TimeOut = 1000
@@ -60,6 +60,14 @@ namespace CPAS.Views.Tests
             int Value = lds.GetExposeValue(1536);
             Assert.IsTrue(Value > 0);
 
+        }
+        [TestMethod()]
+        public void TestUnlock()
+        {
+            bool bRet = lds.MyInit(cfg);
+            bRet=lds.LdsUnLock(out string strError);
+            Console.WriteLine(strError);
+            Assert.IsTrue(bRet);
         }
         #endregion
 

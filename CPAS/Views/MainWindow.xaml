@@ -45,7 +45,7 @@
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="600"/>
+                <ColumnDefinition Width="800"/>
             </Grid.ColumnDefinitions>
             <dxr:RibbonControl Name="ribbonControl1" PageCategoryAlignment="Right" VerticalAlignment="Center" VerticalContentAlignment="Center" MinWidth="350" AllowMinimizeRibbon="False">
                 <dxr:RibbonDefaultPageCategory Caption="defaultCategory" Name="ribbonDefaultPageCategory1">
@@ -121,10 +121,11 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Grid Grid.Column="1">
+                <Grid  Grid.Column="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="45"/>
@@ -141,11 +142,20 @@
                         </Button.Content>
                     </Button>
                 </Grid>
-                <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <Grid Grid.Row="0" Grid.RowSpan="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0"  TextWrapping="Wrap" Foreground="Red" Text="{Binding LastPLCError, Mode=OneWay}"/>
+                    <TextBlock Grid.Row="1"  TextWrapping="Wrap" Foreground="Red" Text="{Binding LastSystemError, Mode=OneWay}"/>
+                </Grid>
+                
+                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
                     <TextBlock Text="OK:" VerticalAlignment="Center" FontSize="20" Margin="50,0,0,0"/>
                     <TextBlock Text="123" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="2">
                     <TextBlock Text="NG:" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
                     <TextBlock Text="123" VerticalAlignment="Center" FontSize="20" Margin="10,0,0,0"/>
                 </StackPanel>

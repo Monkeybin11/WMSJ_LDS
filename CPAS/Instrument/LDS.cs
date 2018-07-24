@@ -69,6 +69,7 @@ namespace CPAS.Instrument
                 comPort = new System.IO.Ports.SerialPort();
                 if (comPort != null && comportCfg != null)
                 {
+                    this.comportCfg = comportCfg;
                     GetPortProfileData(comportCfg);
                     comPort.PortName = comportData.Port;
                     comPort.BaudRate = comportData.BaudRate;
@@ -80,8 +81,9 @@ namespace CPAS.Instrument
                     comPort.ReadBufferSize = 4000;  //4000个字节
                     if (comPort.IsOpen)
                         comPort.Close();
-                    comPort.Open();
-                    return comPort.IsOpen;
+                    //comPort.Open();
+                    //return comPort.IsOpen;
+                    return true;
                 }
                 return false;
                 
@@ -309,7 +311,7 @@ namespace CPAS.Instrument
             string s2 = "bb";
             IntPtr[] pts = new IntPtr[1];
             pts[0] = Marshal.StringToHGlobalAnsi(s1);
-            bool bRet=LdsUnLock(Convert.ToInt16(comportCfg.Port.Substring(3)), pts);
+            bool bRet=LdsUnLock(Convert.ToInt16(comportCfg.Port.Replace("COM","")), pts);
             String a = Marshal.PtrToStringAnsi(pts[0]);
             strWhy = a;
             return bRet;

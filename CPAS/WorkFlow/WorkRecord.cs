@@ -59,9 +59,16 @@ namespace CPAS.WorkFlow
 
             string str = Fake_Barcode_Dt.Rows[0]["Barcode"].ToString();
             str = Fake_Barcode_Dt.Rows[1]["Barcode"].ToString();
+            try
+            {
+                bool b = Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, 1, null, out object Angle);
+            }
+            catch(Exception ex)
+            {
+                Messenger.Default.Send<string>(ex.Message, "ShowError");
+            }
 
-            bRet = true ||
-                    Pw1000USB_1 != null &&
+            bRet =  Pw1000USB_1 != null &&
                     Pw1000USB_2 != null &&
                     lds1 != null &&
                     lds2 != null &&

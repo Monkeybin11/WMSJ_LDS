@@ -37,7 +37,7 @@ namespace CPAS.UserCtrl
         private void BtnTestRoi_Click(object sender, RoutedEventArgs e)
         {
             var VM = DataContext as MainWindowViewModel;
-            VM.TestRoiModelCommand.Execute($"Roi&{CurCamID}");
+            VM.TestRoiCommand.Execute($"{CurCamID}");
         }
 
     }
