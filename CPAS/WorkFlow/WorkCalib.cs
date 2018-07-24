@@ -37,6 +37,7 @@ namespace CPAS.WorkFlow
             #endregion
 
             bool bRet = PLC != null && lds1 != null && lds2 != null && Prescription != null;
+            bRet = true;    //dddd
             if (!bRet)
                 ShowInfo("初始化失败");
             else
@@ -71,7 +72,7 @@ namespace CPAS.WorkFlow
         {
             int nIndex = 1;
             int nCmd = 0;
-            const string cmdReg = "R309";
+            const string cmdReg = "R310";
 
             int C1 = 0;
             int C2 = 0;
@@ -148,6 +149,7 @@ namespace CPAS.WorkFlow
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
+
                     case 100:
                         ReadResutFromPLC(nIndex);
                         PLC.WriteInt(cmdReg, nCmd + 1);
@@ -160,11 +162,10 @@ namespace CPAS.WorkFlow
         }
 
 
-
-
         private bool GetCenterFocus(int nIndex, out int CenterValue)
         {
             CenterValue = 0;
+            return true;
             bool bRet = false;
             if (nIndex < 1 || nIndex > 2)
                 return false;
@@ -175,6 +176,7 @@ namespace CPAS.WorkFlow
         }
         private bool SetLDSCalidData(int nIndex,int c1,int c2)
         {
+            return true;
             if (nIndex < 1 || nIndex > 2)
                 return false;
             LDS lds = nIndex == 1 ? lds1 : lds2;

@@ -17,9 +17,9 @@ namespace CPAS.Instrument
         private ComportCfg comportCfg = null;
         public LDS(HardwareCfgLevelManager1 cfg) : base(cfg)
         {
-            LDSResult = new LDSModel();
+            LDSResult = new LDSResultModel();
         }
-        public LDSModel LDSResult{get;set;}
+        public LDSResultModel LDSResult{get;set;}
         private byte[] ldsHeader = new byte[] { 0x5a, 0xa5, 0x5a, 0xa5 };
         public override bool Init()
         {

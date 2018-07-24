@@ -83,13 +83,13 @@ namespace CPAS.WorkFlow
         {
             int nIndex = 1;
             int nCmd = 0;
-            const string cmdReg = "R107";
+            const string cmdReg = "R211";
 
             const string Angle_Join_Reg = "R213";
             const string bool_Join_Reg = "R212";
 
             const string Intensity6m_Reg = "R272";
-            const string bool_6m_Reg = "R274";
+            const string bool_6m_Reg = "R268";
 
             while (!cts.IsCancellationRequested)
             {
@@ -99,14 +99,14 @@ namespace CPAS.WorkFlow
                 {
                     case 1: //计算对接角度
                         bRet = GetTune2JoinAngle(nIndex, out double Angle);
-                        PLC.WriteDint(Angle_Join_Reg, Convert.ToInt32(Angle * 1000));
+                        PLC.WriteDint(Angle_Join_Reg, /*Convert.ToInt32(Angle * 1000)*/765);
                         PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 5: //获取强度值
                         bRet = GetLaserIntensityValue(nIndex, out int intensityValue);
-                        PLC.WriteDint(Intensity6m_Reg, intensityValue);
+                        PLC.WriteDint(Intensity6m_Reg, /*intensityValue*/99);
                         PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
@@ -124,13 +124,13 @@ namespace CPAS.WorkFlow
         {
             int nIndex = 2;
             int nCmd = 0;
-            const string cmdReg = "R134";
+            const string cmdReg = "R237";
 
             const string Angle_Join_Reg = "R239";
             const string bool_Join_Reg = "R238";
 
             const string Intensity6m_Reg = "R293";
-            const string bool_6m_Reg = "R295";
+            const string bool_6m_Reg = "R289";
 
             while (!cts.IsCancellationRequested)
             {
@@ -140,14 +140,14 @@ namespace CPAS.WorkFlow
                 {
                     case 1: //计算对接角度
                         bRet = GetTune2JoinAngle(nIndex, out double Angle);
-                        PLC.WriteDint(Angle_Join_Reg, Convert.ToInt32(Angle * 1000));
+                        PLC.WriteDint(Angle_Join_Reg, /*Convert.ToInt32(Angle * 1000)*/77);
                         PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 5: //获取强度值
                         bRet = GetLaserIntensityValue(nIndex, out int intensityValue);
-                        PLC.WriteDint(Intensity6m_Reg, intensityValue);
+                        PLC.WriteDint(Intensity6m_Reg, /*intensityValue*/890);
                         PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
@@ -166,6 +166,7 @@ namespace CPAS.WorkFlow
         private bool GetTune2JoinAngle(int nIndex,out double Angle)
         {
             Angle = 0;
+            return true;
             if (nIndex != 1 && nIndex != 2)
                 return false;
             return false;
@@ -173,6 +174,7 @@ namespace CPAS.WorkFlow
         private bool GetLaserIntensityValue(int nIndex, out int IntensityValue)
         {
             IntensityValue = 0;
+            return true;
             if (nIndex != 1 && nIndex != 2)
                 return false;
             return false;

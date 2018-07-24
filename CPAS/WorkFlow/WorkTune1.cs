@@ -108,28 +108,28 @@ namespace CPAS.WorkFlow
                 {
                     case 1: //计算对接角度
                         bRet = GetTune1JoinAngle(nIndex, out double Angle);
-                        PLC.WriteDint(Angle_Join_Reg, Convert.ToInt32(Angle*1000));
+                        PLC.WriteDint(Angle_Join_Reg, /*Convert.ToInt32(Angle * 1000)*/123);
                         PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 3: //计算光斑角度
                         bRet = GetBlobAngle(nIndex, out double BlobAngle);
-                        PLC.WriteDint(Angle_Blob_Reg, Convert.ToInt32(BlobAngle * 1000));
+                        PLC.WriteDint(Angle_Blob_Reg, /*Convert.ToInt32(BlobAngle * 1000)*/11111111);
                         PLC.WriteInt(Bool_Blob_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 5: //获取2米水平强度值
                         bRet = GetLaserIntensity(nIndex, EnumTarget.T2,out int InstensityValue2m);
-                        PLC.WriteDint(Intensity2m_Reg, InstensityValue2m);
+                        PLC.WriteDint(Intensity2m_Reg, /*InstensityValue2m*/777777);
                         PLC.WriteInt(bool_2m_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 7: //获取6米水平强度值
                         bRet = GetLaserIntensity(nIndex, EnumTarget.T6, out int InstensityValue6m);
-                        PLC.WriteDint(Intensity6m_Reg, InstensityValue6m);
+                        PLC.WriteDint(Intensity6m_Reg, /*InstensityValue6m*/76);
                         PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
@@ -169,28 +169,28 @@ namespace CPAS.WorkFlow
                 {
                     case 1: //计算对接角度
                         bRet = GetTune1JoinAngle(nIndex, out double Angle);
-                        PLC.WriteDint(Angle_Join_Reg, Convert.ToInt32(Angle * 1000));
+                        PLC.WriteDint(Angle_Join_Reg, /*Convert.ToInt32(Angle * 1000)*/456);
                         PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 3: //计算光斑角度
                         bRet = GetBlobAngle(nIndex, out double BlobAngle);
-                        PLC.WriteDint(Angle_Blob_Reg, Convert.ToInt32(BlobAngle * 1000));
+                        PLC.WriteDint(Angle_Blob_Reg, /*Convert.ToInt32(BlobAngle * 1000)*/456456456);
                         PLC.WriteInt(Bool_Blob_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 5: //获取2米水平强度值
                         bRet = GetLaserIntensity(nIndex, EnumTarget.T2, out int InstensityValue2m);
-                        PLC.WriteDint(Intensity2m_Reg, InstensityValue2m);
+                        PLC.WriteDint(Intensity2m_Reg, /*InstensityValue2m*/77);
                         PLC.WriteInt(bool_2m_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 7: //获取6米水平强度值
                         bRet = GetLaserIntensity(nIndex, EnumTarget.T6, out int InstensityValue6m);
-                        PLC.WriteDint(Intensity6m_Reg, InstensityValue6m);
+                        PLC.WriteDint(Intensity6m_Reg, /*InstensityValue6m*/66);
                         PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
                         PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
@@ -209,6 +209,7 @@ namespace CPAS.WorkFlow
         {
             bool bRet = false;
             Angle = 0;
+            return true;
             if (nIndex != 1 && nIndex != 2)
                 return false;
 
@@ -221,6 +222,7 @@ namespace CPAS.WorkFlow
         private bool GetBlobAngle(int nIndex, out double Angle)
         {
             Angle = 0;
+            return true;
             if (nIndex != 1 && nIndex != 2)
                 return false;
             bool bRet = false;
@@ -233,6 +235,7 @@ namespace CPAS.WorkFlow
         private bool GetLaserIntensity(int nIndex, EnumTarget target, out int InstensityValue)
         {
             InstensityValue = 0;
+            return true;
             if (nIndex != 1 && nIndex != 2)
                 return false;
             LDS lds= nIndex == 1 ? lds1 : lds2;

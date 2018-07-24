@@ -14,7 +14,6 @@ namespace CPAS.WorkFlow
 {
     public class WorkFlowBase
     {
-        protected Dictionary<string, LDSModel> LdsDic = new Dictionary<string, LDSModel>();//扫描不到直接NG
         public bool Enable;
         public string StationName;
         public int StationIndex;

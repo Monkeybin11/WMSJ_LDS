@@ -59,16 +59,16 @@ namespace CPAS.WorkFlow
 
             string str = Fake_Barcode_Dt.Rows[0]["Barcode"].ToString();
             str = Fake_Barcode_Dt.Rows[1]["Barcode"].ToString();
-            try
-            {
-                bool b = Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, 1, null, out object Angle);
-            }
-            catch(Exception ex)
-            {
-                Messenger.Default.Send<string>(ex.Message, "ShowError");
-            }
+            //try
+            //{
+            //    bool b = Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, 1, null, out object Angle);
+            //}
+            //catch(Exception ex)
+            //{
+            //    Messenger.Default.Send<string>(ex.Message, "ShowError");
+            //}
 
-            bRet =  Pw1000USB_1 != null &&
+            bRet =  true || Pw1000USB_1 != null &&
                     Pw1000USB_2 != null &&
                     lds1 != null &&
                     lds2 != null &&
@@ -162,8 +162,8 @@ namespace CPAS.WorkFlow
             const string cmdReg = "R14";
             const string boolResult_Unlock_Reg = "R16";
 
-            const string barcodeResult_Reg = "R20";
-            const string boolResult_Barcode_Reg = "R44";
+            const string barcodeResult_Reg = "R44";
+            const string boolResult_Barcode_Reg = "R43";
 
             const string boolResult_AdjustPower_Reg = "R82";
 
@@ -200,6 +200,7 @@ namespace CPAS.WorkFlow
         }
         private bool UnLock(int nIndex)
         {
+            return true;
             LDS lds = nIndex == 1 ? lds1 : lds2;
             lds.DeInit();
             bool bRet = lds.LdsUnLock(out string error);
@@ -208,6 +209,8 @@ namespace CPAS.WorkFlow
         }
         private bool GetBarcode(int nIndex, out string Barcode)
         {
+            Barcode= "123456789012345678901";
+            return true; 
             LDS lds = nIndex == 1 ? lds1 : lds2;
             Barcode = Prescription.BarcodeSource == PrescriptionGridModel.BARCODESOURCE.SCANNER ?
                                BarcodeScanner1.Getbarcode() : Fake_Barcode_Dt.Rows[nBarcodeInfFileIndex]["Barcode"].ToString();
@@ -215,6 +218,7 @@ namespace CPAS.WorkFlow
         }
         private bool AdjustPowerValue(int nIndex)
         {
+            return true;
             int nCount = 0;
             bool bRet = false;
             if (nIndex < 1 || nIndex > 2)
@@ -238,11 +242,11 @@ namespace CPAS.WorkFlow
         }
         private bool ReadResutFromPLC(int nIndex)
         {
-
             return true;
         }
         private void ShowPower(EnumUnit unit)   //这个监控是两个一起监控
         {
+            return;
             StringBuilder sb = new StringBuilder();
             sb.Clear();
             sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());

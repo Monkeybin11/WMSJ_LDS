@@ -246,7 +246,8 @@
     <Compile Include="Instrument\QSerisePlc.cs" />
     <Compile Include="Interface\Iauthor.cs" />
     <Compile Include="Models\CameraItem.cs" />
-    <Compile Include="Models\LDSModel.cs" />
+    <Compile Include="Models\LDSResultModel.cs" />
+    <Compile Include="Classes\LDSResultModelMgr.cs" />
     <Compile Include="Models\LogDataItem.cs" />
     <Compile Include="Models\MessageItem.cs" />
     <Compile Include="Models\PrescriptionGridModel.cs" />

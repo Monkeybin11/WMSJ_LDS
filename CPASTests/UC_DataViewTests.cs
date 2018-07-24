@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CPAS.Instrument;
 using CPAS.Config.HardwareManager;
+using CPAS.Classes;
+using CPAS.Models;
 namespace CPAS.Views.Tests
 {
     
@@ -93,6 +95,25 @@ namespace CPAS.Views.Tests
             Assert.IsTrue(bRet);
             string strCode = keyence.Getbarcode();
             Console.WriteLine(strCode);
+        }
+        #endregion
+
+        #region TestLDSModelResult
+        [TestMethod()]
+        public void TestPushInOut()
+        {
+            LDSResultModelMgr.Instance.PushLdsIn(new LDSResultModel() { SN="111",AdjustFocusOK = true, AdjustHorizOK = true });
+            LDSResultModelMgr.Instance.PushLdsIn(new LDSResultModel() { SN = "222", AdjustFocusOK = true, AdjustHorizOK = true });
+            LDSResultModelMgr.Instance.PushLdsIn(new LDSResultModel() { SN = "333", AdjustFocusOK = true, AdjustHorizOK = true });
+            LDSResultModelMgr.Instance.PushLdsIn(new LDSResultModel() { SN = "44", AdjustFocusOK = true, AdjustHorizOK = true });
+            var it = LDSResultModelMgr.Instance.PopOut();
+            it = LDSResultModelMgr.Instance.PopOut();
+            it = LDSResultModelMgr.Instance.PopOut();
+            it = LDSResultModelMgr.Instance.PopOut();
+
+            it = LDSResultModelMgr.Instance.PopOut();
+            it = LDSResultModelMgr.Instance.PopOut();
+            it = LDSResultModelMgr.Instance.PopOut();
         }
         #endregion
     }
