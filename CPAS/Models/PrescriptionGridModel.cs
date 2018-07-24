@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CPAS.Models
 {
-    public class PrescriptionGridModel : INotifyPropertyChanged
+    public class PrescriptionGridModel : INotifyPropertyChanged, ICloneable
     {
         //工序设置
         private string _name;
@@ -27,6 +27,29 @@ namespace CPAS.Models
         private UInt16[] _ldsHoriValue2m = new UInt16[] { 400, 730 };
         private UInt16 _ldsHoriValue6m = 170;
         private Int32 _cMosPointNumber = 1536;
+
+
+
+        //视觉部分设置
+        //ROI设置
+        private string _roiCam1 = "";
+        private string _roiCam2 = "";
+        private string _roiCam3 = "";
+        private string _roiCam4 = "";
+        private string _roiCam5 = "";
+        private string _roiCam6 = "";
+
+
+        //模板设置
+        private string _modelCam1 = "";
+        private string _modelCam2 = "";
+        private string _modelCam3 = "";
+        private string _modelCam4 = "";
+        private string _modelCam5 = "";
+        private string _modelCam6 = "";
+
+
+
 
 
         [CategoryAttribute("工序配方"), DescriptionAttribute("工序名称")]
@@ -217,7 +240,222 @@ namespace CPAS.Models
                 }
             }
         }
+
+
+        [CategoryAttribute("相机Roi设置"), DescriptionAttribute("设置相机1的ROI")]
+        [ReadOnly(true)]
+        public string RoiCam1
+        {
+            get { return _roiCam1; }
+            set
+            {
+                if (_roiCam1 != value)
+                {
+                    _roiCam1 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RoiCam1"));
+                }
+            }
+        }
+        [CategoryAttribute("相机Roi设置"), DescriptionAttribute("设置相机2的ROI")]
+        [ReadOnly(true)]
+        public string RoiCam2
+        {
+            get { return _roiCam2; }
+            set
+            {
+                if (_roiCam2 != value)
+                {
+                    _roiCam2 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RoiCam2"));
+                }
+            }
+        }
+        [CategoryAttribute("相机Roi设置"), DescriptionAttribute("设置相机3的ROI")]
+        [ReadOnly(true)]
+        public string RoiCam3
+        {
+            get { return _roiCam3; }
+            set
+            {
+                if (_roiCam3 != value)
+                {
+                    _roiCam3 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RoiCam3"));
+                }
+            }
+        }
+
+        [CategoryAttribute("相机Roi设置"), DescriptionAttribute("设置相机4的ROI")]
+        [ReadOnly(true)]
+        public string RoiCam4
+        {
+            get { return _roiCam4; }
+            set
+            {
+                if (_roiCam4 != value)
+                {
+                    _roiCam4 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RoiCam4"));
+                }
+            }
+        }
+
+        [CategoryAttribute("相机Roi设置"), DescriptionAttribute("设置相机5的ROI")]
+        [ReadOnly(true)]
+        public string RoiCam5
+        {
+            get { return _roiCam5; }
+            set
+            {
+                if (_roiCam5 != value)
+                {
+                    _roiCam5 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RoiCam5"));
+                }
+            }
+        }
+
+        [CategoryAttribute("相机Roi设置"), DescriptionAttribute("设置相机6的ROI")]
+        [ReadOnly(true)]
+        public string RoiCam6
+        {
+            get { return _roiCam6; }
+            set
+            {
+                if (_roiCam6 != value)
+                {
+                    _roiCam6 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("RoiCam6"));
+                }
+            }
+        }
+
+
+
+
+        [CategoryAttribute("相机模板设置"), DescriptionAttribute("设置相机1的模板")]
+        [ReadOnly(true)]
+        public string ModelCam1
+        {
+            get { return _modelCam1; }
+            set
+            {
+                if (_modelCam1 != value)
+                {
+                    _modelCam1 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ModelCam1"));
+                }
+            }
+        }
+        [CategoryAttribute("相机模板设置"), DescriptionAttribute("设置相机2的模板")]
+        [ReadOnly(true)]
+        public string ModelCam2
+        {
+            get { return _modelCam2; }
+            set
+            {
+                if (_modelCam2 != value)
+                {
+                    _modelCam2 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ModelCam2"));
+                }
+            }
+        }
+        [CategoryAttribute("相机模板设置"), DescriptionAttribute("设置相机3的模板")]
+        [ReadOnly(true)]
+        public string ModelCam3
+        {
+            get { return _modelCam3; }
+            set
+            {
+                if (_modelCam3 != value)
+                {
+                    _modelCam3 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ModelCam3"));
+                }
+            }
+        }
+
+        [CategoryAttribute("相机模板设置"), DescriptionAttribute("设置相机4的模板")]
+        [ReadOnly(true)]
+        public string ModelCam4
+        {
+            get { return _modelCam4; }
+            set
+            {
+                if (_modelCam4 != value)
+                {
+                    _modelCam4 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ModelCam4"));
+                }
+            }
+        }
+
+        [CategoryAttribute("相机模板设置"), DescriptionAttribute("设置相机5的模板")]
+        [ReadOnly(true)]
+        public string ModelCam5
+        {
+            get { return _modelCam5; }
+            set
+            {
+                if (_modelCam5 != value)
+                {
+                    _modelCam5 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ModelCam5"));
+                }
+            }
+        }
+
+        [CategoryAttribute("相机模板设置"), DescriptionAttribute("设置相机6的模板")]
+        [ReadOnly(true)]
+        public string ModelCam6
+        {
+            get { return _modelCam6; }
+            set
+            {
+                if (_modelCam6 != value)
+                {
+                    _modelCam6 = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ModelCam6"));
+                }
+            }
+        }
+
+
+
         public event PropertyChangedEventHandler PropertyChanged;
-   
+
+        public object Clone()
+        {
+            return new PrescriptionGridModel()
+            {
+                Name = this.Name,
+                Remark = this.Remark,
+                BarcodeLength = this.BarcodeLength,
+                BarcodeSource = this.BarcodeSource,
+                CMosPointNumber = this.CMosPointNumber,
+                EnableAdjustFocus = this.EnableAdjustFocus,
+                EnableAdjustHoriz = this.EnableAdjustHoriz,
+                EnableAdjustLaser = this.EnableAdjustLaser,
+                EnableCalibration = this.EnableCalibration,
+                EnableReadBarcode = this.EnableReadBarcode,
+                EnableUnLock = this.EnableUnLock,
+                LDSHoriValue2m = new ushort[] { this.LDSHoriValue2m[0], this.LDSHoriValue2m[1] },
+                LDSHoriValue6m = this.LDSHoriValue6m,
+                LDSPower = new double[] { this.LDSPower[0], this.LDSPower[1] },
+                ModelCam1 = this.ModelCam1,
+                ModelCam2 = this.ModelCam2,
+                ModelCam3 = this.ModelCam3,
+                ModelCam4 = this.ModelCam4,
+                ModelCam5 = this.ModelCam5,
+                ModelCam6 = this.ModelCam6,
+                RoiCam1 = this.RoiCam1,
+                RoiCam2 = this.RoiCam2,
+                RoiCam3 = this.RoiCam3,
+                RoiCam4 = this.RoiCam4,
+                RoiCam5 = this.RoiCam5,
+                RoiCam6 = this.RoiCam6
+            };
+        }
     }
 }

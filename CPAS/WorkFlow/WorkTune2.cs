@@ -50,7 +50,25 @@ namespace CPAS.WorkFlow
             bRet = true;
             if(!bRet)
                 ShowInfo("初始化失败");
-
+            else
+            {
+                if (task1 == null || task1.IsCanceled || task1.IsCompleted)
+                {
+                    task1 = new Task(() =>
+                    {
+                        LdsWorkFunctionSet1();
+                    });
+                    task1.Start();
+                }
+                if (task2 == null || task2.IsCanceled || task2.IsCompleted)
+                {
+                    task2 = new Task(() =>
+                    {
+                        LdsWorkFunctionSet2();
+                    });
+                    task2.Start();
+                }
+            }
             return bRet;
         }
         public WorkTune2(WorkFlowConfig cfg) : base(cfg)

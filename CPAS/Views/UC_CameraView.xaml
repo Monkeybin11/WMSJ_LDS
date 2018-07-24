@@ -168,6 +168,7 @@
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Name="MenueShow" Header="显示" FontSize="20" Click="MenueShow_Click"/>
+                        <MenuItem Name="MenueSelectItem" Header="使用该项" FontSize="20" Click="MenueSelectItem_Click"/>
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.ItemTemplate>

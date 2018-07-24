@@ -122,6 +122,7 @@ namespace CPAS.WorkFlow
 
             const string bool_Calib2m = "R340";
             const string bool_Calib4m = "R385";
+            const string bool_CalibFinalResult = "R385";
 
             while (!cts.IsCancellationRequested)
             {
@@ -143,7 +144,8 @@ namespace CPAS.WorkFlow
 
                     case 5: //计算结果给LDS
                         bRet = SetLDSCalidData(nIndex, C1, C2);
-                        //结果写在哪
+                        PLC.WriteInt(bool_CalibFinalResult, bRet ? 2 : 1);
+                        PLC.WriteInt(cmdReg, nCmd + 1);
                         break;
 
                     case 100:

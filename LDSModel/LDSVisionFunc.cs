@@ -12,122 +12,143 @@ namespace LDSFuncSet
         
         public bool PreProcessShapeMode(HObject ImageIn,HTuple window, HTuple MinThre, HTuple MaxThre, HObject RegionDomain,string strRegionPath, bool bPreView=true)
         {
-            if (RegionDomain == null)
-                HOperatorSet.GetDomain(ImageIn, out RegionDomain);
-
-            // Local iconic variables 
-            HObject ho_ImageReduced, ho_Regions2, ho_RegionFillUp1;
-            HObject ho_Contours1;
-            HObject emptObject = null;
-            // Local control variables 
-            HTuple hv_Width, hv_Height, hv_ModelID;
-
-            // Initialize local and output iconic variables 
-            HOperatorSet.GenEmptyObj(out ho_ImageReduced);
-            HOperatorSet.GenEmptyObj(out ho_Regions2);
-            HOperatorSet.GenEmptyObj(out ho_RegionFillUp1);
-            HOperatorSet.GenEmptyObj(out ho_Contours1);
-
-
-            HOperatorSet.GetImageSize(ImageIn, out hv_Width, out hv_Height);
-            ho_ImageReduced.Dispose();
-            HOperatorSet.ReduceDomain(ImageIn, RegionDomain, out ho_ImageReduced);
-
-            ho_Regions2.Dispose();
-            HOperatorSet.Threshold(ho_ImageReduced, out ho_Regions2, MinThre, MaxThre);
-            ho_RegionFillUp1.Dispose();
-            HOperatorSet.FillUpShape(ho_Regions2, out ho_RegionFillUp1, "area", 1, 500);
-            ho_Contours1.Dispose();
-            HOperatorSet.GenContourRegionXld(ho_RegionFillUp1, out ho_Contours1, "border");
-            if (bPreView == false)
+            try
             {
-                HOperatorSet.CreateShapeModelXld(ho_Contours1, "auto", (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), "auto", "auto", "ignore_local_polarity", 5, out hv_ModelID);
-                HOperatorSet.FindShapeModel(ImageIn, hv_ModelID, (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out HTuple hv_Row, out HTuple hv_Column, out HTuple hv_Angle, out HTuple hv_Score);
+                if (RegionDomain == null)
+                    HOperatorSet.GetDomain(ImageIn, out RegionDomain);
 
-                HTuple hv_ModelPos = new HTuple();
-                hv_ModelPos[0] = hv_Row;
-                hv_ModelPos[1] = hv_Column;
-                hv_ModelPos[2] = hv_Angle;
-                string[] strList = strRegionPath.Split('.');
-                HOperatorSet.WriteShapeModel(hv_ModelID, $"{strList[0]}.shm");
-                HOperatorSet.WriteTuple(hv_ModelPos, $"{strList[0]}.tup");
-                HOperatorSet.WriteRegion(RegionDomain, $"{strList[0]}.reg");
+                // Local iconic variables 
+                HObject ho_ImageReduced, ho_Regions2, ho_RegionFillUp1;
+                HObject ho_Contours1;
+                HObject emptObject = null;
+                // Local control variables 
+                HTuple hv_Width, hv_Height, hv_ModelID;
+
+                // Initialize local and output iconic variables 
+                HOperatorSet.GenEmptyObj(out ho_ImageReduced);
+                HOperatorSet.GenEmptyObj(out ho_Regions2);
+                HOperatorSet.GenEmptyObj(out ho_RegionFillUp1);
+                HOperatorSet.GenEmptyObj(out ho_Contours1);
+
+
+                HOperatorSet.GetImageSize(ImageIn, out hv_Width, out hv_Height);
+                ho_ImageReduced.Dispose();
+                HOperatorSet.ReduceDomain(ImageIn, RegionDomain, out ho_ImageReduced);
+
+                ho_Regions2.Dispose();
+                HOperatorSet.Threshold(ho_ImageReduced, out ho_Regions2, MinThre, MaxThre);
+                ho_RegionFillUp1.Dispose();
+                HOperatorSet.FillUpShape(ho_Regions2, out ho_RegionFillUp1, "area", 1, 500);
+                ho_Contours1.Dispose();
+                HOperatorSet.GenContourRegionXld(ho_RegionFillUp1, out ho_Contours1, "border");
+                if (bPreView == false)
+                {
+                    HOperatorSet.CreateShapeModelXld(ho_Contours1, "auto", (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), "auto", "auto", "ignore_local_polarity", 5, out hv_ModelID);
+                    HOperatorSet.FindShapeModel(ImageIn, hv_ModelID, (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out HTuple hv_Row, out HTuple hv_Column, out HTuple hv_Angle, out HTuple hv_Score);
+
+                    HTuple hv_ModelPos = new HTuple();
+                    hv_ModelPos[0] = hv_Row;
+                    hv_ModelPos[1] = hv_Column;
+                    hv_ModelPos[2] = hv_Angle;
+                    string[] strList = strRegionPath.Split('.');
+                    HOperatorSet.WriteShapeModel(hv_ModelID, $"{strList[0]}.shm");
+                    HOperatorSet.WriteTuple(hv_ModelPos, $"{strList[0]}.tup");
+                    HOperatorSet.WriteRegion(RegionDomain, $"{strList[0]}.reg");
+                }
+
+                HOperatorSet.SetDraw(window, "fill");
+                HOperatorSet.SetColor(window, "red");
+                HOperatorSet.SetSystem("flush_graphic", "false");
+                HOperatorSet.ClearWindow(window);
+                HOperatorSet.DispObj(ImageIn, window);
+                HOperatorSet.DispObj(ho_Contours1, window); //显示模板轮廓
+                HOperatorSet.SetSystem("flush_graphic", "true");
+                HOperatorSet.GenEmptyObj(out emptObject);
+                HOperatorSet.DispObj(emptObject, window);
+
+
+                emptObject.Dispose();
+                RegionDomain.Dispose();
+                ho_ImageReduced.Dispose();
+                ho_Regions2.Dispose();
+                ho_RegionFillUp1.Dispose();
+                ho_Contours1.Dispose();
+                return true;
             }
-
-            HOperatorSet.SetDraw(window, "fill");
-            HOperatorSet.SetColor(window, "red");
-            HOperatorSet.SetSystem("flush_graphic", "false");
-            HOperatorSet.ClearWindow(window);
-            HOperatorSet.DispObj(ImageIn, window);
-            HOperatorSet.DispObj(ho_Contours1, window); //显示模板轮廓
-            HOperatorSet.SetSystem("flush_graphic", "true");
-            HOperatorSet.GenEmptyObj(out emptObject);
-            HOperatorSet.DispObj(emptObject,window);
-
-
-            emptObject.Dispose();
-            RegionDomain.Dispose();
-            ho_ImageReduced.Dispose();
-            ho_Regions2.Dispose();
-            ho_RegionFillUp1.Dispose();
-            ho_Contours1.Dispose();
-            return true;
+            catch (Exception ex)
+            {
+                return false;
+               
+            }
         }
 
         public bool CreateShapeModelXLD(HObject ImageIn, object RegionDomain, string ModelName)
         {
-            HTuple ModelOriginPos = new HTuple();
-            string[] strList = ModelName.Split('.');
-            if (strList.Length != 2)
+            try
+            {
+                HTuple ModelOriginPos = new HTuple();
+                string[] strList = ModelName.Split('.');
+                if (strList.Length != 2)
+                    return false;
+                // Local iconic variables 
+                HObject ho_ImageReduced, ho_Regions2, ho_RegionFillUp1;
+                HObject ho_Contours1;
+
+                // Local control variables 
+                HTuple hv_Width, hv_Height, hv_ModelID, hv_Row;
+                HTuple hv_Column, hv_Angle, hv_Score, hv_ModelPos;
+
+                // Initialize local and output iconic variables 
+                HOperatorSet.GenEmptyObj(out ho_ImageReduced);
+                HOperatorSet.GenEmptyObj(out ho_Regions2);
+                HOperatorSet.GenEmptyObj(out ho_RegionFillUp1);
+                HOperatorSet.GenEmptyObj(out ho_Contours1);
+
+
+                HOperatorSet.GetImageSize(ImageIn, out hv_Width, out hv_Height);
+                ho_ImageReduced.Dispose();
+                HOperatorSet.ReduceDomain(ImageIn, RegionDomain as HObject, out ho_ImageReduced);
+
+                ho_Regions2.Dispose();
+                HOperatorSet.Threshold(ho_ImageReduced, out ho_Regions2, 204, 255);
+                ho_RegionFillUp1.Dispose();
+                HOperatorSet.FillUpShape(ho_Regions2, out ho_RegionFillUp1, "area", 1, 1000);
+                HOperatorSet.Connection(ho_RegionFillUp1, out HObject RegionConnection);
+                HOperatorSet.SelectShape(RegionConnection, out HObject RegionSelected, "area", "and", 10000, 200000);
+
+                ho_Contours1.Dispose();
+                HOperatorSet.GenContourRegionXld(RegionSelected, out ho_Contours1, "border");
+
+
+                HOperatorSet.CreateShapeModelXld(ho_Contours1, "auto", (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), "auto", "auto", "ignore_local_polarity", 5, out hv_ModelID);
+                HOperatorSet.WriteShapeModel(hv_ModelID, "LdsShapeModel.shm");
+                HOperatorSet.FindShapeModel(ImageIn, hv_ModelID, (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out hv_Row, out hv_Column, out hv_Angle, out hv_Score);
+
+                hv_ModelPos = new HTuple();
+                hv_ModelPos[0] = hv_Row;
+                hv_ModelPos[1] = hv_Column;
+                hv_ModelPos[2] = hv_Angle;
+
+                //创建的模板保存起来
+                HOperatorSet.WriteShapeModel(hv_ModelID, $"{strList[0]}.shm");
+                HOperatorSet.WriteTuple(hv_ModelPos, $"{strList[0]}.tup");
+
+
+                (RegionDomain as HObject).Dispose();
+                ho_ImageReduced.Dispose();
+                ho_Regions2.Dispose();
+                ho_RegionFillUp1.Dispose();
+                ho_Contours1.Dispose();
+                RegionConnection.Dispose();
+                RegionSelected.Dispose();
+                return true;
+            }
+            catch (Exception ex)
+            {
                 return false;
-            // Local iconic variables 
-            HObject ho_ImageReduced, ho_Regions2, ho_RegionFillUp1;
-            HObject ho_Contours1;
-
-            // Local control variables 
-            HTuple hv_Width, hv_Height, hv_ModelID, hv_Row;
-            HTuple hv_Column, hv_Angle, hv_Score, hv_ModelPos;
-
-            // Initialize local and output iconic variables 
-            HOperatorSet.GenEmptyObj(out ho_ImageReduced);
-            HOperatorSet.GenEmptyObj(out ho_Regions2);
-            HOperatorSet.GenEmptyObj(out ho_RegionFillUp1);
-            HOperatorSet.GenEmptyObj(out ho_Contours1);
-
-            
-            HOperatorSet.GetImageSize(ImageIn, out hv_Width, out hv_Height);
-            ho_ImageReduced.Dispose();
-            HOperatorSet.ReduceDomain(ImageIn, RegionDomain as HObject, out ho_ImageReduced);
-
-            ho_Regions2.Dispose();
-            HOperatorSet.Threshold(ho_ImageReduced, out ho_Regions2, 204, 255);
-            ho_RegionFillUp1.Dispose();
-            HOperatorSet.FillUpShape(ho_Regions2, out ho_RegionFillUp1, "area", 1, 1000);
-            ho_Contours1.Dispose();
-            HOperatorSet.GenContourRegionXld(ho_RegionFillUp1, out ho_Contours1, "border");
-
-
-            HOperatorSet.CreateShapeModelXld(ho_Contours1, "auto", (new HTuple(0)).TupleRad() ,(new HTuple(360)).TupleRad(), "auto", "auto", "ignore_local_polarity", 5, out hv_ModelID);
-            HOperatorSet.WriteShapeModel(hv_ModelID, "LdsShapeModel.shm");
-            HOperatorSet.FindShapeModel(ImageIn, hv_ModelID, (new HTuple(0)).TupleRad() , (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out hv_Row, out hv_Column, out hv_Angle, out hv_Score);
-
-            hv_ModelPos = new HTuple();
-            hv_ModelPos[0] = hv_Row;
-            hv_ModelPos[1] = hv_Column;
-            hv_ModelPos[2] = hv_Angle;
-
-            //创建的模板保存起来
-            HOperatorSet.WriteShapeModel(hv_ModelID, $"{strList[0]}.shm");
-            HOperatorSet.WriteTuple(hv_ModelPos, $"{strList[0]}.tup");
-
-
-            (RegionDomain as HObject).Dispose();
-            ho_ImageReduced.Dispose();
-            ho_Regions2.Dispose();
-            ho_RegionFillUp1.Dispose();
-            ho_Contours1.Dispose();
-            return true;
+            }
         }
+
         public bool FindShapeModelXLD(HObject ImageIn, HTuple ModelName, out HTuple OutRow, out HTuple OutCol,out HTuple OutAngle)
         {
             OutRow = null;

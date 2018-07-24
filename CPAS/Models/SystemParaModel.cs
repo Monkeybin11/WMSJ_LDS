@@ -18,7 +18,8 @@ namespace CPAS.Models
         private string _curSelectedPrescription = "";
         private EnumBadBarcodeExpiration _badBarcodeExpiration;
         private EnumBadBarcodeExpiration _imageSaveExpiration;
-       [Browsable(false)]
+
+        [ReadOnly(true)]
         public string CurPrescriptionName
         {
             get { return _curSelectedPrescription; }
@@ -52,6 +53,7 @@ namespace CPAS.Models
                 }
             }
         }
+
         public event PropertyChangedEventHandler PropertyChanged;
         
     }

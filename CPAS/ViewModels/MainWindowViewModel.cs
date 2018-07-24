@@ -49,6 +49,7 @@ namespace CPAS.ViewModels
         private string _strPowerMeterValue1 = "NA", _strPowerMeterValue2 = "NA";
         private int _maxThre = 0, _minThre=0;
         public PrescriptionGridModel _prescriptionUsed = new PrescriptionGridModel();
+        public PrescriptionGridModel _currentSelectPrescription = null;
         private SystemParaModel _systemPataModelUsed = new SystemParaModel();
         private EnumCamSnapState _amSnapState;
         private int _currentSelectRoiTemplate=0;
@@ -229,6 +230,18 @@ namespace CPAS.ViewModels
             }
             get { return _currentSelectRoiTemplate; }
         }
+        public PrescriptionGridModel CurrentSelectPrescription
+        {
+            set
+            {
+                if (_currentSelectPrescription != value)
+                {
+                    _currentSelectPrescription = value;
+                    RaisePropertyChanged();
+                }
+            }
+            get { return _currentSelectPrescription; }
+        }
         public int MaxThre
         {
             set
@@ -402,6 +415,116 @@ namespace CPAS.ViewModels
                 if (SystemMessageCollection.Count > 50)
                     SystemMessageCollection.RemoveAt(0);
             }
+        }
+        private void SetPrescriptionRoiModelUsedName(PrescriptionGridModel pres,int nIndex, string strType, string strUsedName)
+        {
+            if (pres == null)
+            {
+                UC_MessageBox.ShowMsgBox("请先选择一个配方操作");
+                return;
+            }
+            if (strType.ToLower() == "roi")
+            {
+                switch (nIndex)
+                {
+                    case 1:
+                        pres.RoiCam1= strUsedName;
+                        break;
+                    case 2:
+                        pres.RoiCam2 = strUsedName;
+                        break;
+                    case 3:
+                        pres.RoiCam3 = strUsedName;
+                        break;
+                    case 4:
+                        pres.RoiCam4 = strUsedName;
+                        break;
+                    case 5:
+                        pres.RoiCam5 = strUsedName;
+                        break;
+                    case 6:
+                        pres.RoiCam6 = strUsedName;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else if (strType.ToLower() == "model")
+            {
+                switch (nIndex)
+                {
+                    case 1:
+                        pres.ModelCam1 = strUsedName;
+                        break;
+                    case 2:
+                        pres.ModelCam2 = strUsedName;
+                        break;
+                    case 3:
+                        pres.ModelCam3 = strUsedName;
+                        break;
+                    case 4:
+                        pres.ModelCam4 = strUsedName;
+                        break;
+                    case 5:
+                        pres.ModelCam5 = strUsedName;
+                        break;
+                    case 6:
+                        pres.ModelCam6 = strUsedName;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        private string GetPrescriptionRoiModelUsedName(PrescriptionGridModel pres, int nIndex, string strType)
+        {
+            if (pres == null)
+            {
+                UC_MessageBox.ShowMsgBox("请先选择一个配方操作");
+                    return "";
+            }
+            if (strType.ToLower() == "roi")
+            {
+                switch (nIndex)
+                {
+                    case 1:
+                        return pres.RoiCam1;
+                    case 2:
+                        return pres.RoiCam2;
+                    case 3:
+                        return pres.RoiCam3;
+                    case 4:
+                        return pres.RoiCam4;
+                    case 5:
+                        return pres.RoiCam5;
+                    case 6:
+                        return pres.RoiCam6;
+                    default:
+                        return "";
+                }
+            }
+            else if (strType.ToLower() == "model")
+            {
+                switch (nIndex)
+                {
+                    case 1:
+                        return pres.ModelCam1; 
+                    case 2:
+                        return pres.ModelCam2;
+                    case 3:
+                        return pres.ModelCam3;
+                    case 4:
+                        return pres.ModelCam4;
+                    case 5:
+                        return pres.ModelCam5;
+                    case 6:
+                        return pres.ModelCam6;
+                    default:
+                        return "";
+                }
+            }
+            return "";
+              
         }
         #endregion
 
@@ -864,7 +987,7 @@ namespace CPAS.ViewModels
             }
         }
 
-        public RelayCommand<RoiModelBase> ShowRoiModelCommand
+        public RelayCommand<RoiModelBase> ShowRoiModelCommand       //菜单项显示此项
         {
             get
             {
@@ -880,7 +1003,36 @@ namespace CPAS.ViewModels
                 });
             }
         }
-
+        public RelayCommand<RoiModelBase> SelectUseRoiModelCommand    //菜单键选中此项,选择相机使用哪个模板和Roi
+        {
+            get
+            {
+                return new RelayCommand<RoiModelBase>(item =>
+                {
+                    if (item != null)
+                    {
+                        if (CurrentSelectPrescription == null)
+                        {
+                            UC_MessageBox.ShowMsgBox("请选择一个配方进行配置");
+                            return;
+                        }
+                        int nCamID = Convert.ToInt16(item.StrFullName.Substring(3, 1));
+                        if (item.GetType() == typeof(RoiItem))
+                        {
+                            SetPrescriptionRoiModelUsedName(CurrentSelectPrescription, nCamID + 1, "Roi", item.StrName);
+                        }
+                        else
+                        {
+                            SetPrescriptionRoiModelUsedName(CurrentSelectPrescription, nCamID + 1, "Model", item.StrName);
+                        }
+                        if (CurrentSelectPrescription.Name == PrescriptionUsed.Name)
+                        {
+                            PrescriptionUsed = CurrentSelectPrescription.Clone() as PrescriptionGridModel;
+                        }
+                    }
+                });
+            }
+        }
         public RelayCommand<Tuple<RoiModelBase, int>> SaveModelParaCommand
         {
             get
@@ -927,22 +1079,40 @@ namespace CPAS.ViewModels
                     List<string> fileList = FileHelper.GetProfileList($"VisionData\\ModelTemp");
                     TemplateItem item = tuple.Item1 as TemplateItem;
                     int nCamID = tuple.Item2;
-                    if (item != null && fileList.Count == 0)
-                    {
-                        if (nCamID >= 0)
-                        {
-                            string strRegionPath = $"VisionData\\Model\\{item.StrFullName}.reg";
-                            object region = Vision.Vision.Instance.ReadRegion(strRegionPath);
-                            Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, strRegionPath, region);
-                        }
-                    }
-                    else
-                    {
-                        string strRegionPath = $"VisionData\\ModelTemp\\{fileList[0]}.reg";
-                        object region = Vision.Vision.Instance.ReadRegion(strRegionPath);
-                        Vision.Vision.Instance.PreCreateShapeModel(nCamID, MinThre, MaxThre, EnumShapeModelType.XLD, strRegionPath, region);    //传入Region
-
-                    }
+                    if (nCamID >= 0)
+                            {
+                                double angle = 0.0f;
+                                string strRecParaFileName =GetPrescriptionRoiModelUsedName(PrescriptionUsed,nCamID+1,"Roi");
+                                string strModelFileName = GetPrescriptionRoiModelUsedName(PrescriptionUsed, nCamID + 1, "Model");
+                                if (strRecParaFileName == "" || strModelFileName == "")
+                                {
+                                    UC_MessageBox.ShowMsgBox("请确认当前使用的配方选择了Roi和Model");
+                                    return;
+                                }
+                                else
+                                {
+                                    strRecParaFileName = $"VisionData\\Roi\\Cam{nCamID}_{strRecParaFileName}.tup";
+                                    strModelFileName = $"VisionData\\Model\\Cam{nCamID}_{strModelFileName}.shm";
+                                }
+                                if (PrescriptionUsed == null)
+                                {
+                                    UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}不存在");
+                                    return;
+                                }
+                                if (!File.Exists(strRecParaFileName))
+                                {
+                                    UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}的Roi:{strRecParaFileName}不存在");
+                                    return;
+                                }
+                                if (!File.Exists(strModelFileName))
+                                {
+                                    UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}的模板{strModelFileName}不存在");
+                                    return;
+                                }
+                                bool bRet=Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE1, nCamID, $"{strRecParaFileName}&{strModelFileName}", out object result);
+                                if (bRet)
+                                    angle = double.Parse(result.ToString())*180;
+                            }
                 });
             }
         }
@@ -1123,6 +1293,15 @@ namespace CPAS.ViewModels
 
             //当前选择的配方
             SystemParaModelUsed = ConfigMgr.SystemParaCfgMgr.SystemParaModels[0];
+            foreach (var pres in PrescriptionCollection)
+            {
+                if (pres.Name == SystemParaModelUsed.CurPrescriptionName)
+                {
+                    PrescriptionUsed = pres;
+                    break;
+                }
+            }
+
         }
 
         ~MainWindowViewModel()

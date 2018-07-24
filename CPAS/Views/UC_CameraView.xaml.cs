@@ -146,14 +146,20 @@ namespace CPAS.Views
             }
         }
 
+
+        private void BtnDrawModelRegion_Click(object sender, RoutedEventArgs e)
+        {
+            (DataContext as MainWindowViewModel).PreDrawModelRoiCommand.Execute(new Tuple<RoiModelBase,int>(ListBoxRoiTemplate.SelectedItem as RoiModelBase, Cb_Cameras.SelectedIndex));
+        }
+
         private void MenueShow_Click(object sender, RoutedEventArgs e)
         {
             (DataContext as MainWindowViewModel).ShowRoiModelCommand.Execute(ListBoxRoiTemplate.SelectedItem);
         }
 
-        private void BtnDrawModelRegion_Click(object sender, RoutedEventArgs e)
+        private void MenueSelectItem_Click(object sender, RoutedEventArgs e)
         {
-            (DataContext as MainWindowViewModel).PreDrawModelRoiCommand.Execute(new Tuple<RoiModelBase,int>(ListBoxRoiTemplate.SelectedItem as RoiModelBase, Cb_Cameras.SelectedIndex));
+            (DataContext as MainWindowViewModel).SelectUseRoiModelCommand.Execute(ListBoxRoiTemplate.SelectedItem);
         }
     }
 }

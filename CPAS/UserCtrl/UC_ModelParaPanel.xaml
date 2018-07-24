@@ -56,8 +56,8 @@
                 <TextBox Grid.Column="1" Margin="3" FontSize="15" VerticalContentAlignment="Center"/>
             </Grid>
 
-            <Button Name="BtnSaveModelPara" Margin="2" Content="保存模板" FontSize="15" Grid.Row="4" Grid.Column="0" Click="BtnSaveModelPara_Click"/>
-            <Button Name="BtnTestModel" Margin="2" Content="测试模板" FontSize="15" Grid.Row="4" Grid.Column="1" Click="BtnTestModel_Click"/>
+            <Button Name="BtnSaveModelPara" Margin="2" Content="保存模板" FontSize="20" Grid.Row="4" Grid.Column="0" Click="BtnSaveModelPara_Click" Style="{StaticResource RoundButtonStyle1}" Background="LightBlue" />
+            <Button Name="BtnTestModel" Margin="2" Content="测试模板" FontSize="20" Grid.Row="4" Grid.Column="1" Click="BtnTestModel_Click" Style="{StaticResource RoundButtonStyle1}" Background="LightBlue"/>
         </Grid>
     </Grid>
 </UserControl>

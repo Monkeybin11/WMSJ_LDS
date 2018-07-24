@@ -269,6 +269,7 @@ namespace CPAS.Vision
         }
         public bool ProcessImage(IMAGEPROCESS_STEP nStep, int nCamID, object para, out object result)
         {
+            bool bRet = false;
             result = null;
             if (nCamID < 0)
                 return false;
@@ -281,13 +282,19 @@ namespace CPAS.Vision
                     switch (nStep)
                     {
                         case IMAGEPROCESS_STEP.GET_ANGLE_TUNE1:
-                            GetAngleTune1(HoImageList[nCamID], nCamID, out Angle, HwindowDic[nCamID]["CameraViewCam"]);
+                            string[] strPara = para.ToString().Split('&');
+                            if (strPara.Length != 2)
+                                return false;
+                            string strRectRoiFileName = strPara[0];
+                            string strModelFileName = strPara[1];
+                            bRet = GetAngleTune1(HoImageList[nCamID], strModelFileName, strRectRoiFileName, out Angle, HwindowDic[nCamID]["CameraViewCam"]);
                             result = Angle;
-                            break;
+                            return bRet;
+
                         case IMAGEPROCESS_STEP.GET_ANGLE_TUNE2:
-                            GetAngleTune2(HoImageList[nCamID], out Angle, HwindowDic[nCamID]["CameraViewCam"]);
+                            bRet = GetAngleTune2(nCamID, out Angle, HwindowDic[nCamID]["CameraViewCam"]);
                             result = Angle;
-                            break;
+                            return bRet;
                         case IMAGEPROCESS_STEP.GET_ANGLE_BLOB:
 
                             break;
@@ -313,7 +320,7 @@ namespace CPAS.Vision
             }
         }
 
-        public bool DrawRoi(int nCamID, EnumRoiType type, out object outRegion, string fileName=null)
+        public bool DrawRoi(int nCamID, EnumRoiType type, out object outRegion, string fileName = null)
         {
             outRegion = null;
             if (nCamID < 0)
@@ -411,7 +418,7 @@ namespace CPAS.Vision
                                 outRegion = Region;
                             }
                         }
-                 
+
                         break;
                 }
                 return false;
@@ -528,9 +535,9 @@ namespace CPAS.Vision
                 {
                     if (it.Value != -1)
                     {
-                        HOperatorSet.ClearWindow(it.Value);
-                        if (HoImageList[nCamID] != null)
-                            HOperatorSet.DispObj(HoImageList[nCamID], it.Value);
+                        //HOperatorSet.ClearWindow(it.Value);
+                        //if (HoImageList[nCamID] != null)
+                        //HOperatorSet.DispObj(HoImageList[nCamID], it.Value);
                         HOperatorSet.SetDraw(it.Value, "margin");
                         HOperatorSet.SetColor(it.Value, "green");
                         HOperatorSet.DispObj(region, it.Value);
@@ -551,7 +558,7 @@ namespace CPAS.Vision
                 int nCamID = Convert.ToInt16(splitString[splitString.Length - 1].Substring(3, 1));
 
                 //三个文件同时读取
-                splitString= ModelFilePathName.Split('.');
+                splitString = ModelFilePathName.Split('.');
                 HOperatorSet.ReadShapeModel(ModelFilePathName, out HTuple ModelID);
                 HOperatorSet.ReadRegion(out HObject ModelRoiRegion, $"{splitString[0]}.reg");
                 HOperatorSet.ReadTuple($"{splitString[0]}.tup", out HTuple ModelOriginPos);
@@ -560,9 +567,9 @@ namespace CPAS.Vision
                 {
                     if (it.Value != -1)
                     {
-                        HOperatorSet.ClearWindow(it.Value);
-                        if (HoImageList[nCamID] != null)
-                            HOperatorSet.DispObj(HoImageList[nCamID], it.Value);
+                        //HOperatorSet.ClearWindow(it.Value);
+                        //if (HoImageList[nCamID] != null)
+                        //HOperatorSet.DispObj(HoImageList[nCamID], it.Value);
                         HOperatorSet.SetDraw(it.Value, "margin");
                         HOperatorSet.SetColor(it.Value, "green");
 
@@ -574,7 +581,7 @@ namespace CPAS.Vision
                             HOperatorSet.DispObj(contoursAffinTrans, it.Value);
                             contoursAffinTrans.Dispose();
                         }
-                                   
+
                         modelContours.Dispose();
                     }
                 }
@@ -620,9 +627,8 @@ namespace CPAS.Vision
 
             try
             {
-
-                //dic.Add("DirectShow", new Tuple<string, string>("Integrated Camera", "DirectShow"));
-
+                dic.Add("DirectShow", new Tuple<string, string>("Integrated Camera", "DirectShow"));
+                return dic;
                 HOperatorSet.InfoFramegrabber(camType.ToString(), "info_boards", out HTuple hv_Information, out HTuple hv_ValueList);
                 if (0 == hv_ValueList.Length)
                     return dic;
@@ -656,108 +662,590 @@ namespace CPAS.Vision
         }
 
         #region LDS专用
-        public bool GetAngleTune1(HObject image, int nCamID, out double fAngle, HTuple hwindow = null)
+        public bool GetAngleTune1(HObject imageIn, string ModelFileName, string RectParaFileName, out double fAngle, HTuple hwindow = null)
         {
-            //nCamID表示用第几个相机的ROI
-
             fAngle = 0;
-            // Local iconic variables
-            HObject ho_ImageScaled = null, ho_ImageMean = null;
-            // Local control variables 
-            HTuple hv_EdgeGrayValue = new HTuple();
-            HTuple hv_nSegment = new HTuple(), hv_Width = new HTuple();
-            HTuple hv_Height = new HTuple();
-            HTuple hv_Row = new HTuple(), hv_Column = new HTuple(), hv_Phi = new HTuple();
-            HTuple hv_Length1 = new HTuple(), hv_Length2 = new HTuple();
-            HTuple hv_RectanglePara = new HTuple(), hv_RecPara2 = new HTuple();
-            HTuple hv_ModelPos = new HTuple(), hv_ModelID = new HTuple();
-            HTuple hv_Row1 = new HTuple(), hv_Column1 = new HTuple(), hv_Angle = new HTuple();
-            HTuple hv_Score = new HTuple(), hv_HomMat2D1 = new HTuple();
-            HTuple hv_QRow = new HTuple(), hv_QColumn = new HTuple(), hv_Row2 = new HTuple();
-            HTuple hv_Column2 = new HTuple(), hv_Phi2 = new HTuple(), hv_QRow2 = new HTuple();
-            HTuple hv_QColumn2 = new HTuple(), hv_OutRowStart = new HTuple();
-            HTuple hv_OutColStart = new HTuple(), hv_OutRowEnd = new HTuple();
-            HTuple hv_OutColEnd = new HTuple(), hv_OutRowStart1 = new HTuple();
-            HTuple hv_OutColStart1 = new HTuple(), hv_OutRowEnd1 = new HTuple();
-            HTuple hv_OutColEnd1 = new HTuple();
-
-            // Initialize local and output iconic variables 
-            HOperatorSet.GenEmptyObj(out ho_ImageScaled);
-            HOperatorSet.GenEmptyObj(out ho_ImageMean);
-
-
-            hv_EdgeGrayValue = 8;
-            hv_nSegment = 20;
-            ho_ImageScaled.Dispose();
-            scale_image_range(image, out ho_ImageScaled, 100, 200);
-            HOperatorSet.GetImageSize(image, out hv_Width, out hv_Height);
-            ho_ImageMean.Dispose();
-            HOperatorSet.MeanImage(image, out ho_ImageMean, 50, 50);
-            HOperatorSet.GetImageSize(ho_ImageMean, out hv_Width, out hv_Height);
-            HOperatorSet.ReadTuple("RectanglePara.tup", out hv_RectanglePara);
-            HOperatorSet.ReadTuple("RecPara2.tup", out hv_RecPara2);
-            if (hwindow != null)
+            try
             {
-                HOperatorSet.SetDraw(hwindow, "margin");
+                string[] strRoiListDot = RectParaFileName.Split('.');
+                if (strRoiListDot.Length < 2)
+                    return false;
+
+                string[] strRoiListIta = RectParaFileName.Split('\\');
+                if (strRoiListIta.Length < 2)
+                    return false;
+
+                string[] strModelListDot = ModelFileName.Split('.');
+                if (strRoiListDot.Length < 2)
+                    return false;
+
+                string[] strModelListIta = ModelFileName.Split('\\');
+                if (strRoiListIta.Length < 2)
+                    return false;
+
+                int nCamID = Convert.ToInt16(strRoiListIta[strRoiListIta.Length - 1].Substring(3, 1));
+                // Local iconic variables
+                HObject ho_ImageScaled = null, ho_ImageMean = null;
+                // Local control variables 
+                HTuple hv_EdgeGrayValue = new HTuple();
+                HTuple hv_nSegment = new HTuple(), hv_Width = new HTuple();
+                HTuple hv_Height = new HTuple();
+                HTuple hv_Row = new HTuple(), hv_Column = new HTuple(), hv_Phi = new HTuple();
+                HTuple hv_Length1 = new HTuple(), hv_Length2 = new HTuple();
+                HTuple hv_RectanglePara = new HTuple();
+                HTuple hv_ModelPos = new HTuple(), hv_ModelID = new HTuple();
+                HTuple hv_Row1 = new HTuple(), hv_Column1 = new HTuple(), hv_Angle = new HTuple();
+                HTuple hv_Score = new HTuple(), hv_HomMat2D1 = new HTuple();
+                HTuple hv_QRow = new HTuple(), hv_QColumn = new HTuple(), hv_Row2 = new HTuple();
+                HTuple hv_Column2 = new HTuple(), hv_Phi2 = new HTuple(), hv_QRow2 = new HTuple();
+                HTuple hv_QColumn2 = new HTuple(), hv_OutRowStart = new HTuple();
+                HTuple hv_OutColStart = new HTuple(), hv_OutRowEnd = new HTuple();
+                HTuple hv_OutColEnd = new HTuple(), hv_OutRowStart1 = new HTuple();
+                HTuple hv_OutColStart1 = new HTuple(), hv_OutRowEnd1 = new HTuple();
+                HTuple hv_OutColEnd1 = new HTuple();
+
+                // Initialize local and output iconic variables 
+                HOperatorSet.GenEmptyObj(out ho_ImageScaled);
+                HOperatorSet.GenEmptyObj(out ho_ImageMean);
+
+                HObject image = imageIn.SelectObj(1);
+                hv_EdgeGrayValue = 8;
+                hv_nSegment = 20;
+                ho_ImageScaled.Dispose();
+                scale_image_range(image, out ho_ImageScaled, 100, 200);
+                HOperatorSet.GetImageSize(image, out hv_Width, out hv_Height);
+                ho_ImageMean.Dispose();
+                HOperatorSet.MeanImage(image, out ho_ImageMean, 200, 200);
+                HOperatorSet.Threshold(ho_ImageMean, out HObject RegionThreshold, 100, 255);
+                HOperatorSet.FillUp(RegionThreshold, out HObject RegionFilledUp);
+                HOperatorSet.Connection(RegionFilledUp, out HObject RegionConnected);
+                HOperatorSet.SelectShapeStd(RegionConnected, out HObject RegionSelected, "max_area", 70);
+                HOperatorSet.DilationCircle(RegionSelected, out HObject RegionDilationed, 200);
+                HOperatorSet.ReduceDomain(image, RegionDilationed, out HObject imageReduced);
+
+                HOperatorSet.GetImageSize(ho_ImageMean, out hv_Width, out hv_Height);
+                HOperatorSet.ReadTuple(RectParaFileName, out hv_RectanglePara);
+                //如果指定了窗口，那么就显示出来
+                if (hwindow == null)
+                {
+                    if (HwindowDic.Keys.Contains(nCamID))
+                    {
+                        if (HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
+                        {
+                            hwindow = HwindowDic[nCamID]["CameraViewCam"];
+                        }
+                    }
+
+                }
+                if (hwindow != null)
+                {
+                    HOperatorSet.ClearWindow(hwindow);
+                    HOperatorSet.DispObj(image, hwindow);
+                    HOperatorSet.SetDraw(hwindow, "margin");
+                    HOperatorSet.SetColor(hwindow, "red");
+                    HOperatorSet.SetLineWidth(hwindow, 3);
+                }
+                else
+                {
+                    return false;
+                }
+                //读取ROI的region区域
+                HOperatorSet.ReadRegion(out HObject RectRegion, $"{strRoiListDot[0]}.reg");
+
+
+                //读取矩形ROI—1的值
+                hv_Row = hv_RectanglePara[0];
+                hv_Column = hv_RectanglePara[1];
+                hv_Phi = hv_RectanglePara[2];
+                hv_Length1 = hv_RectanglePara[3];
+                hv_Length2 = hv_RectanglePara[4];
+                //图像预处理
+
+
+                //读取模板与它的起始位置
+                HOperatorSet.ReadTuple($"{strModelListDot[0]}.tup", out hv_ModelPos);
+                HOperatorSet.ReadShapeModel($"{strModelListDot[0]}.shm", out hv_ModelID);
+
+                HOperatorSet.FindShapeModel(imageReduced, hv_ModelID, (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out hv_Row1, out hv_Column1, out hv_Angle, out hv_Score);
+                if (hv_Row1.Length == 0)
+                {
+                    disp_message(hwindow, "查找模板失败", "window", 10, 10, "red", "true");
+                    return false;
+                }
+                else
+                {
+                    disp_message(hwindow, $"模板位置:({ hv_Column1},{ hv_Row1})", "window", 10, 10, "red", "true");
+                    disp_message(hwindow, $"分数: { hv_Score}", "window", 50, 10, "red", "true");
+                    HOperatorSet.DispCross(hwindow, hv_Row1, hv_Column1, 60, hv_Angle);
+
+                }
+
+                //模板偏移
+                HOperatorSet.VectorAngleToRigid(hv_ModelPos.TupleSelect(0), hv_ModelPos.TupleSelect(1), 0, hv_Row1, hv_Column1, hv_Angle, out hv_HomMat2D1);
+                HOperatorSet.AffineTransPoint2d(hv_HomMat2D1, hv_Row, hv_Column, out hv_QRow, out hv_QColumn);
+                //Region偏移
+                HOperatorSet.AffineTransRegion(RectRegion, out HObject regionTrans, hv_HomMat2D1, "false");
+
+
+                hv_Row = hv_QRow.Clone();
+                hv_Column = hv_QColumn.Clone();
+                hv_Phi = hv_Phi + hv_Angle;
+
+                //*
+                //读取矩形ROI—2的值
+                hv_Row2 = hv_RectanglePara[5];
+                hv_Column2 = hv_RectanglePara[6];
+                hv_Phi2 = hv_RectanglePara[7];
+                HTuple hv_Length21 = hv_RectanglePara[8];
+                HTuple hv_Length22 = hv_RectanglePara[9];
+
+                HOperatorSet.AffineTransPoint2d(hv_HomMat2D1, hv_Row2, hv_Column2, out hv_QRow2, out hv_QColumn2);
+                hv_Phi2 = hv_Phi2 + hv_Angle;
+                hv_Row2 = hv_QRow2.Clone();
+                hv_Column2 = hv_QColumn2.Clone();
+
+                FindLine(ho_ImageScaled, hv_nSegment, hv_EdgeGrayValue, hv_Row, hv_Column, hv_Phi, hv_Length1, hv_Length2, out hv_OutRowStart, out hv_OutColStart, out hv_OutRowEnd, out hv_OutColEnd);
+                FindLine(ho_ImageScaled, hv_nSegment, hv_EdgeGrayValue, hv_Row2, hv_Column2, hv_Phi2, hv_Length21, hv_Length22, out hv_OutRowStart1, out hv_OutColStart1, out hv_OutRowEnd1, out hv_OutColEnd1);
+
+
+                HOperatorSet.SetColor(hwindow, "green");
+                HOperatorSet.SetLineWidth(hwindow, 3);
+                HOperatorSet.DispObj(regionTrans, hwindow);
+
                 HOperatorSet.SetColor(hwindow, "red");
                 HOperatorSet.SetLineWidth(hwindow, 3);
-            }
-            hv_Row = hv_RectanglePara[0];
-            hv_Column = hv_RectanglePara[1];
-            hv_Phi = hv_RectanglePara[2];
-            hv_Length1 = hv_RectanglePara[3];
-            hv_Length2 = hv_RectanglePara[4];
-
-            HOperatorSet.ReadTuple("ModelPos.tup", out hv_ModelPos);
-            HOperatorSet.ReadShapeModel("LdsShapeModel.shm", out hv_ModelID);
-            HOperatorSet.FindShapeModel(image, hv_ModelID, (new HTuple(0)).TupleRad()
-                , (new HTuple(360)).TupleRad(), 0.7, 1, 0.5, "least_squares", 0, 0.9, out hv_Row1,
-                out hv_Column1, out hv_Angle, out hv_Score);
-
-            //模板偏移
-            HOperatorSet.VectorAngleToRigid(hv_ModelPos.TupleSelect(0), hv_ModelPos.TupleSelect(1), 0, hv_Row1, hv_Column1, hv_Angle, out hv_HomMat2D1);
-            HOperatorSet.AffineTransPoint2d(hv_HomMat2D1, hv_Row, hv_Column, out hv_QRow, out hv_QColumn);
 
 
-            hv_Row = hv_QRow.Clone();
-            hv_Column = hv_QColumn.Clone();
-            hv_Phi = hv_Phi + hv_Angle;
-
-
-            //*
-            hv_Row2 = hv_RecPara2[0];
-            hv_Column2 = hv_RecPara2[1];
-            hv_Phi2 = (hv_RecPara2.TupleSelect(2)) + hv_Angle;
-            HOperatorSet.AffineTransPoint2d(hv_HomMat2D1, hv_Row2, hv_Column2, out hv_QRow2, out hv_QColumn2);
-            hv_Phi2 = (hv_RecPara2.TupleSelect(2)) + hv_Angle;
-            hv_Row2 = hv_QRow2.Clone();
-            hv_Column2 = hv_QColumn2.Clone();
-
-            FindLine(ho_ImageScaled, hv_nSegment, hv_EdgeGrayValue, hv_Row, hv_Column, hv_Phi, hv_Length1, hv_Length2, out hv_OutRowStart, out hv_OutColStart, out hv_OutRowEnd, out hv_OutColEnd);
-            FindLine(ho_ImageScaled, hv_nSegment, hv_EdgeGrayValue, hv_Row2, hv_Column2, hv_Phi2, hv_RecPara2.TupleSelect(3), hv_RecPara2.TupleSelect(4), out hv_OutRowStart1, out hv_OutColStart1, out hv_OutRowEnd1, out hv_OutColEnd1);
-            if (hwindow != null)
-            {
-                HOperatorSet.SetColor(hwindow, "red");
-                HOperatorSet.SetLineWidth(hwindow, 3);
                 HOperatorSet.DispLine(hwindow, hv_OutRowStart, hv_OutColStart, hv_OutRowEnd, hv_OutColEnd);
                 HOperatorSet.DispLine(hwindow, hv_OutRowStart1, hv_OutColStart1, hv_OutRowEnd1, hv_OutColEnd1);
-            }
 
-            image.Dispose();
-            ho_ImageScaled.Dispose();
-            ho_ImageMean.Dispose();
-            return true;
+
+                HOperatorSet.AngleLx(hv_OutRowStart, hv_OutColStart, hv_OutRowEnd, hv_OutColEnd, out HTuple hv_Angle1);
+                HOperatorSet.AngleLx(hv_OutRowStart1, hv_OutColStart1, hv_OutRowEnd1, hv_OutColEnd1, out HTuple hv_Angle2);
+                fAngle = (hv_Angle1 + hv_Angle2) / 2;
+                HTuple hv_StratRow = hv_OutRowEnd.Clone();
+                HTuple hv_StartCol = hv_OutColEnd.Clone();
+                if ((int)(new HTuple(hv_Angle1.TupleLess(0))) != 0)
+                {
+                    hv_Angle1 = hv_Angle1 + 3.14159;
+                    hv_StratRow = hv_OutRowStart.Clone();
+                    hv_StartCol = hv_OutColStart.Clone();
+                }
+
+                HOperatorSet.SetColor(hwindow, "red");
+
+                HTuple hv_CenterRow = (hv_OutRowStart + hv_OutRowEnd) / 2;
+                HTuple hv_CenterCol = (hv_OutColStart + hv_OutColEnd) / 2;
+
+                HOperatorSet.DispArc(hwindow, hv_CenterRow, hv_CenterCol, hv_Angle1, hv_StratRow, hv_StartCol);
+                HOperatorSet.DispLine(hwindow, hv_CenterRow, hv_CenterCol, hv_CenterRow, hv_CenterCol + 500);
+                disp_message(hwindow, ((hv_Angle1 * 180) / 3.14159) + "度", "image", hv_OutRowEnd + 50, hv_OutColEnd, "red", "true");
+
+                HTuple hv_StratRow1 = hv_OutRowEnd1.Clone();
+                HTuple hv_StartCol1 = hv_OutColEnd1.Clone();
+                if ((int)(new HTuple(hv_Angle2.TupleLess(0))) != 0)
+                {
+                    hv_Angle2 = hv_Angle2 + 3.14159;
+                    hv_StratRow1 = hv_OutRowStart1.Clone();
+                    hv_StartCol1 = hv_OutColStart1.Clone();
+                }
+                HTuple hv_CenterRow1 = (hv_OutRowStart1 + hv_OutRowEnd1) / 2;
+                HTuple hv_CenterCol1 = (hv_OutColStart1 + hv_OutColEnd1) / 2;
+                HOperatorSet.DispArc(hwindow, (hv_OutRowStart1 + hv_OutRowEnd1) / 2, (hv_OutColStart1 + hv_OutColEnd1) / 2, hv_Angle2, hv_StratRow1, hv_StartCol1);
+                HOperatorSet.DispLine(hwindow, hv_CenterRow1, hv_CenterCol1, hv_CenterRow1, hv_CenterCol1 + 500);
+                disp_message(hwindow, ((hv_Angle2 * 180) / 3.14159) + "度", "image", hv_OutRowEnd1 + 50, hv_OutColEnd1, "red", "true");
+
+
+                image.Dispose();
+                ho_ImageScaled.Dispose();
+                ho_ImageMean.Dispose();
+                regionTrans.Dispose();
+                RegionThreshold.Dispose();
+                RegionFilledUp.Dispose();
+                RegionConnected.Dispose();
+                RegionSelected.Dispose();
+                RegionDilationed.Dispose();
+                imageReduced.Dispose();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
-        public bool GetAngleTune2(HObject image, out double fAngle, HTuple hwindow = null)
+
+
+        public bool GetAngleTune1(int nCamID, string ModelFileName, string RectParaFileName, out double fAngle, HTuple hwindow = null)
         {
+
             fAngle = 0;
-            return true;
+            try
+            {
+                HObject image = HoImageList[nCamID].SelectObj(1);
+                string[] strRoiListDot = RectParaFileName.Split('.');
+                if (strRoiListDot.Length < 2)
+                    return false;
+
+                string[] strRoiListIta = RectParaFileName.Split('\\');
+                if (strRoiListIta.Length < 2)
+                    return false;
+
+                string[] strModelListDot = ModelFileName.Split('.');
+                if (strRoiListDot.Length < 2)
+                    return false;
+
+                string[] strModelListIta = ModelFileName.Split('\\');
+                if (strRoiListIta.Length < 2)
+                    return false;
+
+                // Local iconic variables
+                HObject ho_ImageScaled = null, ho_ImageMean = null;
+                // Local control variables 
+                HTuple hv_EdgeGrayValue = new HTuple();
+                HTuple hv_nSegment = new HTuple(), hv_Width = new HTuple();
+                HTuple hv_Height = new HTuple();
+                HTuple hv_Row = new HTuple(), hv_Column = new HTuple(), hv_Phi = new HTuple();
+                HTuple hv_Length1 = new HTuple(), hv_Length2 = new HTuple();
+                HTuple hv_RectanglePara = new HTuple();
+                HTuple hv_ModelPos = new HTuple(), hv_ModelID = new HTuple();
+                HTuple hv_Row1 = new HTuple(), hv_Column1 = new HTuple(), hv_Angle = new HTuple();
+                HTuple hv_Score = new HTuple(), hv_HomMat2D1 = new HTuple();
+                HTuple hv_QRow = new HTuple(), hv_QColumn = new HTuple(), hv_Row2 = new HTuple();
+                HTuple hv_Column2 = new HTuple(), hv_Phi2 = new HTuple(), hv_QRow2 = new HTuple();
+                HTuple hv_QColumn2 = new HTuple(), hv_OutRowStart = new HTuple();
+                HTuple hv_OutColStart = new HTuple(), hv_OutRowEnd = new HTuple();
+                HTuple hv_OutColEnd = new HTuple(), hv_OutRowStart1 = new HTuple();
+                HTuple hv_OutColStart1 = new HTuple(), hv_OutRowEnd1 = new HTuple();
+                HTuple hv_OutColEnd1 = new HTuple();
+
+                // Initialize local and output iconic variables 
+                HOperatorSet.GenEmptyObj(out ho_ImageScaled);
+                HOperatorSet.GenEmptyObj(out ho_ImageMean);
+
+
+                hv_EdgeGrayValue = 8;
+                hv_nSegment = 20;
+                ho_ImageScaled.Dispose();
+                scale_image_range(image, out ho_ImageScaled, 100, 200);
+                HOperatorSet.GetImageSize(image, out hv_Width, out hv_Height);
+                ho_ImageMean.Dispose();
+                HOperatorSet.MeanImage(image, out ho_ImageMean, 200, 200);
+                HOperatorSet.Threshold(ho_ImageMean, out HObject RegionThreshold, 100, 255);
+                HOperatorSet.FillUp(RegionThreshold, out HObject RegionFilledUp);
+                HOperatorSet.Connection(RegionFilledUp, out HObject RegionConnected);
+                HOperatorSet.SelectShapeStd(RegionConnected, out HObject RegionSelected, "max_area", 70);
+                HOperatorSet.DilationCircle(RegionSelected, out HObject RegionDilationed, 200);
+                HOperatorSet.ReduceDomain(image, RegionDilationed, out HObject imageReduced);
+
+                HOperatorSet.GetImageSize(ho_ImageMean, out hv_Width, out hv_Height);
+                HOperatorSet.ReadTuple(RectParaFileName, out hv_RectanglePara);
+                //如果指定了窗口，那么就显示出来
+                if (hwindow == null)
+                {
+                    if (HwindowDic.Keys.Contains(nCamID))
+                    {
+                        if (HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
+                        {
+                            hwindow = HwindowDic[nCamID]["CameraViewCam"];
+                        }
+                    }
+
+                }
+                if (hwindow != null)
+                {
+                    HOperatorSet.ClearWindow(hwindow);
+                    HOperatorSet.DispObj(image, hwindow);
+                    HOperatorSet.SetDraw(hwindow, "margin");
+                    HOperatorSet.SetColor(hwindow, "red");
+                    HOperatorSet.SetLineWidth(hwindow, 3);
+                }
+                else
+                {
+                    return false;
+                }
+                //读取ROI的region区域
+                HOperatorSet.ReadRegion(out HObject RectRegion, $"{strRoiListDot[0]}.reg");
+
+
+                //读取矩形ROI—1的值
+                hv_Row = hv_RectanglePara[0];
+                hv_Column = hv_RectanglePara[1];
+                hv_Phi = hv_RectanglePara[2];
+                hv_Length1 = hv_RectanglePara[3];
+                hv_Length2 = hv_RectanglePara[4];
+                //图像预处理
+
+
+                //读取模板与它的起始位置
+                HOperatorSet.ReadTuple($"{strModelListDot[0]}.tup", out hv_ModelPos);
+                HOperatorSet.ReadShapeModel($"{strModelListDot[0]}.shm", out hv_ModelID);
+
+                HOperatorSet.FindShapeModel(imageReduced, hv_ModelID, (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out hv_Row1, out hv_Column1, out hv_Angle, out hv_Score);
+                if (hv_Row1.Length == 0)
+                {
+                    disp_message(hwindow, "查找模板失败", "window", 10, 10, "red", "true");
+                    return false;
+                }
+                else
+                {
+                    disp_message(hwindow, $"模板位置:({ hv_Column1},{ hv_Row1})", "window", 10, 10, "red", "true");
+                    disp_message(hwindow, $"分数: { hv_Score}", "window", 50, 10, "red", "true");
+                    HOperatorSet.DispCross(hwindow, hv_Row1, hv_Column1, 60, hv_Angle);
+
+                }
+
+                //模板偏移
+                HOperatorSet.VectorAngleToRigid(hv_ModelPos.TupleSelect(0), hv_ModelPos.TupleSelect(1), 0, hv_Row1, hv_Column1, hv_Angle, out hv_HomMat2D1);
+                HOperatorSet.AffineTransPoint2d(hv_HomMat2D1, hv_Row, hv_Column, out hv_QRow, out hv_QColumn);
+                //Region偏移
+                HOperatorSet.AffineTransRegion(RectRegion, out HObject regionTrans, hv_HomMat2D1, "false");
+
+
+                hv_Row = hv_QRow.Clone();
+                hv_Column = hv_QColumn.Clone();
+                hv_Phi = hv_Phi + hv_Angle;
+
+
+                //读取矩形ROI—2的值
+                hv_Row2 = hv_RectanglePara[5];
+                hv_Column2 = hv_RectanglePara[6];
+                hv_Phi2 = hv_RectanglePara[7];
+                HTuple hv_Length21 = hv_RectanglePara[8];
+                HTuple hv_Length22 = hv_RectanglePara[9];
+
+                HOperatorSet.AffineTransPoint2d(hv_HomMat2D1, hv_Row2, hv_Column2, out hv_QRow2, out hv_QColumn2);
+                hv_Phi2 = hv_Phi2 + hv_Angle;
+                hv_Row2 = hv_QRow2.Clone();
+                hv_Column2 = hv_QColumn2.Clone();
+
+                FindLine(ho_ImageScaled, hv_nSegment, hv_EdgeGrayValue, hv_Row, hv_Column, hv_Phi, hv_Length1, hv_Length2, out hv_OutRowStart, out hv_OutColStart, out hv_OutRowEnd, out hv_OutColEnd);
+                FindLine(ho_ImageScaled, hv_nSegment, hv_EdgeGrayValue, hv_Row2, hv_Column2, hv_Phi2, hv_Length21, hv_Length22, out hv_OutRowStart1, out hv_OutColStart1, out hv_OutRowEnd1, out hv_OutColEnd1);
+
+                HOperatorSet.AngleLx(hv_OutRowStart, hv_OutColStart, hv_OutRowEnd, hv_OutColEnd, out HTuple hv_Angle1);
+                HOperatorSet.AngleLx(hv_OutRowStart1, hv_OutColStart1, hv_OutRowEnd1, hv_OutColEnd1, out HTuple hv_Angle2);
+
+                HTuple hv_StratRow = hv_OutRowEnd.Clone();
+                HTuple hv_StartCol = hv_OutColEnd.Clone();
+
+                HTuple hv_StratRow1 = hv_OutRowEnd1.Clone();
+                HTuple hv_StartCol1 = hv_OutColEnd1.Clone();
+
+                if ((int)(new HTuple(hv_Angle1.TupleLess(0))) != 0)
+                {
+                    hv_Angle1 = hv_Angle1 + 3.14159;
+                    hv_StratRow = hv_OutRowStart.Clone();
+                    hv_StartCol = hv_OutColStart.Clone();
+                }
+
+                if ((int)(new HTuple(hv_Angle2.TupleLess(0))) != 0)
+                {
+                    hv_Angle2 = hv_Angle2 + 3.14159;
+                    hv_StratRow1 = hv_OutRowStart1.Clone();
+                    hv_StartCol1 = hv_OutColStart1.Clone();
+                }
+
+                fAngle = (hv_Angle1 + hv_Angle2) / 2;
+                if (hwindow != null)
+                {
+                    HOperatorSet.SetColor(hwindow, "green");
+                    HOperatorSet.SetLineWidth(hwindow, 3);
+                    HOperatorSet.DispObj(regionTrans, hwindow);
+
+                    HOperatorSet.SetColor(hwindow, "red");
+                    HOperatorSet.SetLineWidth(hwindow, 3);
+
+
+                    HOperatorSet.DispLine(hwindow, hv_OutRowStart, hv_OutColStart, hv_OutRowEnd, hv_OutColEnd);
+                    HOperatorSet.DispLine(hwindow, hv_OutRowStart1, hv_OutColStart1, hv_OutRowEnd1, hv_OutColEnd1);
+
+
+
+                    HOperatorSet.SetColor(hwindow, "red");
+
+                    HTuple hv_CenterRow = (hv_OutRowStart + hv_OutRowEnd) / 2;
+                    HTuple hv_CenterCol = (hv_OutColStart + hv_OutColEnd) / 2;
+
+                    HOperatorSet.DispArc(hwindow, hv_CenterRow, hv_CenterCol, hv_Angle1, hv_StratRow, hv_StartCol);
+                    HOperatorSet.DispLine(hwindow, hv_CenterRow, hv_CenterCol, hv_CenterRow, hv_CenterCol + 500);
+                    disp_message(hwindow, ((hv_Angle1 * 180) / 3.14159) + "度", "image", hv_OutRowEnd + 50, hv_OutColEnd, "red", "true");
+
+
+
+                    HTuple hv_CenterRow1 = (hv_OutRowStart1 + hv_OutRowEnd1) / 2;
+                    HTuple hv_CenterCol1 = (hv_OutColStart1 + hv_OutColEnd1) / 2;
+                    HOperatorSet.DispArc(hwindow, (hv_OutRowStart1 + hv_OutRowEnd1) / 2, (hv_OutColStart1 + hv_OutColEnd1) / 2, hv_Angle2, hv_StratRow1, hv_StartCol1);
+                    HOperatorSet.DispLine(hwindow, hv_CenterRow1, hv_CenterCol1, hv_CenterRow1, hv_CenterCol1 + 500);
+                    disp_message(hwindow, ((hv_Angle2 * 180) / 3.14159) + "度", "image", hv_OutRowEnd1 + 50, hv_OutColEnd1, "red", "true");
+                }
+
+                image.Dispose();
+                ho_ImageScaled.Dispose();
+                ho_ImageMean.Dispose();
+                regionTrans.Dispose();
+                RegionThreshold.Dispose();
+                RegionFilledUp.Dispose();
+                RegionConnected.Dispose();
+                RegionSelected.Dispose();
+                RegionDilationed.Dispose();
+                imageReduced.Dispose();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+        public bool GetAngleTune2(int nCamID, out double fAngle, HTuple hwindow = null)
+        {
+            HObject ho_Image111Jpg, ho_ImageScaled, ho_Regions;
+            HObject ho_RegionErosion, ho_RegionFillUp, ho_ConnectedRegions;
+            HObject ho_SelectedRegions, ho_RegionTrans, ho_RegionErosion1;
+            HObject ho_RegionDilation, ho_RegionDifference, ho_ImageReduced;
+            HObject ho_Regions1, ho_RegionErosion2, ho_RegionTrans1;
+            HObject ho_Skeleton, ho_Contours, ho_SelectedContours;
+
+            // Local control variables 
+
+            HTuple hv_RowBegin, hv_ColBegin;
+            HTuple hv_RowEnd, hv_ColEnd, hv_Nr, hv_Nc, hv_Dist, hv_Angle;
+
+            // Initialize local and output iconic variables 
+            HOperatorSet.GenEmptyObj(out ho_Image111Jpg);
+            HOperatorSet.GenEmptyObj(out ho_ImageScaled);
+            HOperatorSet.GenEmptyObj(out ho_Regions);
+            HOperatorSet.GenEmptyObj(out ho_RegionErosion);
+            HOperatorSet.GenEmptyObj(out ho_RegionFillUp);
+            HOperatorSet.GenEmptyObj(out ho_ConnectedRegions);
+            HOperatorSet.GenEmptyObj(out ho_SelectedRegions);
+            HOperatorSet.GenEmptyObj(out ho_RegionTrans);
+            HOperatorSet.GenEmptyObj(out ho_RegionErosion1);
+            HOperatorSet.GenEmptyObj(out ho_RegionDilation);
+            HOperatorSet.GenEmptyObj(out ho_RegionDifference);
+            HOperatorSet.GenEmptyObj(out ho_ImageReduced);
+            HOperatorSet.GenEmptyObj(out ho_Regions1);
+            HOperatorSet.GenEmptyObj(out ho_RegionErosion2);
+            HOperatorSet.GenEmptyObj(out ho_RegionTrans1);
+            HOperatorSet.GenEmptyObj(out ho_Skeleton);
+            HOperatorSet.GenEmptyObj(out ho_Contours);
+            HOperatorSet.GenEmptyObj(out ho_SelectedContours);
+            fAngle = 0;
+            try
+            {
+                if (hwindow == null)
+                {
+                    if (HwindowDic.Keys.Contains(nCamID))
+                    {
+                        if (HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
+                        {
+                            hwindow = HwindowDic[nCamID]["CameraViewCam"];
+                        }
+                    }
+                }
+                if (hwindow == null)
+                {
+                    return false;
+                }
+                ho_Image111Jpg = HoImageList[nCamID].SelectObj(1);
+                ho_ImageScaled.Dispose();
+                scale_image_range(ho_Image111Jpg, out ho_ImageScaled, 100, 200);
+
+                HOperatorSet.DispObj(ho_ImageScaled, hwindow);
+                ho_Regions.Dispose();
+                HOperatorSet.Threshold(ho_ImageScaled, out ho_Regions, 207, 255);
+                ho_RegionErosion.Dispose();
+                HOperatorSet.ErosionCircle(ho_Regions, out ho_RegionErosion, 3.5);
+                ho_RegionFillUp.Dispose();
+                HOperatorSet.FillUp(ho_RegionErosion, out ho_RegionFillUp);
+                ho_ConnectedRegions.Dispose();
+                HOperatorSet.Connection(ho_RegionFillUp, out ho_ConnectedRegions);
+                ho_SelectedRegions.Dispose();
+                HOperatorSet.SelectShape(ho_ConnectedRegions, out ho_SelectedRegions, "area", "and", 458034, 1000675);
+                ho_RegionTrans.Dispose();
+                HOperatorSet.ShapeTrans(ho_SelectedRegions, out ho_RegionTrans, "outer_circle");
+                ho_RegionErosion1.Dispose();
+                HOperatorSet.ErosionCircle(ho_RegionTrans, out ho_RegionErosion1, 5);
+
+                ho_RegionDilation.Dispose();
+                HOperatorSet.DilationCircle(ho_RegionTrans, out ho_RegionDilation, 120);
+                ho_RegionDifference.Dispose();
+                HOperatorSet.Difference(ho_RegionDilation, ho_RegionErosion1, out ho_RegionDifference
+                    );
+                ho_ImageReduced.Dispose();
+                HOperatorSet.ReduceDomain(ho_ImageScaled, ho_RegionDifference, out ho_ImageReduced
+                    );
+                ho_Regions1.Dispose();
+                HOperatorSet.Threshold(ho_ImageReduced, out ho_Regions1, 124, 255);
+                ho_RegionErosion2.Dispose();
+                HOperatorSet.ErosionCircle(ho_Regions1, out ho_RegionErosion2, 25);
+                ho_RegionTrans1.Dispose();
+                HOperatorSet.ShapeTrans(ho_RegionErosion2, out ho_RegionTrans1, "rectangle2");
+
+                HOperatorSet.DispObj(ho_Image111Jpg, hwindow);
+                HOperatorSet.SetLineWidth(hwindow, 3);
+                ho_Skeleton.Dispose();
+                HOperatorSet.Skeleton(ho_RegionTrans1, out ho_Skeleton);
+                ho_Contours.Dispose();
+                HOperatorSet.GenContoursSkeletonXld(ho_Skeleton, out ho_Contours, 1, "filter");
+                ho_SelectedContours.Dispose();
+                HOperatorSet.SelectContoursXld(ho_Contours, out ho_SelectedContours, "contour_length", 1000, 2000000, -0.5, 0.5);
+                HOperatorSet.FitLineContourXld(ho_SelectedContours, "tukey", -1, 0, 5, 2, out hv_RowBegin, out hv_ColBegin, out hv_RowEnd, out hv_ColEnd, out hv_Nr, out hv_Nc, out hv_Dist);
+                HOperatorSet.DispLine(hwindow, hv_RowBegin, hv_ColBegin, hv_RowEnd, hv_ColEnd);
+                HOperatorSet.DispLine(hwindow, hv_RowEnd, hv_ColEnd - 4000, hv_RowEnd, hv_ColEnd + 4000);
+                HOperatorSet.AngleLx(hv_RowBegin, hv_ColBegin, hv_RowEnd, hv_ColEnd, out hv_Angle);
+                if ((int)(new HTuple(hv_Angle.TupleLess(0))) != 0)
+                {
+                    hv_Angle = hv_Angle + 3.14159;
+                }
+                HOperatorSet.DispArc(hwindow, hv_RowEnd, hv_ColEnd, hv_Angle, (hv_RowBegin + hv_RowEnd) / 2, (hv_ColBegin + hv_ColEnd) / 2);
+                disp_message(hwindow, ((hv_Angle * 180) / 3.14159) + "度", "image", hv_RowEnd + 50, hv_ColEnd, "red", "true");
+                return true;
+            }
+            catch (HalconException HDevExpDefaultException)
+            {
+                ho_Image111Jpg.Dispose();
+                ho_ImageScaled.Dispose();
+                ho_Regions.Dispose();
+                ho_RegionErosion.Dispose();
+                ho_RegionFillUp.Dispose();
+                ho_ConnectedRegions.Dispose();
+                ho_SelectedRegions.Dispose();
+                ho_RegionTrans.Dispose();
+                ho_RegionErosion1.Dispose();
+                ho_RegionDilation.Dispose();
+                ho_RegionDifference.Dispose();
+                ho_ImageReduced.Dispose();
+                ho_Regions1.Dispose();
+                ho_RegionErosion2.Dispose();
+                ho_RegionTrans1.Dispose();
+                ho_Skeleton.Dispose();
+                ho_Contours.Dispose();
+                ho_SelectedContours.Dispose();
+                return false;
+            }
+            ho_Image111Jpg.Dispose();
+            ho_ImageScaled.Dispose();
+            ho_Regions.Dispose();
+            ho_RegionErosion.Dispose();
+            ho_RegionFillUp.Dispose();
+            ho_ConnectedRegions.Dispose();
+            ho_SelectedRegions.Dispose();
+            ho_RegionTrans.Dispose();
+            ho_RegionErosion1.Dispose();
+            ho_RegionDilation.Dispose();
+            ho_RegionDifference.Dispose();
+            ho_ImageReduced.Dispose();
+            ho_Regions1.Dispose();
+            ho_RegionErosion2.Dispose();
+            ho_RegionTrans1.Dispose();
+            ho_Skeleton.Dispose();
+            ho_Contours.Dispose();
+            ho_SelectedContours.Dispose();
         }
         #endregion
 
-        public bool PreCreateShapeModel(int nCamID,int MinThre,int MaxThre, EnumShapeModelType modelType,string regionFilePath,object regionIn=null)
+        public bool PreCreateShapeModel(int nCamID, int MinThre, int MaxThre, EnumShapeModelType modelType, string regionFilePath, object regionIn = null)
         {
-            if (nCamID < 0 || MaxThre<MinThre)
+            if (nCamID < 0 || MaxThre < MinThre)
                 return false;
             if (HwindowDic.Keys.Contains(nCamID) && HwindowDic[nCamID].Keys.Contains("CameraViewCam"))
             {
@@ -769,8 +1257,8 @@ namespace CPAS.Vision
                     case EnumShapeModelType.Shape:
                         break;
                     case EnumShapeModelType.XLD:
-                        HObject region=regionIn as HObject;
-                        return LdsFuncSet.PreProcessShapeMode(HoImageList[nCamID], window, MinThre, MaxThre, region, regionFilePath,true);
+                        HObject region = regionIn as HObject;
+                        return LdsFuncSet.PreProcessShapeMode(HoImageList[nCamID], window, MinThre, MaxThre, region, regionFilePath, true);
                     default:
                         return false;
                 }
@@ -1207,6 +1695,6 @@ namespace CPAS.Vision
             }
             return list;
         }
-   
+
     }
 }

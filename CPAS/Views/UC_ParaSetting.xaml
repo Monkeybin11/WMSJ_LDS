@@ -26,7 +26,7 @@
                         <ColumnDefinition Width="400"/>
                     </Grid.ColumnDefinitions>
                     <dxprg:PropertyGridControl  Name="PrescriptionGridProperty" FontSize="20" BorderThickness="0" BorderBrush="Transparent" ExpandCategoriesWhenSelectedObjectChanged="True" 
-                                                SelectedObject="{Binding SelectedItem,ElementName=PrescriptionListBox}"/>
+                                                SelectedObject="{Binding SelectedItem,ElementName=PrescriptionListBox , Mode=TwoWay}"/>
                     <GridSplitter Grid.Column="1" Width="5" VerticalAlignment="Stretch" HorizontalAlignment="Center" Background="Transparent"/>
                     <Grid Grid.Column="2">
                         <Grid.RowDefinitions>
@@ -85,7 +85,7 @@
                             <TextBlock Text="{Binding SystemParaModelUsed.CurPrescriptionName}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             <Rectangle Grid.Row="2" Grid.ColumnSpan="3" Fill="Orange"/>
                         </Grid>
-                        <ListBox Name="PrescriptionListBox" Grid.Row="1" BorderThickness="0" ItemsSource="{Binding PrescriptionCollection}">
+                        <ListBox Name="PrescriptionListBox" Grid.Row="1" BorderThickness="0" ItemsSource="{Binding PrescriptionCollection}" SelectedItem="{Binding CurrentSelectPrescription, Mode=TwoWay}">
                             <ListBox.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Name="SelectThisItem" Header="选择此配方" FontSize="15"  Click="SelectThisItem_Click"/>
