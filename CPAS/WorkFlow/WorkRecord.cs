@@ -83,7 +83,7 @@ namespace CPAS.WorkFlow
                 if (task1 == null || task1.IsCanceled || task1.IsCompleted)
                 {
                     task1 = new Task(() => LdsWorkFunctionSet1(), cts.Token);
-                    task1.Start();
+                    //task1.Start();
                 }
                 if (task2 == null || task2.IsCanceled || task2.IsCompleted)
                 {
@@ -186,7 +186,7 @@ namespace CPAS.WorkFlow
                     switch (nCmd)
                     {
                         case 1:
-                            bRet = UnLock(1);
+                            bRet = UnLock(nIndex);
                             PLC.WriteDint(boolResult_Unlock_Reg, bRet ? 2 : 1);
                             PLC.WriteInt(cmdReg, nCmd + 1);
                             ShowInfo($"LDS2解锁结果:{bRet}");
@@ -222,7 +222,6 @@ namespace CPAS.WorkFlow
         }
         private bool UnLock(int nIndex)
         {
-            return true;
             LDS lds = nIndex == 1 ? lds1 : lds2;
             lds.DeInit();
             bool bRet = lds.LdsUnLock(out string error);

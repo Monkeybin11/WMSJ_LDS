@@ -9,6 +9,8 @@ using CPAS.Instrument;
 using CPAS.Config.HardwareManager;
 using CPAS.Classes;
 using CPAS.Models;
+using System.Threading;
+
 namespace CPAS.Views.Tests
 {
     
@@ -54,6 +56,14 @@ namespace CPAS.Views.Tests
             Assert.IsTrue(bRet);
         }
         [TestMethod()]
+        public void ReadSerialNumber()
+        {
+            bool bRet = lds.MyInit(cfg);
+            Assert.IsTrue(bRet);
+            string strSN = lds.GetSerialNumber();
+            Console.WriteLine(strSN);
+        }
+        [TestMethod()]
         public void GetExposeValue()
         {
             bool bRet = lds.MyInit(cfg);
@@ -63,21 +73,25 @@ namespace CPAS.Views.Tests
             Assert.IsTrue(Value > 0);
 
         }
+
         [TestMethod()]
         public void TestUnlock()
         {
             bool bRet = lds.MyInit(cfg);
+            Thread.Sleep(300);
             bRet=lds.LdsUnLock(out string strError);
             Console.WriteLine(strError);
             Assert.IsTrue(bRet);
         }
+
         [TestMethod()]
         public void TestSub()
         {
-            bool bRet = lds.MyInit(cfg);
-            bRet = lds.InCreasePower(false);
-            lds.EnsureLaserPower();
-            bRet = lds.CheckSetPowerStatusOK();
+            bool bRet = true;
+            bRet &= lds.MyInit(cfg,true);
+            bRet &= lds.InCreasePower(false);
+            bRet &=lds.EnsureLaserPower();
+            //bRet = lds.CheckSetPowerStatusOK();
             Assert.IsTrue(bRet);
         }
         #endregion

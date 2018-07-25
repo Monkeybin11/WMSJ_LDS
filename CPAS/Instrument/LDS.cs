@@ -62,7 +62,7 @@ namespace CPAS.Instrument
                 return false;
             }
         }
-        public bool MyInit(ComportCfg comportCfg)
+        public bool MyInit(ComportCfg comportCfg,bool bClose=false)
         {
             try
             {
@@ -81,8 +81,12 @@ namespace CPAS.Instrument
                     comPort.ReadBufferSize = 4000;  //4000个字节
                     if (comPort.IsOpen)
                         comPort.Close();
-                    comPort.Open();
-                    return comPort.IsOpen;
+                    if (!bClose)
+                    {
+                        comPort.Open();
+                        return comPort.IsOpen;
+                    }
+                    return true;
                 }
                 return false;
                 
@@ -97,7 +101,7 @@ namespace CPAS.Instrument
             if (comPort != null)
             {
                 comPort.Close();
-                comPort.Dispose();
+                //comPort.Dispose();
             }
             return true;
         }
@@ -114,13 +118,14 @@ namespace CPAS.Instrument
                 return true;
             }
         }
-        public void EnsureLaserPower()
+        public bool EnsureLaserPower()
         {
             lock (comPort)
             {
                 if (comPort == null)
-                    return ;
+                    return false;
                 comPort.Write("laserpowerok$");
+                return true;
             }
         }
         public bool CheckSetPowerStatusOK()
@@ -130,11 +135,26 @@ namespace CPAS.Instrument
                 if (comPort == null)
                     return false;
                 comPort.Write("getstatuscode$");
-                Thread.Sleep(20);
+                Thread.Sleep(30);
                 byte[] recv = new byte[10];
                 comPort.Read(recv, 0, 10);
                 string strRet = System.Text.Encoding.UTF8.GetString(recv);
                 return strRet=="BR";
+            }
+        }
+        public string GetSerialNumber()
+        {
+            lock (comPort)
+            {
+                if (comPort == null)
+                    return "";
+                comPort.Write("getserial$");
+                Thread.Sleep(30);
+                byte[] recv = new byte[50];
+                
+                comPort.Read(recv, 0, 50);
+                string strRet = System.Text.Encoding.UTF8.GetString(recv).Replace("\0","");
+                return strRet;
             }
         }
         #endregion
@@ -310,7 +330,8 @@ namespace CPAS.Instrument
             string s2 = "bb";
             IntPtr[] pts = new IntPtr[1];
             pts[0] = Marshal.StringToHGlobalAnsi(s1);
-            bool bRet=LdsUnLock(Convert.ToInt16(comportCfg.Port.Replace("COM","")), pts);
+            int nCom = Convert.ToInt16(comportCfg.Port.Replace("COM", ""));
+            bool bRet= ldsUnLock(nCom, pts);
             String a = Marshal.PtrToStringAnsi(pts[0]);
             strWhy = a;
             return bRet;
@@ -414,6 +435,6 @@ namespace CPAS.Instrument
         }
 
         [DllImport("LdsUnlockLibrary.dll", EntryPoint = "?LdsUnlock@@YA_NHPAPAD@Z", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool LdsUnLock(int nPortNum, IntPtr[] ptrs);
+        public static extern bool ldsUnLock(int nPortNum, IntPtr[] ptrs);
     }
 }
