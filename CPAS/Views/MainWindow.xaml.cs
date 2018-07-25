@@ -11,6 +11,7 @@ using GalaSoft.MvvmLight.Messaging;
 using CPAS.Instrument;
 using System.Text;
 using System;
+using CPAS.ViewModels;
 
 namespace CPAS.Views
 {
@@ -52,7 +53,6 @@ namespace CPAS.Views
                             PLC.ReadInt("R5017"),
                             PLC.ReadInt("R5018")
                             };
-
                             ShowPLCError(errorCodes, dtError);
                             Thread.Sleep(300);
                         }
@@ -85,12 +85,7 @@ namespace CPAS.Views
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            BtnStop.PerformClick();
-            //if (cts != null)
-            //{
-            //    cts.Cancel();
-            //    taskMonitor.Wait(2000);
-            //}
+            Process.GetCurrentProcess().Kill();
         }
 
         private void BtnMin_Click(object sender, RoutedEventArgs e)
@@ -100,7 +95,7 @@ namespace CPAS.Views
 
         private void CloseWindow_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            Process.GetCurrentProcess().Kill();
         }
     }
 }

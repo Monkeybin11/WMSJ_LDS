@@ -633,8 +633,8 @@ namespace CPAS.Vision
 
             try
             {
-                dic.Add("DirectShow", new Tuple<string, string>("Integrated Camera", "DirectShow"));
-                return dic;
+                //dic.Add("DirectShow", new Tuple<string, string>("Integrated Camera", "DirectShow"));
+                //return dic;
                 HOperatorSet.InfoFramegrabber(camType.ToString(), "info_boards", out HTuple hv_Information, out HTuple hv_ValueList);
                 if (0 == hv_ValueList.Length)
                     return dic;

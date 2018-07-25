@@ -28,7 +28,7 @@ namespace CPAS.Views.Tests
             BaudRate = 115200,
             Parity = "none",
             DataBits = 8,
-            Port = "COM9",
+            Port = "COM19",
             PortName = "LDSPort",
             StopBits = 1,
             TimeOut = 1000
@@ -69,6 +69,15 @@ namespace CPAS.Views.Tests
             bool bRet = lds.MyInit(cfg);
             bRet=lds.LdsUnLock(out string strError);
             Console.WriteLine(strError);
+            Assert.IsTrue(bRet);
+        }
+        [TestMethod()]
+        public void TestSub()
+        {
+            bool bRet = lds.MyInit(cfg);
+            bRet = lds.InCreasePower(false);
+            lds.EnsureLaserPower();
+            bRet = lds.CheckSetPowerStatusOK();
             Assert.IsTrue(bRet);
         }
         #endregion

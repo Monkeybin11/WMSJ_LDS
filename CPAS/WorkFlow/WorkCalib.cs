@@ -79,38 +79,52 @@ namespace CPAS.WorkFlow
 
             const string bool_Calib2m = "R311";
             const string bool_Calib4m = "R366";
-
-            while (!cts.IsCancellationRequested)
+            try
             {
-                bool bRet = false;
-                nCmd = PLC.ReadInt(cmdReg);
-                switch (nCmd)
-                {
-                    case 1: //读取2米强度值
-                        bRet = GetCenterFocus(nIndex, out C1);
-                        PLC.WriteInt(bool_Calib2m, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
+                while (!cts.IsCancellationRequested)
+            {
+               
+                    bool bRet = false;
+                    nCmd = PLC.ReadInt(cmdReg);
+                    switch (nCmd)
+                    {
+                        case 1: //读取2米强度值
+                            bRet = GetCenterFocus(nIndex, out C1);
+                            PLC.WriteInt(bool_Calib2m, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo("读取LDS1的2米处激光中心值");
+                            break;
 
-                    case 3: //读取4米强度值
-                        bRet = GetCenterFocus(nIndex, out C1);
-                        PLC.WriteInt(bool_Calib4m, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
+                        case 3: //读取4米强度值
+                            bRet = GetCenterFocus(nIndex, out C1);
+                            PLC.WriteInt(bool_Calib4m, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo("读取LDS1的4米处激光中心值");
+                            break;
 
-                    case 5: //计算结果给LDS
-                        bRet=SetLDSCalidData(nIndex, C1, C2);
-                        //结果写在哪
-                        break;
-                    case 100:
-                        ReadResutFromPLC(nIndex);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    default:
-                        break;
+                        case 5: //计算结果给LDS
+                            bRet = SetLDSCalidData(nIndex, C1, C2);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo("计算结果写入LDS1");
+                            //结果写在哪
+                            break;
+                        case 100:
+                            ReadResutFromPLC(nIndex);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            break;
+                        default:
+                            break;
+                    }
+                    Thread.Sleep(100);
                 }
-                Thread.Sleep(100);
+                ShowInfo("LDS1的服务器被用户退出");
             }
+            catch (Exception ex)
+            {
+                ShowInfo($"LDS1的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
+            }
+
+
         }
         private void LdsWorkFunctionSet2()
         {
@@ -124,40 +138,50 @@ namespace CPAS.WorkFlow
             const string bool_Calib2m = "R340";
             const string bool_Calib4m = "R385";
             const string bool_CalibFinalResult = "R385";
-
-            while (!cts.IsCancellationRequested)
+            try
             {
-                bool bRet = false;
-                nCmd = PLC.ReadInt(cmdReg);
-                switch (nCmd)
+                while (!cts.IsCancellationRequested)
                 {
-                    case 1: //读取2米强度值
-                        bRet = GetCenterFocus(nIndex, out C1);
-                        PLC.WriteInt(bool_Calib2m, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
+                    bool bRet = false;
+                    nCmd = PLC.ReadInt(cmdReg);
+                    switch (nCmd)
+                    {
+                        case 1: //读取2米强度值
+                            bRet = GetCenterFocus(nIndex, out C1);
+                            PLC.WriteInt(bool_Calib2m, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo("读取LDS2的2米中心值");
+                            break;
 
-                    case 3: //读取4米强度值
-                        bRet = GetCenterFocus(nIndex, out C1);
-                        PLC.WriteInt(bool_Calib4m, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
+                        case 3: //读取4米强度值
+                            bRet = GetCenterFocus(nIndex, out C1);
+                            PLC.WriteInt(bool_Calib4m, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo("读取LDS2的4米中心值");
+                            break;
 
-                    case 5: //计算结果给LDS
-                        bRet = SetLDSCalidData(nIndex, C1, C2);
-                        PLC.WriteInt(bool_CalibFinalResult, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
+                        case 5: //计算结果给LDS
+                            bRet = SetLDSCalidData(nIndex, C1, C2);
+                            PLC.WriteInt(bool_CalibFinalResult, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo("计算结果写入LDS2");
+                            break;
 
 
-                    case 100:
-                        ReadResutFromPLC(nIndex);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    default:
-                        break;
+                        case 100:
+                            ReadResutFromPLC(nIndex);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            break;
+                        default:
+                            break;
+                    }
+                    Thread.Sleep(100);
                 }
-                Thread.Sleep(100);
+                ShowInfo("LDS1的服务器被用户退出");
+            }
+            catch (Exception ex)
+            {
+                ShowInfo($"LDS1的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
             }
         }
 

@@ -90,34 +90,43 @@ namespace CPAS.WorkFlow
 
             const string Intensity6m_Reg = "R272";
             const string bool_6m_Reg = "R268";
-
-            while (!cts.IsCancellationRequested)
+            try
             {
-                bool bRet = false;
-                nCmd = PLC.ReadInt(cmdReg);
-                switch (nCmd)
+                while (!cts.IsCancellationRequested)
                 {
-                    case 1: //计算对接角度
-                        bRet = GetTune2JoinAngle(nIndex, out double Angle);
-                        PLC.WriteDint(Angle_Join_Reg, /*Convert.ToInt32(Angle * 1000)*/765);
-                        PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
+                    bool bRet = false;
+                    nCmd = PLC.ReadInt(cmdReg);
+                    switch (nCmd)
+                    {
+                        case 1: //计算对接角度
+                            bRet = GetTune2JoinAngle(nIndex, out double Angle);
+                            PLC.WriteDint(Angle_Join_Reg, /*Convert.ToInt32(Angle * 1000)*/765);
+                            PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"计算LDS1的对接角度结果{bRet},{Angle}");
+                            break;
 
-                    case 5: //获取强度值
-                        bRet = GetLaserIntensityValue(nIndex, out int intensityValue);
-                        PLC.WriteDint(Intensity6m_Reg, /*intensityValue*/99);
-                        PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    case 100:
-                        ReadResutFromPLC(nIndex);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    default:
-                        break;
+                        case 5: //获取强度值
+                            bRet = GetLaserIntensityValue(nIndex, out int intensityValue);
+                            PLC.WriteDint(Intensity6m_Reg, /*intensityValue*/99);
+                            PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"读取LDS1的6.5米处水平强度值{bRet},{intensityValue}");
+                            break;
+                        case 100:
+                            ReadResutFromPLC(nIndex);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            break;
+                        default:
+                            break;
+                    }
+                    Thread.Sleep(100);
                 }
-                Thread.Sleep(100);
+                ShowInfo($"LDS1的服务器正常退出");
+            }
+            catch (Exception ex)
+            {
+                ShowInfo($"LDS1的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
             }
         }
         private void LdsWorkFunctionSet2()
@@ -131,34 +140,43 @@ namespace CPAS.WorkFlow
 
             const string Intensity6m_Reg = "R293";
             const string bool_6m_Reg = "R289";
-
-            while (!cts.IsCancellationRequested)
+            try
             {
-                bool bRet = false;
-                nCmd = PLC.ReadInt(cmdReg);
-                switch (nCmd)
+                while (!cts.IsCancellationRequested)
                 {
-                    case 1: //计算对接角度
-                        bRet = GetTune2JoinAngle(nIndex, out double Angle);
-                        PLC.WriteDint(Angle_Join_Reg, /*Convert.ToInt32(Angle * 1000)*/77);
-                        PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
+                    bool bRet = false;
+                    nCmd = PLC.ReadInt(cmdReg);
+                    switch (nCmd)
+                    {
+                        case 1: //计算对接角度
+                            bRet = GetTune2JoinAngle(nIndex, out double Angle);
+                            PLC.WriteDint(Angle_Join_Reg, /*Convert.ToInt32(Angle * 1000)*/77);
+                            PLC.WriteInt(bool_Join_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"计算LDS2的对接角度结果{bRet},{Angle}");
+                            break;
 
-                    case 5: //获取强度值
-                        bRet = GetLaserIntensityValue(nIndex, out int intensityValue);
-                        PLC.WriteDint(Intensity6m_Reg, /*intensityValue*/890);
-                        PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    case 100:
-                        ReadResutFromPLC(nIndex);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    default:
-                        break;
+                        case 5: //获取强度值
+                            bRet = GetLaserIntensityValue(nIndex, out int intensityValue);
+                            PLC.WriteDint(Intensity6m_Reg, /*intensityValue*/890);
+                            PLC.WriteInt(bool_6m_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"读取LDS2的6.5米处水平强度值{bRet},{intensityValue}");
+                            break;
+                        case 100:
+                            ReadResutFromPLC(nIndex);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            break;
+                        default:
+                            break;
+                    }
+                    Thread.Sleep(100);
                 }
-                Thread.Sleep(100);
+                ShowInfo($"LDS2的服务器正常退出");
+            }
+            catch (Exception ex)
+            {
+                ShowInfo($"LDS2的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
             }
         }
 

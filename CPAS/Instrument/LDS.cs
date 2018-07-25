@@ -81,9 +81,8 @@ namespace CPAS.Instrument
                     comPort.ReadBufferSize = 4000;  //4000个字节
                     if (comPort.IsOpen)
                         comPort.Close();
-                    //comPort.Open();
-                    //return comPort.IsOpen;
-                    return true;
+                    comPort.Open();
+                    return comPort.IsOpen;
                 }
                 return false;
                 

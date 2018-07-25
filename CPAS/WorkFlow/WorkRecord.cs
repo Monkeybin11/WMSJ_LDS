@@ -122,36 +122,47 @@ namespace CPAS.WorkFlow
             const string boolResult_Barcode_Reg = "R19";
 
             const string boolResult_AdjustPower_Reg = "R67";
-
-            while (!cts.IsCancellationRequested)
+            try
             {
-                bool bRet = false;
-                nCmd = PLC.ReadInt(cmdReg);
-                switch (nCmd)
+                while (!cts.IsCancellationRequested)
                 {
-                    case 1:
-                        PLC.WriteDint(boolResult_Unlock_Reg, UnLock(nIndex) ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    case 3:
-                        bRet = GetBarcode(nIndex, out string barcode);
-                        PLC.WriteString(barcodeResult_Reg, barcode);
-                        PLC.WriteInt(boolResult_Barcode_Reg, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    case 5:
-                        bRet = AdjustPowerValue(nIndex);
-                        PLC.WriteInt(boolResult_AdjustPower_Reg, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    case 100:
-                        ReadResutFromPLC(nIndex);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    default:
-                        break;
+                    bool bRet = false;
+                    nCmd = PLC.ReadInt(cmdReg);
+                    switch (nCmd)
+                    {
+                        case 1:
+                            bRet = UnLock(nIndex);
+                            PLC.WriteDint(boolResult_Unlock_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"LDS1解锁结果:{bRet}");
+                            break;
+                        case 3:
+                            bRet = GetBarcode(nIndex, out string barcode);
+                            PLC.WriteString(barcodeResult_Reg, barcode);
+                            PLC.WriteInt(boolResult_Barcode_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"LDS1读取条码结果:{bRet}");
+                            break;
+                        case 5:
+                            bRet = AdjustPowerValue(nIndex);
+                            PLC.WriteInt(boolResult_AdjustPower_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"LDS1调整激光功率结果:{bRet}");
+                            break;
+                        case 100:
+                            ReadResutFromPLC(nIndex);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            break;
+                        default:
+                            break;
+                    }
+                    Thread.Sleep(30);
                 }
-                Thread.Sleep(30);
+                ShowInfo($"LDS1的服务器被用户退出");
+            }
+            catch (Exception ex)
+            {
+                ShowInfo($"LDS1的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
             }
         }
         private void LdsWorkFunctionSet2()
@@ -166,36 +177,47 @@ namespace CPAS.WorkFlow
             const string boolResult_Barcode_Reg = "R43";
 
             const string boolResult_AdjustPower_Reg = "R82";
-
-            while (!cts.IsCancellationRequested)
+            try
             {
-                bool bRet = false;
-                nCmd = PLC.ReadInt(cmdReg);
-                switch (nCmd)
+                while (!cts.IsCancellationRequested)
                 {
-                    case 1:
-                        PLC.WriteDint(boolResult_Unlock_Reg, UnLock(nIndex) ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    case 3:
-                        bRet = GetBarcode(nIndex, out string barcode);
-                        PLC.WriteString(barcodeResult_Reg, barcode);
-                        PLC.WriteInt(boolResult_Barcode_Reg, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    case 5:
-                        bRet = AdjustPowerValue(nIndex);
-                        PLC.WriteInt(boolResult_AdjustPower_Reg, bRet ? 2 : 1);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    case 100:
-                        ReadResutFromPLC(nIndex);
-                        PLC.WriteInt(cmdReg, nCmd + 1);
-                        break;
-                    default:
-                        break;
+                    bool bRet = false;
+                    nCmd = PLC.ReadInt(cmdReg);
+                    switch (nCmd)
+                    {
+                        case 1:
+                            bRet = UnLock(1);
+                            PLC.WriteDint(boolResult_Unlock_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"LDS2解锁结果:{bRet}");
+                            break;
+                        case 3:
+                            bRet = GetBarcode(nIndex, out string barcode);
+                            PLC.WriteString(barcodeResult_Reg, barcode);
+                            PLC.WriteInt(boolResult_Barcode_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"LDS2读取条码结果:{bRet}");
+                            break;
+                        case 5:
+                            bRet = AdjustPowerValue(nIndex);
+                            PLC.WriteInt(boolResult_AdjustPower_Reg, bRet ? 2 : 1);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            ShowInfo($"LDS2调整激光功率结果:{bRet}");
+                            break;
+                        case 100:
+                            ReadResutFromPLC(nIndex);
+                            PLC.WriteInt(cmdReg, nCmd + 1);
+                            break;
+                        default:
+                            break;
+                    }
+                    Thread.Sleep(30);
                 }
-                Thread.Sleep(30);
+                ShowInfo($"LDS1的服务器被用户停止");
+            }
+            catch (Exception ex)
+            {
+                ShowInfo($"LDS2的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
             }
         }
         private bool UnLock(int nIndex)
