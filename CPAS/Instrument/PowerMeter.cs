@@ -7,6 +7,8 @@ using System.Threading;
 using CPAS.Config.HardwareManager;
 using CPAS.Config;
 using NationalInstruments.VisaNS;
+using Thorlabs.TLPM_32.Interop;
+using System.Runtime.InteropServices;
 
 namespace CPAS.Instrument
 {
@@ -20,10 +22,9 @@ namespace CPAS.Instrument
     {
         private byte[] byteRecv = new byte[64];
         ComportCfg comportCfg = null;
-        NIVasaCfg nivisaCfg = null;
+        private TLPM tlpm;
         public double[] MeasureValue=new double[4] { 0.0f,0.0f,0.0f,0.0f};
         MessageBasedSession session = null;
- 
         public PowerMeter(HardwareCfgLevelManager1 cfg) : base(cfg)
         {
         }
@@ -59,24 +60,29 @@ namespace CPAS.Instrument
                 }
                 else if (Config.ConnectMode.ToUpper() == @"NIVISA")
                 {
+                    HandleRef Instrument_Handle = new HandleRef();
+                    TLPM searchDevice = new TLPM(Instrument_Handle.Handle);
+                    uint count = 0;
+                    int pInvokeResult = searchDevice.findRsrc(out count);
+                    if (count == 0)
+                    {
+                        searchDevice.Dispose();
+                        return false;
+                    }
                     foreach (var it in hardwareCfg.NIVisas)
                     {
-                        if (it.PortName == Config.PortName)
-                            nivisaCfg = it;
-                    }
-                    if (nivisaCfg != null)
-                    {
-                        string[] resources = ResourceManager.GetLocalManager().FindResources(nivisaCfg.KeyWord1);
-                        foreach (var res in resources)
+                        for (uint i=0;i< count;i++)
                         {
-                            if (res.Contains(nivisaCfg.KeyWord2))
+                            StringBuilder descr = new StringBuilder(1024);
+                            searchDevice.getRsrcName(i, descr);
+                            if (descr.ToString().Contains(it.KeyWord1))
                             {
-                                session = ResourceManager.GetLocalManager().Open(resources[0].ToString()) as MessageBasedSession;
+                                tlpm = new TLPM(descr.ToString(), false, false);
+                                return tlpm != null;
                             }
-                        }
-                        string str = session.Query("READ?");
-                        return session != null;
+                        }        
                     }
+
                 }
                 return false;
             }
@@ -85,28 +91,37 @@ namespace CPAS.Instrument
                 return false;
             }
         }
-        public bool MyInit()
+        public bool MyInit(string keywords)
         {
-            NIVasaCfg nivisaCfg = new NIVasaCfg()
+            try
             {
-                KeyWord1 = "USB?*",
-                KeyWord2 = "P2010125",
-                PortName = ""
-            };
-            if (nivisaCfg != null)
-            {
-                string[] resources = ResourceManager.GetLocalManager().FindResources(nivisaCfg.KeyWord1);
-                foreach (var res in resources)
-                {
-                    if (res.Contains(nivisaCfg.KeyWord2))
+
+                    HandleRef Instrument_Handle = new HandleRef();
+                    TLPM searchDevice = new TLPM(Instrument_Handle.Handle);
+                    uint count = 0;
+                    int pInvokeResult = searchDevice.findRsrc(out count);
+                    if (count == 0)
                     {
-                        session = ResourceManager.GetLocalManager().Open(resources[0].ToString()) as MessageBasedSession;
+                        searchDevice.Dispose();
+                        return false;
                     }
-                }
-                string str = session.Query("READ?");
-                return session != null;
+                
+                    for (uint i = 0; i < count; i++)
+                    {
+                        StringBuilder descr = new StringBuilder(1024);
+                        searchDevice.getRsrcName(i, descr);
+                        if (descr.ToString().Contains(keywords))
+                        {
+                            tlpm = new TLPM(descr.ToString(), false, false);
+                            return tlpm != null;
+                        }
+                    }                
+                return false;
             }
-            return false;
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
         public override bool DeInit()
         {
@@ -152,9 +167,9 @@ namespace CPAS.Instrument
         }
         public double GetPowerValue(EnumUnit unit)
         {
+            int err = tlpm.measPower(out double value);
 
-            string strValue=Query("READ?").ToString();
-            if (double.TryParse(strValue, out double value))
+            if (err==0)
             {
                 int n = 1;
                 switch (unit)
@@ -166,7 +181,6 @@ namespace CPAS.Instrument
                         n = 1000000;
                             break;
                 }
-                
                 return value*n;
             }
             return 0.0f;

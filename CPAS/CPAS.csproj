@@ -176,6 +176,10 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Thorlabs.TLPM_32.Interop, Version=4.0.0.0, Culture=neutral, PublicKeyToken=db52e1f7e1afc70c, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Extdll\Thorlabs.TLPM_32.Interop.dll</HintPath>
+    </Reference>
     <Reference Include="UIAutomationProvider">
       <Private>True</Private>
     </Reference>

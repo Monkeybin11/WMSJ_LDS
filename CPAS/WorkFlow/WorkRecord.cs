@@ -24,12 +24,13 @@ namespace CPAS.WorkFlow
         private Keyence_SR1000 BarcodeScanner1 = null;
         private Keyence_SR1000 BarcodeScanner2 = null;
         QSerisePlc PLC = null;
-
+        private int[] nAdjustCount = new int[] { 0,0};
         private string FILE_FAKE_BARCODE_FILE = FileHelper.GetCurFilePathString() + "UserData\\Barcode.xls";
         private DataTable Fake_Barcode_Dt = new DataTable();
         private int nBarcodeInfFileIndex = 0;
         private Task task1 = null, task2 = null;
-
+        private double powerValue = 0.0;
+        private double powerValue1 = 0.0;
         protected override bool UserInit()
         {
 
@@ -59,14 +60,7 @@ namespace CPAS.WorkFlow
 
             string str = Fake_Barcode_Dt.Rows[0]["Barcode"].ToString();
             str = Fake_Barcode_Dt.Rows[1]["Barcode"].ToString();
-            //try
-            //{
-            //    bool b = Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, 1, null, out object Angle);
-            //}
-            //catch(Exception ex)
-            //{
-            //    Messenger.Default.Send<string>(ex.Message, "ShowError");
-            //}
+  
 
             bRet =  true || Pw1000USB_1 != null &&
                     Pw1000USB_2 != null &&
@@ -80,12 +74,12 @@ namespace CPAS.WorkFlow
             else
             {
                 ShowInfo("初始化站位成功");
-                if (task1 == null || task1.IsCanceled || task1.IsCompleted)
+                if (task1 == null || task1.Status==TaskStatus.Canceled || task1.Status==TaskStatus.RanToCompletion)
                 {
-                    task1 = new Task(() => LdsWorkFunctionSet1(), cts.Token);
-                    //task1.Start();
+                   // task1 = new Task(() => LdsWorkFunctionSet1(), cts.Token);
+                   // task1.Start();
                 }
-                if (task2 == null || task2.IsCanceled || task2.IsCompleted)
+                if (task2 == null || task2.Status==TaskStatus.Canceled || task2.Status==TaskStatus.RanToCompletion)
                 {
                     task2 = new Task(() => LdsWorkFunctionSet2(), cts.Token);
                     task2.Start();
@@ -103,10 +97,33 @@ namespace CPAS.WorkFlow
         protected override int WorkFlow()
         {
             StringBuilder sb = new StringBuilder();
+            int nCount = 0;
+            List<double> L = new List<double>();
+            List<double> L1 = new List<double>();
+            double sum = 0, sum1 = 0;
             while (!cts.IsCancellationRequested)
             {
-                ShowPower(EnumUnit.μW);
-                Thread.Sleep(200);
+                Thread.Sleep(1000);
+                //powerValue = Pw1000USB_1.GetPowerValue(EnumUnit.mW);
+                //powerValue1 = Pw1000USB_2.GetPowerValue(EnumUnit.mW);
+                //L.Add(powerValue);
+                //L1.Add(powerValue1);
+                //Thread.Sleep(200);
+                //if (nCount++ > 2)
+                //{
+                //    for (int i = 0; i < L.Count; i++)
+                //    {
+                //        sum += L[i];
+                //        sum1 += L1[i];
+                //        powerValue = sum / L.Count;
+                //        powerValue1 = sum1 / L1.Count;
+                //    }
+                //    L.Clear();
+                //    L1.Clear();
+                //    sum = 0;
+                //    sum1 = 0;
+                //    nCount = 0;
+                //}
             }
             return 0;
         }
@@ -124,10 +141,13 @@ namespace CPAS.WorkFlow
             const string boolResult_AdjustPower_Reg = "R67";
             try
             {
+                nAdjustCount[nIndex-1] = 0;
+                nCmd = 5;
                 while (!cts.IsCancellationRequested)
                 {
                     bool bRet = false;
-                    nCmd = PLC.ReadInt(cmdReg);
+                    //nCmd = PLC.ReadInt(cmdReg);
+                   
                     switch (nCmd)
                     {
                         case 1:
@@ -135,6 +155,7 @@ namespace CPAS.WorkFlow
                             PLC.WriteDint(boolResult_Unlock_Reg, bRet ? 2 : 1);
                             PLC.WriteInt(cmdReg, nCmd + 1);
                             ShowInfo($"LDS1解锁结果:{bRet}");
+                            nCmd = 2;
                             break;
                         case 3:
                             bRet = GetBarcode(nIndex, out string barcode);
@@ -148,6 +169,7 @@ namespace CPAS.WorkFlow
                             PLC.WriteInt(boolResult_AdjustPower_Reg, bRet ? 2 : 1);
                             PLC.WriteInt(cmdReg, nCmd + 1);
                             ShowInfo($"LDS1调整激光功率结果:{bRet}");
+                            nCmd = 6;
                             break;
                         case 100:
                             ReadResutFromPLC(nIndex);
@@ -179,10 +201,13 @@ namespace CPAS.WorkFlow
             const string boolResult_AdjustPower_Reg = "R82";
             try
             {
+                nAdjustCount[nIndex-1] = 0;
+                nCmd = 5;
                 while (!cts.IsCancellationRequested)
                 {
                     bool bRet = false;
-                    nCmd = PLC.ReadInt(cmdReg);
+                    //nCmd = PLC.ReadInt(cmdReg);
+                   
                     switch (nCmd)
                     {
                         case 1:
@@ -190,6 +215,7 @@ namespace CPAS.WorkFlow
                             PLC.WriteDint(boolResult_Unlock_Reg, bRet ? 2 : 1);
                             PLC.WriteInt(cmdReg, nCmd + 1);
                             ShowInfo($"LDS2解锁结果:{bRet}");
+                            nCmd = 2;
                             break;
                         case 3:
                             bRet = GetBarcode(nIndex, out string barcode);
@@ -203,6 +229,8 @@ namespace CPAS.WorkFlow
                             PLC.WriteInt(boolResult_AdjustPower_Reg, bRet ? 2 : 1);
                             PLC.WriteInt(cmdReg, nCmd + 1);
                             ShowInfo($"LDS2调整激光功率结果:{bRet}");
+                            //ShowPower(EnumUnit.mW);
+                            nCmd = 6;
                             break;
                         case 100:
                             ReadResutFromPLC(nIndex);
@@ -239,27 +267,45 @@ namespace CPAS.WorkFlow
         }
         private bool AdjustPowerValue(int nIndex)
         {
-            return true;
-            int nCount = 0;
+            
             bool bRet = false;
             if (nIndex < 1 || nIndex > 2)
                 return false;
             LDS lds = nIndex == 1 ? lds1 : lds2;
             PowerMeter powerMeter = nIndex == 1 ? Pw1000USB_1 : Pw1000USB_2;
-            double powerValue = powerMeter.GetPowerValue(EnumUnit.μW);
+            powerValue=powerMeter.GetPowerValue(EnumUnit.mW);
             bool bIncrease = false;
             if (powerValue < Prescription.LDSPower[0])
                 bIncrease = true;
             if (powerValue > Prescription.LDSPower[1])
                 bIncrease = false;
-            while (powerValue < Prescription.LDSPower[0] || powerValue > Prescription.LDSPower[1] || nCount++ > 20)  //直到功率满足要求
+            nAdjustCount[nIndex - 1] = 0;
+            while (!cts.IsCancellationRequested)  //直到功率满足要求
             {
-                lds.InCreasePower(bIncrease);
-                Thread.Sleep(1100); //必须要大于1s
+                powerValue=powerMeter.GetPowerValue(EnumUnit.mW);
+                if (powerValue < Prescription.LDSPower[0])
+                    bIncrease = true;
+                if (powerValue > Prescription.LDSPower[1])
+                    bIncrease = false;
+                if (powerValue < Prescription.LDSPower[0] || powerValue > Prescription.LDSPower[1])
+                {
+                    lds.InCreasePower(bIncrease);
+                    lds.EnsureLaserPower();
+                    Thread.Sleep(1000); //必须要大于1s
+                    ShowPower(EnumUnit.mW);
+                }
+                else
+                {
+                    return true;
+                }
+
+                if (nAdjustCount[nIndex - 1]++ > 30)
+                    break;
             }
-            lds.EnsureLaserPower();
-            bRet = lds.CheckSetPowerStatusOK(); //查看是否烧录OK
-            return bRet;
+            powerValue = powerMeter.GetPowerValue(EnumUnit.mW);
+            return (powerValue > Prescription.LDSPower[0]) && (powerValue < Prescription.LDSPower[0]);
+            //bRet = lds.CheckSetPowerStatusOK(); //查看是否烧录OK
+
         }
         private bool ReadResutFromPLC(int nIndex)
         {
@@ -267,14 +313,13 @@ namespace CPAS.WorkFlow
         }
         private void ShowPower(EnumUnit unit)   //这个监控是两个一起监控
         {
-            return;
             StringBuilder sb = new StringBuilder();
             sb.Clear();
-            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
+            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(unit), 3).ToString());
             sb.Append(" ");
             sb.Append(unit.ToString());
             sb.Append(",");
-            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(EnumUnit.μW), 3).ToString());
+            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(unit), 3).ToString());
             sb.Append(unit.ToString());
             Messenger.Default.Send(new Tuple<string, string, string>(cfg.Name, "ShowPower", sb.ToString()), "WorkFlowMessage");
         }

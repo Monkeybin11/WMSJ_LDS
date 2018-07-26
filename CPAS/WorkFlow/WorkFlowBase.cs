@@ -34,7 +34,7 @@ namespace CPAS.WorkFlow
         protected void ClearAllStep() { nStepStack.Clear(); }
         protected int GetCurStepCount() { return nStepStack.Count; }
         protected virtual bool UserInit() { return true; }
-        public WorkFlowBase(WorkFlowConfig cfg) { this.cfg = cfg;  t = new Task(() => ThreadFunc(this), cts.Token); }
+        public WorkFlowBase(WorkFlowConfig cfg) { this.cfg = cfg; }
         public void ShowInfo(string strInfo=null)    //int msg, int iPara, object lParam
         {
             if (strInfo == null || strInfo.Trim().ToString() == "")
@@ -49,9 +49,7 @@ namespace CPAS.WorkFlow
                 LogHelper.WriteLine($"工站{cfg.Name}初始化UserInit失败,无法启动流程");
                 return false;
             }
-            if (t.Status == TaskStatus.Created)
-                t.Start();
-            else if (t.Status == TaskStatus.Canceled || t.Status == TaskStatus.RanToCompletion)
+            else if (t==null || t.Status == TaskStatus.Canceled || t.Status == TaskStatus.RanToCompletion)
             {
                 cts = new CancellationTokenSource();
                 t = new Task(() => ThreadFunc(this), cts.Token);

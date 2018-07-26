@@ -88,8 +88,8 @@ namespace CPAS.Views.Tests
         public void TestSub()
         {
             bool bRet = true;
-            bRet &= lds.MyInit(cfg,true);
-            bRet &= lds.InCreasePower(false);
+            bRet &= lds.MyInit(cfg);
+            bRet &= lds.InCreasePower(true);
             bRet &=lds.EnsureLaserPower();
             //bRet = lds.CheckSetPowerStatusOK();
             Assert.IsTrue(bRet);
@@ -101,7 +101,7 @@ namespace CPAS.Views.Tests
         public void TestReadPower()
         {
             PowerMeter pm = new PowerMeter(null);
-            bool bRet = pm.Init();
+            bool bRet = pm.MyInit("P2010125");
             Assert.IsTrue(bRet);
             double Value = pm.GetPowerValue(EnumUnit.μW);
             Console.WriteLine(Value);

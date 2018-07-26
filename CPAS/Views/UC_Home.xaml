@@ -56,18 +56,19 @@
                     <!--<Rectangle Fill="White" RadiusX="20" RadiusY="20" Stroke="Orange" StrokeThickness="2" Height="50" Margin="20"/>-->
                     <TextBlock Text="等待解锁2" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
-                <Grid Grid.Row="0" Grid.Column="1">
-
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Power1:"  FontSize="20"/>
+                    <TextBlock Grid.Row="1" VerticalAlignment="Center"  Text="{Binding StrPowerMeterValue1}" FontSize="20" Foreground="Red"/>
+                    <TextBlock Grid.Row="2" Text="Power2:"  FontSize="20"/>
+                    <TextBlock Grid.Row="3" VerticalAlignment="Center"  Text="{Binding StrPowerMeterValue2}" FontSize="20" Foreground="Red"/>
                 </Grid>
-                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical" Margin="0,20,0,0">
-                    <TextBlock Text="Power1:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="{Binding StrPowerMeterValue1}" FontSize="40" Foreground="Red"/>
-                </StackPanel>
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical" Margin="0,20,0,0">
-                    <TextBlock Text="Power2:" HorizontalAlignment="Center" FontSize="20"/>
-                    <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="{Binding StrPowerMeterValue2}" FontSize="40" Foreground="Red"/>
-                </StackPanel>
-
+               
             </Grid>
         </Border >
         <Border Grid.Row="1" Grid.Column="1" CornerRadius="10" BorderThickness="1" BorderBrush="#FF6D74B8" Margin="2" Background="White">
