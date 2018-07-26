@@ -613,8 +613,10 @@ namespace CPAS.Vision
             }
             return true;
         }
+
         public bool OpenImageInWindow(int nCamID, string imageFilePath, HTuple hwindow)
         {
+
             HOperatorSet.ReadImage(out HObject image, imageFilePath);
             if (HoImageList[nCamID] != null)
             {
@@ -625,7 +627,14 @@ namespace CPAS.Vision
             HOperatorSet.GetImageSize(HoImageList[nCamID], out HTuple width, out HTuple height);
             HOperatorSet.SetPart(hwindow, 0, 0, height, width);
             HOperatorSet.DispObj(HoImageList[nCamID], hwindow);
+
+            image.Dispose();
             return true;
+        }
+        public bool CloseCamera()
+        {
+            HOperatorSet.CloseAllFramegrabbers();
+            return true;       
         }
         public Dictionary<string, Tuple<string, string>> FindCamera(EnumCamType camType)
         {
@@ -666,6 +675,8 @@ namespace CPAS.Vision
             }
 
         }
+
+        HTuple s_hv_ModelID = null;
 
         #region LDS专用
         public bool GetAngleTune1(HObject imageIn, string ModelFileName, string RectParaFileName, out double fAngle, HTuple hwindow = null)
@@ -766,9 +777,17 @@ namespace CPAS.Vision
 
                 //读取模板与它的起始位置
                 HOperatorSet.ReadTuple($"{strModelListDot[0]}.tup", out hv_ModelPos);
-                HOperatorSet.ReadShapeModel($"{strModelListDot[0]}.shm", out hv_ModelID);
+                //  HOperatorSet.ReadShapeModel($"{strModelListDot[0]}.shm", out hv_ModelID);
+                if(s_hv_ModelID==null)
+                    HOperatorSet.ReadShapeModel($"{strModelListDot[0]}.shm", out s_hv_ModelID);//读一次
 
-                HOperatorSet.FindShapeModel(imageReduced, hv_ModelID, (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), 0.5, 1, 0.5, "least_squares", 0, 0.9, out hv_Row1, out hv_Column1, out hv_Angle, out hv_Score);
+                HOperatorSet.FindShapeModel(imageReduced, 
+                                             s_hv_ModelID, 
+                                             (new HTuple(0)).TupleRad(), 
+                                             (new HTuple(90)).TupleRad(), 0.5, 1, 0.5, 
+                                             "least_squares", 0, 0.9,
+                                             out hv_Row1, out hv_Column1, out hv_Angle, out hv_Score);
+               
                 if (hv_Row1.Length == 0)
                 {
                     foreach (var it in HwindowDic[nCamID])
@@ -786,6 +805,7 @@ namespace CPAS.Vision
                         HOperatorSet.DispCross(it.Value, hv_Row1, hv_Column1, 60, hv_Angle);
                     }
                 }
+                //HOperatorSet.ClearShapeModel(s_hv_ModelID);
 
                 //模板偏移
                 HOperatorSet.VectorAngleToRigid(hv_ModelPos.TupleSelect(0), hv_ModelPos.TupleSelect(1), 0, hv_Row1, hv_Column1, hv_Angle, out hv_HomMat2D1);
@@ -885,7 +905,7 @@ namespace CPAS.Vision
             }
             catch (Exception ex)
             {
-                return false;
+                throw new Exception($"处理图片是发生错误{ex.Message}");
             }
         }
 
@@ -896,6 +916,7 @@ namespace CPAS.Vision
             fAngle = 0;
             try
             {
+
                 string[] strRoiListDot = RectParaFileName.Split('.');
                 if (strRoiListDot.Length < 2)
                     return false;
@@ -1105,9 +1126,13 @@ namespace CPAS.Vision
                 imageReduced.Dispose();
                 return true;
             }
+            catch (HalconException hex)
+            {
+                throw hex;
+            }
             catch (Exception ex)
             {
-                return false;
+                throw ex;
             }
         }
         public bool GetAngleTune2(int nCamID, out double fAngle, HTuple hwindow = null)

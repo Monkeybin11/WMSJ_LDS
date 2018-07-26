@@ -614,6 +614,11 @@ namespace CPAS.ViewModels
                 return new RelayCommand(() =>
                 {
                     WorkFlow.WorkFlowMgr.Instance.StopAllStation();
+                    int i = 0;
+                    foreach (var it in ConfigMgr.CameraCfgs)
+                    {
+                        Vision.Vision.Instance.CloseCam(i++);
+                    }
                     LogHelper.WriteLine($"结束运行按钮被按下", LogHelper.LogType.NORMAL);
                 });
             }
@@ -1132,9 +1137,16 @@ namespace CPAS.ViewModels
                             UC_MessageBox.ShowMsgBox($"当前配方:{PrescriptionUsed}的模板{strModelFileName}不存在");
                             return;
                         }
-                        bool bRet=Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE1, nCamID, $"{strRecParaFileName}&{strModelFileName}", out object result);
-                        if (bRet)
-                            angle = double.Parse(result.ToString())*180;
+                        try
+                        {
+                            bool bRet = Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE1, nCamID, $"{strRecParaFileName}&{strModelFileName}", out object result);
+                            if (bRet)
+                                angle = double.Parse(result.ToString()) * 180;
+                        }
+                        catch (Exception ex)
+                        {
+                            Messenger.Default.Send<string>($"测试Model发生错误{ex.Message}","ShowError");
+                        }
                     }
                 });
             }
@@ -1147,8 +1159,15 @@ namespace CPAS.ViewModels
                 {
                     int nCamID= Convert.ToInt16(str);
                     if (nCamID < 0)
-                        return;   
-                    Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, nCamID, null, out object result);
+                        return;
+                    try
+                    {
+                        Vision.Vision.Instance.ProcessImage(Vision.Vision.IMAGEPROCESS_STEP.GET_ANGLE_TUNE2, nCamID, null, out object result);
+                    }
+                    catch (Exception ex)
+                    {
+                        Messenger.Default.Send<string>($"测试Roi发生错误{ex.Message}","ShowError");
+                    }
                 });
             }
         }
