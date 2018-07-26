@@ -109,7 +109,10 @@ namespace CPAS.Vision
                 else
                     HwindowDic.Add(nCamID, new Dictionary<string, HTuple>() { { Name, hWindow } });
                 if (ActiveCamDic.Keys.Contains(nCamID))
-                    HOperatorSet.SetPart(HwindowDic[nCamID][Name], 0, 0, ActiveCamDic[nCamID].Item2, ActiveCamDic[nCamID].Item1);
+                {
+                    if(HwindowDic[nCamID][Name]!=-1)
+                        HOperatorSet.SetPart(HwindowDic[nCamID][Name], 0, 0, ActiveCamDic[nCamID].Item2, ActiveCamDic[nCamID].Item1);
+                }
 
 
                 //需要解除此窗口与其他相机的关联
@@ -725,7 +728,7 @@ namespace CPAS.Vision
                 HOperatorSet.GenEmptyObj(out ho_ImageScaled);
                 HOperatorSet.GenEmptyObj(out ho_ImageMean);
 
-                HObject image = imageIn.SelectObj(1);
+                HObject image = imageIn.Clone();
                 HOperatorSet.GetImageSize(image, out HTuple imageWidth, out HTuple imageHeight);
                 hv_EdgeGrayValue = 8;
                 hv_nSegment = 20;

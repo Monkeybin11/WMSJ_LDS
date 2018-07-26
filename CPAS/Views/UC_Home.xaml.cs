@@ -94,7 +94,7 @@ namespace CPAS.Views
             await Task.Run(()=> {
                 if (bFirstLoaded)
                 {
-                    Task.Delay(1500).Wait();
+                    Task.Delay(3500).Wait();
                     bFirstLoaded = false;
                 }
                 SetAttachWindow(true);
@@ -132,6 +132,7 @@ namespace CPAS.Views
         {
             if (bAttach)
             {
+
                 Vision.Vision.Instance.AttachCamWIndow(0, "HomeCam1", Cam1.HalconWindow);
                 Vision.Vision.Instance.AttachCamWIndow(1, "HomeCam2", Cam2.HalconWindow);
                 Vision.Vision.Instance.AttachCamWIndow(2, "HomeCam3", Cam3.HalconWindow);
