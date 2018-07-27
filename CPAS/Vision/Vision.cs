@@ -728,7 +728,7 @@ namespace CPAS.Vision
                 HOperatorSet.GenEmptyObj(out ho_ImageScaled);
                 HOperatorSet.GenEmptyObj(out ho_ImageMean);
 
-                HObject image = imageIn.Clone();
+                HObject image = imageIn.SelectObj(1);
                 HOperatorSet.GetImageSize(image, out HTuple imageWidth, out HTuple imageHeight);
                 hv_EdgeGrayValue = 8;
                 hv_nSegment = 20;
@@ -919,7 +919,6 @@ namespace CPAS.Vision
             fAngle = 0;
             try
             {
-
                 string[] strRoiListDot = RectParaFileName.Split('.');
                 if (strRoiListDot.Length < 2)
                     return false;

@@ -83,11 +83,6 @@ namespace CPAS.Views
                 }
             }
         }
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Process.GetCurrentProcess().Kill();
-        }
-
         private void BtnMin_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
@@ -95,7 +90,7 @@ namespace CPAS.Views
 
         private void CloseWindow_Click(object sender, RoutedEventArgs e)
         {
-            Process.GetCurrentProcess().Kill();
+            //Process.GetCurrentProcess().Kill();
         }
     }
 }

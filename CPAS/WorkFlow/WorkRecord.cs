@@ -71,20 +71,6 @@ namespace CPAS.WorkFlow
                     PLC != null;
             if (!bRet)
                 ShowInfo("初始化失败");
-            else
-            {
-                ShowInfo("初始化站位成功");
-                if (task1 == null || task1.Status==TaskStatus.Canceled || task1.Status==TaskStatus.RanToCompletion)
-                {
-                   // task1 = new Task(() => LdsWorkFunctionSet1(), cts.Token);
-                   // task1.Start();
-                }
-                if (task2 == null || task2.Status==TaskStatus.Canceled || task2.Status==TaskStatus.RanToCompletion)
-                {
-                    task2 = new Task(() => LdsWorkFunctionSet2(), cts.Token);
-                    task2.Start();
-                }
-            }
             return bRet;
         }
         public WorkRecord(WorkFlowConfig cfg) : base(cfg)
@@ -96,6 +82,18 @@ namespace CPAS.WorkFlow
 
         protected override int WorkFlow()
         {
+
+            if (task1 == null || task1.Status == TaskStatus.Canceled || task1.Status == TaskStatus.RanToCompletion)
+            {
+                task1 = new Task(() => LdsWorkFunctionSet1(), cts.Token);
+                task1.Start();
+            }
+            if (task2 == null || task2.Status == TaskStatus.Canceled || task2.Status == TaskStatus.RanToCompletion)
+            {
+                task2 = new Task(() => LdsWorkFunctionSet2(), cts.Token);
+                task2.Start();
+            }
+
             StringBuilder sb = new StringBuilder();
             int nCount = 0;
             List<double> L = new List<double>();
@@ -103,27 +101,29 @@ namespace CPAS.WorkFlow
             double sum = 0, sum1 = 0;
             while (!cts.IsCancellationRequested)
             {
-                Thread.Sleep(1000);
-                //powerValue = Pw1000USB_1.GetPowerValue(EnumUnit.mW);
-                //powerValue1 = Pw1000USB_2.GetPowerValue(EnumUnit.mW);
-                //L.Add(powerValue);
-                //L1.Add(powerValue1);
-                //Thread.Sleep(200);
-                //if (nCount++ > 2)
-                //{
-                //    for (int i = 0; i < L.Count; i++)
-                //    {
-                //        sum += L[i];
-                //        sum1 += L1[i];
-                //        powerValue = sum / L.Count;
-                //        powerValue1 = sum1 / L1.Count;
-                //    }
-                //    L.Clear();
-                //    L1.Clear();
-                //    sum = 0;
-                //    sum1 = 0;
-                //    nCount = 0;
-                //}
+                Thread.Sleep(200);
+                Console.WriteLine("111111");
+                continue;
+                powerValue = Pw1000USB_1.GetPowerValue(EnumUnit.mW);
+                powerValue1 = Pw1000USB_2.GetPowerValue(EnumUnit.mW);
+                L.Add(powerValue);
+                L1.Add(powerValue1);
+                Thread.Sleep(200);
+                if (nCount++ > 2)
+                {
+                    for (int i = 0; i < L.Count; i++)
+                    {
+                        sum += L[i];
+                        sum1 += L1[i];
+                        powerValue = sum / L.Count;
+                        powerValue1 = sum1 / L1.Count;
+                    }
+                    L.Clear();
+                    L1.Clear();
+                    sum = 0;
+                    sum1 = 0;
+                    nCount = 0;
+                }
             }
             return 0;
         }
@@ -147,7 +147,9 @@ namespace CPAS.WorkFlow
                 {
                     bool bRet = false;
                     //nCmd = PLC.ReadInt(cmdReg);
-                   
+                    Console.WriteLine("22222");
+                    Thread.Sleep(100);
+                    continue;
                     switch (nCmd)
                     {
                         case 1:
@@ -184,7 +186,7 @@ namespace CPAS.WorkFlow
             }
             catch (Exception ex)
             {
-                ShowInfo($"LDS1的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
+                ShowInfo($"LDS1的服务器异常终止:{ex.Message}");
             }
         }
         private void LdsWorkFunctionSet2()
@@ -207,7 +209,10 @@ namespace CPAS.WorkFlow
                 {
                     bool bRet = false;
                     //nCmd = PLC.ReadInt(cmdReg);
-                   
+                    Console.WriteLine("33333");
+                    Thread.Sleep(100);
+                     Messenger.Default.Send(new Tuple<string, string, string>(cfg.Name, "ShowPower", $"{nAdjustCount[0]++}mW,{1+nAdjustCount[0]++}mW"), "WorkFlowMessage");
+                    continue;
                     switch (nCmd)
                     {
                         case 1:
@@ -245,7 +250,7 @@ namespace CPAS.WorkFlow
             }
             catch (Exception ex)
             {
-                ShowInfo($"LDS2的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
+                ShowInfo($"LDS2的服务器异常终止:{ex.Message}");
             }
         }
         private bool UnLock(int nIndex)
@@ -298,7 +303,6 @@ namespace CPAS.WorkFlow
                 {
                     return true;
                 }
-
                 if (nAdjustCount[nIndex - 1]++ > 30)
                     break;
             }
@@ -319,7 +323,7 @@ namespace CPAS.WorkFlow
             sb.Append(" ");
             sb.Append(unit.ToString());
             sb.Append(",");
-            sb.Append(Math.Round(Pw1000USB_1.GetPowerValue(unit), 3).ToString());
+            sb.Append(Math.Round(Pw1000USB_2.GetPowerValue(unit), 3).ToString());
             sb.Append(unit.ToString());
             Messenger.Default.Send(new Tuple<string, string, string>(cfg.Name, "ShowPower", sb.ToString()), "WorkFlowMessage");
         }

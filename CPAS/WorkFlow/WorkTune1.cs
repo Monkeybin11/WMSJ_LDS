@@ -58,28 +58,29 @@ namespace CPAS.WorkFlow
                 ShowInfo("初始化失败");
             else
             {
-                if (task1 == null || task1.IsCanceled || task1.IsCompleted)
-                {
-                    task1 = new Task(() =>
-                    {
-                        LdsWorkFunctionSet1();
-                    });
-                    task1.Start();
-                }
-                if (task2 == null || task2.IsCanceled || task2.IsCompleted)
-                {
-                    task2 = new Task(() =>
-                    {
-                        LdsWorkFunctionSet2();
-                    });
-                    task2.Start();
-                }
+     
             }
             return bRet;
         }
 
         protected override int WorkFlow()
         {
+            if (task1 == null || task1.IsCanceled || task1.IsCompleted)
+            {
+                task1 = new Task(() =>
+                {
+                    LdsWorkFunctionSet1();
+                });
+                task1.Start();
+            }
+            if (task2 == null || task2.IsCanceled || task2.IsCompleted)
+            {
+                task2 = new Task(() =>
+                {
+                    LdsWorkFunctionSet2();
+                });
+                task2.Start();
+            }
             return 0;
         }
         private void LdsWorkFunctionSet1()
@@ -151,7 +152,7 @@ namespace CPAS.WorkFlow
             }
             catch (Exception ex)
             {
-                ShowInfo($"LDS1的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
+                ShowInfo($"LDS1的服务器异常终止:{ex.Message}");
             }
         }
         private void LdsWorkFunctionSet2()
@@ -223,7 +224,7 @@ namespace CPAS.WorkFlow
             }
             catch (Exception ex)
             {
-                ShowInfo($"LDS2的服务器异常终止:{ex.Message}，错误堆栈{ex.StackTrace}");
+                ShowInfo($"LDS2的服务器异常终止:{ex.Message}");
             }
         }
 

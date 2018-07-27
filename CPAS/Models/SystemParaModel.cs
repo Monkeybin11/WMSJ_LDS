@@ -18,7 +18,7 @@ namespace CPAS.Models
         private string _curSelectedPrescription = "";
         private EnumBadBarcodeExpiration _badBarcodeExpiration;
         private EnumBadBarcodeExpiration _imageSaveExpiration;
-
+        private UInt32 _gainFactor = 0;
         [ReadOnly(true)]
         public string CurPrescriptionName
         {
@@ -53,7 +53,19 @@ namespace CPAS.Models
                 }
             }
         }
-
+        [ReadOnly(true)]
+        public UInt32 GainFactor
+        {
+            get { return _gainFactor; }
+            set
+            {
+                if (_gainFactor != value)
+                {
+                    _gainFactor = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("GainFactor"));
+                }
+            }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
         
     }

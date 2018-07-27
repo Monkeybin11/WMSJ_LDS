@@ -52,6 +52,7 @@ namespace CPAS.WorkFlow
             else if (t==null || t.Status == TaskStatus.Canceled || t.Status == TaskStatus.RanToCompletion)
             {
                 cts = new CancellationTokenSource();
+
                 t = new Task(() => ThreadFunc(this), cts.Token);
                 t.Start();
             }
@@ -64,6 +65,7 @@ namespace CPAS.WorkFlow
         }
         private static int ThreadFunc(object o) { return (o as WorkFlowBase).WorkFlow(); }
         protected virtual int WorkFlow() { return 0; }
+
         public void WaitComplete()
         {
             //if (t != null)
